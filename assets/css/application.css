@@ -1,0 +1,380 @@
+body {
+        -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none;   /* Chrome/Safari/Opera */
+        -khtml-user-select: none;    /* Konqueror */
+        -moz-user-select: none;      /* Firefox */
+        -ms-user-select: none;       /* Internet Explorer/Edge */
+        user-select: none;
+        background-color: #f1f1f1;
+        margin: 0px;
+        padding-top:0.5vh;
+        font-size: 15px;
+        font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    }
+    .mainDiv {
+        margin-top: 0.5vh;
+        padding-left:0.5vw;
+        height: 89vh;
+        overflow: auto;
+    }
+
+    .header{
+    width: 99vw;
+    margin-left: auto;
+    margin-right:auto;
+    color: #2A3132;
+    border: 1px solid #336B87;
+    padding: 5px;
+    }
+
+    .nvButton {
+        height:8vh;
+        margin:1vh 0.5vw;
+        min-width:7vw;
+        font-size:1.5em;
+        font-weight:bold;
+        font-family: Arial;
+        text-align: Center;
+    }
+    .modalNVButton {
+        height:6vh;
+        margin:0.5vh 0.5vw;
+        min-width:7vw;
+        font-size:15pt;
+        font-weight:bold;
+        font-family: Arial;
+        text-align: Center;
+    }
+
+    .blue {
+        background-color:  #0F4C81;
+        color: #FFFFFF;
+    }
+
+    .green {
+        background-color: #278040;
+        color: #FFFFFF;
+    }
+
+    .red {
+        background-color: #990011;
+        color: #FFFFFF;
+    }
+
+    .nvBar {
+          width: 100%;
+          position: fixed;
+    }
+    .footer {
+        bottom: 0;
+        background-color: #0F4C81;
+        height: 10vh;
+        text-align:right;
+    }
+
+
+    .tabs {
+        display: flex;
+        flex-wrap: wrap; // make sure it wraps
+    }
+    .tabs label {
+        order: 1; // Put the labels first
+        display: block;
+        padding: 1rem 2rem;
+        margin-right: 0.2rem;
+        cursor: pointer;
+        background: #90CAF9;
+        font-weight: bold;
+        transition: background ease 0.2s;
+    }
+    .tabs .tab {
+        order: 99; // Put the tabs last
+        flex-grow: 1;
+        width: 96vw;
+        display: none;
+        padding: 1rem;
+        background: #fff;
+        border: 1px solid silver;
+    }
+    .tabs input[type="radio"] {
+        display: none;
+    }
+    .tabs input[type="radio"]:checked + label {
+        background: #fff;
+    }
+    .tabs input[type="radio"]:checked + label + .tab {
+        display: block;
+    }
+
+    @media (max-width: 45em) {
+        .tabs .tab,
+        .tabs label {
+            order: initial;
+        }
+        .tabs label {
+            width: 100%;
+            margin-right: 0;
+            margin-top: 0.2rem;
+        }
+    }
+
+
+    .mainButtons {
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 1vh;
+        margin-bottom: 1vh;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 1.3em;
+        color: #ffffff;
+        padding: 10px 20px;
+        -moz-border-radius: 6px;
+        -webkit-border-radius: 6px;
+        border-radius: 6px;
+        background-color: #505160;
+        border: 1px solid #003B46;
+        -moz-box-shadow:
+            0px 1px 1px rgba(000,000,000,0.5),
+            inset 1px 2px 0px rgba(255,255,255,0.4);
+        -webkit-box-shadow:
+            0px 1px 1px rgba(000,000,000,0.5),
+            inset 1px 2px 0px rgba(255,255,255,0.4);
+        box-shadow:
+            0px 1px 1px rgba(000,000,000,0.5),
+            inset 1px 2px 0px rgba(255,255,255,0.4);
+        text-shadow:
+            1px 1px 2px rgba(000,000,000,0.7),
+            0px 1px 0px rgba(255,255,255,0.4);
+    }
+
+ul li{
+  color: #000;
+  display: block;
+  position: relative;
+  float: left;
+  width: 100%;
+  height: 100px;
+}
+
+ul li input[type=radio]{
+  position: absolute;
+  visibility: hidden;
+}
+ul li input[type=checkbox]{
+  position: absolute;
+  visibility: hidden;
+}
+
+ul li label{
+  display: block;
+  position: relative;
+  font-weight: 300;
+  font-size: 16pt;
+  padding: 40px 50px 5px 80px;
+  height: 6vh;
+  z-index: 9;
+  cursor: pointer;
+  -webkit-transition: all 0.25s linear;
+}
+
+
+ul li .check{
+  display: block;
+  position: absolute;
+  border: 5px solid #000;
+  border-radius: 100%;
+  height: 40px;
+  width: 40px;
+  top: 30px;
+  left: 20px;
+	z-index: 5;
+	transition: border .25s linear;
+	-webkit-transition: border .25s linear;
+}
+
+ul li .check::before {
+  display: block;
+  position: absolute;
+	content: '';
+  border-radius: 100%;
+  height: 20px;
+  width: 20px;
+  top: 5px;
+  left: 5px;
+  margin: auto;
+	transition: background 0.25s linear;
+	-webkit-transition: background 0.25s linear;
+}
+
+ul li .select{
+  display: block;
+  position: absolute;
+  border: 5px solid #000000;
+  border-radius: 5px;
+  height: 40px;
+  width: 40px;
+  top: 30px;
+  left: 20px;
+	z-index: 5;
+	transition: border .25s linear;
+	-webkit-transition: border .25s linear;
+}
+
+
+ul li .select::before {
+  display: block;
+  position: absolute;
+	content: '';
+  border-radius: 5px;
+  height: 20px;
+  width: 20px;
+  top: 5px;
+	left: 5px;
+  margin: auto;
+	transition: background 0.25s linear;
+	-webkit-transition: background 0.25s linear;
+}
+
+input[type=radio]:checked ~ .check {
+  border: 5px solid #0F4C81;
+}
+
+input[type=radio]:checked ~ .check::before{
+  background: 	#0F4C81;
+}
+
+input[type=radio]:checked ~ label{
+  color: 	#0F4C81;
+}
+
+
+input[type=checkbox]:checked ~ .select {
+  border: 5px solid #0F4C81;
+}
+
+input[type=checkbox]:checked ~ .select::before{
+  background: #0F4C81;
+}
+
+input[type=checkbox]:checked ~ label{
+  color: #0F4C81;
+}
+        * {
+  box-sizing: border-box;
+}
+
+#regForm {
+  background-color: #ffffff;
+  margin:  auto;
+  font-family: Raleway;
+  width: 99%;
+  min-width: 300px;
+}
+
+h1 {
+  text-align: center;
+}
+
+input {
+  padding: 10px;
+  width: 100%;
+  font-size: 17px;
+  font-family: Raleway;
+  border: 1px solid #aaaaaa;
+}
+
+/* Mark input boxes that gets an error on validation: */
+input.invalid {
+  background-color: #ffdddd;
+}
+
+/* Hide all steps by default: */
+.tab {
+  display: none;
+}
+
+button {
+  border: none;
+  padding: 10px 20px;
+  font-size: 17px;
+  font-family: Raleway;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+#prevBtn {
+  background-color: #bbbbbb;
+}
+
+/* Make circles that indicate the steps of the form: */
+.step {
+  height: 15px;
+  width: 15px;
+  margin: 0 2px;
+  background-color: #bbbbbb;
+  border: none;
+  border-radius: 50%;
+  display: inline-block;
+  opacity: 0.5;
+}
+
+.step.active {
+  opacity: 1;
+}
+
+/* Mark the steps that are finished and valid: */
+.step.finish {
+  background-color: #4CAF50;
+}
+            .modalDialog {
+        position: fixed;
+        font-family: Arial, Helvetica, sans-serif;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 99999;
+        opacity:0;
+        -webkit-transition: opacity 400ms ease-in;
+        -moz-transition: opacity 400ms ease-in;
+        transition: opacity 400ms ease-in;
+        pointer-events: none;
+    }
+    .modalDialog:target {
+        opacity:1;
+        pointer-events: auto;
+    }
+    .modalDialog > div {
+        width: 90vw;
+        position: relative;
+        margin: 8vh auto 2vh auto;
+        padding: 1%;
+        border-radius: 10px;
+        background: #fff;
+        height: 90vh;
+    }
+    .close {
+        background: #606061;
+        color: #FFFFFF;
+        line-height: 25px;
+        position: absolute;
+        right: -12px;
+        text-align: center;
+        top: -10px;
+        width: 24px;
+        text-decoration: none;
+        font-weight: bold;
+        -webkit-border-radius: 12px;
+        -moz-border-radius: 12px;
+        border-radius: 12px;
+        -moz-box-shadow: 1px 1px 3px #000;
+        -webkit-box-shadow: 1px 1px 3px #000;
+        box-shadow: 1px 1px 3px #000;
+    }
+    .close:hover {
+        background: #00d9ff;
+    }
