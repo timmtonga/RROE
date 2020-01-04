@@ -1,0 +1,54 @@
+{% extends 'layout/application.html' %}
+
+{% block body %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/keyboard.css') }}">
+    <script type="text/javascript">
+        navButtons = [["Cancel", "window.location='/login'", "Red", "Left"],
+            ["Login", "validateLogin()", "Green", "Right"]]
+    </script>
+    <div style="display:table; width: inherit">
+        <div style="display: table-row; ">
+            <div style="display: table-cell">
+                <img src="/assets/images/appIcon.png" style="height: 5vh; width: 5vw;">
+            </div>
+            <div style="display: table-cell; vertical-align: bottom;text-align:center;width: 100%;">
+                <h2>Results Review and Order Entry System</h2>
+            </div>
+            <div style="display: table-cell; vertical-align:top;padding-right: 3px;">
+                <span>Power</span>
+                <div style="border: 1px solid black; height: 3vh;">
+                    <div style="width: 100%;height:100%; background-color: green;vertical-align: central;text-align: center;color: #ffdddd;">
+                        100%
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-left: auto;margin-right: auto;width: 60%; border: 1px solid silver;padding: 2%;">
+      <h1>Please login</h1>
+      <form action="/login" name="loginForm" method="post">
+          <h3>Username</h3>
+        <input type="text" placeholder="Username" name="username" class="input" value="{{
+          request.form.username }}" required style="width: 90%; font-size : 18pt;border-radius:5px;height: 7vh;">
+          <h3>Password</h3>
+         <input type="password" placeholder="Password" required name="password" class="input" value="{{
+          request.form.password }}" style="width: 90%; font-size : 18pt;border-radius:5px;height: 7vh;">
+      </form>
+        <p class="error" id="errorField" style="font-size: 15pt;margin: 2%;">
+            {% if error %}
+            <strong>Error:</strong> {{ error }}
+            {% endif %}
+        </p>
+    </div>
+    <div class="simple-keyboard" style="margin-left: auto;margin-right: auto;width: 60%; border: 1px solid silver;margin-top: 2vh;">
+
+    </div>
+    <script>
+        function validateLogin() {
+                document.loginForm.submit()
+        }
+    </script>
+    <script src="{{url_for('static', filename='javascript/keyboard.js')}}"></script>
+    <script src="{{url_for('static', filename='javascript/keyboard_init.js')}}"></script>
+{% endblock %}

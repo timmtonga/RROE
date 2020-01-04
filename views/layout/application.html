@@ -2,36 +2,18 @@
     <head>
         <title>RROE</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/application.css') }}">
-
+        <script src="{{url_for('static', filename='javascript/application.js')}}"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body >
-        <div class="header">
-            <table style="width: 100%;">
-                <tr>
-                    <td rowspan="2"><img src="/assets/images/appIcon.png" style="height: 5vh; width: 5vw;"></td>
-                    <td><b>Facility</b></td>
-                    <td>:</td>
-                    <td><i>Kamuzu Central Hospital</i></td>
-                    <td><b>User</b></td>
-                    <td>:</td>
-                    <td><i>Dr Kaphaidyani Chingaipechikumandimchere</i></td>
-                </tr>
-                <tr>
-                    <td><b>Department</b></td>
-                    <td>:</td>
-                    <td><i>Medical Department</i></td>
-                    <td><b>Role</b></td>
-                    <td>:</td>
-                    <td><i>Internal Medicine Specialist</i></td>
-                </tr>
-            </table>
-        </div>
         <div class="mainDiv">
             {% block body %}
             {% endblock %}
         </div>
-        <div class="nvBar footer" style="text-align: left; padding-left 1vw;">&nbsp;
-                <a href="/logout"><button class="nvButton" style="float:left;" >Logout</button></a>
-        </div>
+        <div class="nvBar footer" id= "navFooter" style="text-align: left;">&nbsp;</div>
     </body>
+
+    <script type="text/javascript">
+        addNavButtons()
+    </script>
 </html>

@@ -1,0 +1,41 @@
+{% extends 'layout/application.html' %}
+
+{% block body %}
+<script type="text/javascript">
+    navButtons = [["Logout", "window.location='/login'", "Red", "Left"],
+        ["Finish", "submitSelections()", "Green", "Right"]]
+
+    function submitSelections(){
+        if (document.querySelectorAll('input[type="radio"]:checked').length > 0)
+        {
+            document.locationSelection.submit();
+        }
+        document.getElementById("errorField").innerText = "Please select one location from the list."
+    }
+</script>
+
+<div style="padding: 10px; ">
+    <p>
+        <span style="font-style: italic; font-size:16pt;">Welcome {{ session["user"]["current_user"] }}!</span><br/>
+        <span style="font-weight: bold; font-size:18pt;">Please select your location :</span>
+    </p>
+    <p class="error" id="errorField">
+        {% if error %}
+            <strong>Error:</strong> {{ error }}
+        {% endif %}
+    </p>
+    <form action="/select_location" method="post" name="locationSelection">
+        <div style="width: 100%; height: 80%; border: 2px solid blue;overflow:auto;margin-left: auto;margin-right: auto;">
+            <ul>
+                {%  for i in options %}
+                    <div style="display:table-row;">
+                        <div style='display: table-cell; vertical-align: center;'>
+                            <li><input type='radio' id={{ i[0] }} value={{ i[0] }} name='location'><label for={{ i[0] }}>{{i[1]}}</label><div class='check'></div></li>
+                        </div>
+                    </div>
+                {% endfor %}
+            </ul>
+        </div>
+    </form>
+</div>
+{% endblock %}

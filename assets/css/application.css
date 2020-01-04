@@ -1,31 +1,42 @@
 body {
-        -webkit-touch-callout: none; /* iOS Safari */
-        -webkit-user-select: none;   /* Chrome/Safari/Opera */
-        -khtml-user-select: none;    /* Konqueror */
-        -moz-user-select: none;      /* Firefox */
-        -ms-user-select: none;       /* Internet Explorer/Edge */
-        user-select: none;
-        background-color: #f1f1f1;
-        margin: 0px;
-        padding-top:0.5vh;
-        font-size: 15px;
-        font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-    }
-    .mainDiv {
-        margin-top: 0.5vh;
-        padding-left:0.5vw;
-        height: 89vh;
-        overflow: auto;
-    }
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none;   /* Chrome/Safari/Opera */
+    -khtml-user-select: none;    /* Konqueror */
+    -moz-user-select: none;      /* Firefox */
+    -ms-user-select: none;       /* Internet Explorer/Edge */
+    user-select: none;
+    background-color: #f1f1f1;
+    margin: 0px;
+    padding-top:0.5vh;
+    font-size: 15px;
+    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+}
+.mainDiv {
+    margin-top: 0.5vh;
+    padding-left:0.5vw;
+    height: 89vh;
+    overflow: auto;
+}
 
-    .header{
+.error {
+    color: red;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.header{
     width: 99vw;
     margin-left: auto;
     margin-right:auto;
     color: #2A3132;
     border: 1px solid #336B87;
     padding: 5px;
-    }
+}
+
+.char{
+    height: 5vh;
+    width: 6vw;
+}
 
     .nvButton {
         height:8vh;
@@ -54,6 +65,10 @@ body {
     .green {
         background-color: #278040;
         color: #FFFFFF;
+    }
+    .lightGreen {
+        background-color: #DE7A22;
+        color: #FFFFFF !important;
     }
 
     .red {
@@ -306,7 +321,8 @@ button:hover {
 }
 
 #prevBtn {
-  background-color: #bbbbbb;
+    background-color: #DE7A22;
+    color: #FFFFFF;
 }
 
 /* Make circles that indicate the steps of the form: */

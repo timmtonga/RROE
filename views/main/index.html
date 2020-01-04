@@ -1,7 +1,33 @@
 {% extends 'layout/application.html' %}
 
 {% block body %}
-<div style="display: table-row; ">
+<script type="text/javascript">
+    navButtons = [["Logout", "window.location='/login'", "Red", "Left"],
+        ["Change Location", "window.location='/select_location'", "lightGreen", "Right"]]
+</script>
+
+<div class="header">
+    <table style="width: 100%;">
+        <tr>
+            <td rowspan="2"><img src="/assets/images/appIcon.png" style="height: 5vh; width: 5vw;"></td>
+            <td><b>Facility</b></td>
+            <td>:</td>
+            <td><i>Kamuzu Central Hospital</i></td>
+            <td><b>User</b></td>
+            <td>:</td>
+            <td><i>{{ session["user"]["current_user"] }}</i></td>
+        </tr>
+        <tr>
+            <td><b>Department</b></td>
+            <td>:</td>
+            <td><i>{{ session["location"] }}</i></td>
+            <td><b>Role</b></td>
+            <td>:</td>
+            <td><i>{{ session["user"]["rank"] }}</i></td>
+        </tr>
+    </table>
+</div>
+<div style="display: table-row;margin-top: 2vh !important;">
     <div style="display: table-cell;">
         <img src="/assets/images/2D_barcode.png" style="height: 4vh; width: 7vw;"> <br/>
         <img src="/assets/images/barcode.png" style="height: 4vh; width: 7vw;">
