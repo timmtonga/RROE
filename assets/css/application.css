@@ -13,9 +13,10 @@ body {
 }
 .mainDiv {
     margin-top: 0.5vh;
+    margin-bottom: 0.5vh;
     padding-left:0.5vw;
     height: 89vh;
-    overflow: auto;
+    overflow: hidden;
 }
 
 .error {
@@ -87,6 +88,12 @@ body {
         text-align:right;
     }
 
+    .nvHeader {
+        top: 0;
+        background-color: #0F4C81;
+        height: 5vh;
+        text-align:right;
+    }
 
     .tabs {
         display: flex;
@@ -110,6 +117,8 @@ body {
         padding: 1rem;
         background: #fff;
         border: 1px solid silver;
+        height: 60vh;
+        overflow:auto;
     }
     .tabs input[type="radio"] {
         display: none;

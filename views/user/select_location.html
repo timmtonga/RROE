@@ -9,6 +9,7 @@
         if (document.querySelectorAll('input[type="radio"]:checked').length > 0)
         {
             document.locationSelection.submit();
+            return;
         }
         document.getElementById("errorField").innerText = "Please select one location from the list."
     }

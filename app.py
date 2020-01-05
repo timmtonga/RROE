@@ -20,7 +20,35 @@ except:
 #Root page of application
 @app.route("/")
 def index():
-    return render_template('main/index.html')
+    records = []
+    my_team_recs = []
+    if session["user"]["role"] == "Nurse":
+        for item in db.view('_design/tests/_view/testStatus'):
+            if (item.value['status'] in ['Ordered', 'Specimen Collected', 'Analysis Complete'] and item.value['ward'] == session.get('location')):
+                records.append({'status': item.value.get('status'),'test': item.value.get('test_type'),
+                                'name': db.get(item.value.get('patient_id')).get('name'),
+                                'ordered_on':datetime.fromtimestamp(float(item.value.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
+                                'patient_id': item.value.get('patient_id')})
+    else:
+        for item in db.view('_design/tests/_view/testByOrderer',key='doctor16'):
+             records.append({'status': item.value.get('status'),'test': item.value.get('test_type'),
+                             'name': db.get(item.value.get('patient_id')).get('name'),
+                             'ordered_on':datetime.fromtimestamp(float(item.value.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
+                             'patient_id': item.value.get('patient_id')})
+
+        my_team = []
+        for provider in db.view("_design/users/_view/teams",key=session.get('user').get('team'), limit=1000):
+            my_team.append(provider.value)
+
+        for provider in my_team:
+            for item in db.view('_design/tests/_view/testByOrderer',key=provider):
+                my_team_recs.append({'status': item.value.get('status'),'test': item.value.get('test_type'),
+                                'name': db.get(item.value.get('patient_id')).get('name'),
+                                'ordered_by': db.get(provider).get('name'),
+                                'ordered_on':datetime.fromtimestamp(float(item.value.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
+                                'patient_id': item.value.get('patient_id')})
+
+    return render_template('main/index.html', orders = records, team_records = my_team_recs)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -34,8 +62,11 @@ def login():
                 error = "Wrong password. Please try again."
             else:
                 session["logged_in"] = True
-                session["user"] = {'username': request.form['username'], 'role': user['role'],
-                                   'current_user': user['name'], 'team': user['team'], 'rank': user['designation']}
+                session["user"] = {'username': request.form['username'],
+                                   'role': user['role'],
+                                   'current_user': user.get('name','Unknown'),
+                                   'team': user.get('team', 'Unassigned'),
+                                   'rank': user.get('designation', 'Unassigned')}
                 return redirect(url_for('select_location'))
 
     session["user"] = None
@@ -56,8 +87,11 @@ def select_location():
     return render_template('user/select_location.html', error=error, options=locations_options())
 
 @app.route("/patient/<patient_id>", methods=['GET'])
-def patient():
-    return render_template('patient/show.html')
+def patient(patient_id=None):
+    patient = db.get(patient_id)
+    pt= { 'name': patient.get('name'), 'gender': 'male' if patient.get('gender') == 'M' else 'female',
+          'dob': datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), 'id': patient_id}
+    return render_template('patient/show.html',pt_details = pt)
 
 @app.route("/user/new")
 def new_user():

@@ -1,9 +1,10 @@
-import couchdb  # importing couchdb
+from couchdb import Server # importing couchdb
+from couchdb.design import ViewDefinition
 import random
 import datetime
 from werkzeug.security import generate_password_hash
 
-couch = couchdb.Server('http://admin:rootpwd@127.0.0.1:5984/')
+couch = Server('http://admin:rootpwd@127.0.0.1:5984/')
 del couch['rroe_trial']
 
 # Creating Database
@@ -116,7 +117,7 @@ surnames = ['Ball','Bell','Berry','Black','Blake','Bond','Bower','Brown','Buckla
 def intializeFacts():
     simulateProviders()
     simulatePatients()
-
+    initializeViews()
 
 def simulateProviders():
     dr =  1
@@ -168,6 +169,7 @@ def simulatePatients():
                 'status': test_status[random.randint(0, (len(test_status)-1))],
                 'test_type': random.choice(test_types.keys()),
                 'type': 'test',
+                'ward': random.choice(['4A', '4B','MSS','MHDU']),
                 'patient_id': id
             }
 
@@ -217,6 +219,40 @@ def simulateMeasures(testType):
             test_measures[measure] = random.choice(test_types[testType]['measures'][measure]['options'])
 
     return test_measures
+
+def initializeViews():
+    view = ViewDefinition('tests', 'testStatus', '''function(doc) {
+        if (doc.type && doc.type == 'test'){
+                emit(doc.status, doc);
+            }
+        }''')
+
+    view.get_doc(db)
+    # The view is not yet stored in the database, in fact, design doc doesn't
+    # even exist yet. That can be fixed using the `sync` method:
+    view.sync(db)
+
+    view = ViewDefinition('tests', 'testByOrderer', '''function(doc) {
+            if (doc.type && doc.type == 'test'){
+                    emit(doc.ordered_by, doc);
+                }
+            }''')
+
+    view.get_doc(db)
+    # The view is not yet stored in the database, in fact, design doc doesn't
+    # even exist yet. That can be fixed using the `sync` method:
+    view.sync(db)
+
+    view = ViewDefinition('users', 'teams', '''function(doc) {
+            if (doc.type && doc.type == 'user' && doc.team){
+                    emit(doc.team, doc._id);  
+                }
+            }''')
+
+    view.get_doc(db)
+    # The view is not yet stored in the database, in fact, design doc doesn't
+    # even exist yet. That can be fixed using the `sync` method:
+    view.sync(db)
 
 if __name__ =='__main__':
     intializeFacts()

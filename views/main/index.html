@@ -27,7 +27,7 @@
         </tr>
     </table>
 </div>
-<div style="display: table-row;margin-top: 2vh !important;">
+<div style="display: table-row;margin-top: 4vh !important;">
     <div style="display: table-cell;">
         <img src="/assets/images/2D_barcode.png" style="height: 4vh; width: 7vw;"> <br/>
         <img src="/assets/images/barcode.png" style="height: 4vh; width: 7vw;">
@@ -38,84 +38,11 @@
 </div>
 <br/>
 <div class="tabs">
-  <input type="radio" name="tabs" id="tabone" checked="checked">
-  <label for="tabone">My Orders</label>
-  <div class="tab">
-        <div class = "mainButtons" onmousedown="window.location='/patient'">
-          <span style="font-weight:bold; font-size: 1.25em ;">Patient John Joe</span>
-          <div style="display: table-row; ">
-              <div style="display: table-cell; ">Test Ordered</div>
-              <div style="display: table-cell;padding-left:1vw; padding-right:1vw;">:</div>
-              <div style="display: table-cell;">Renal Function Test</div>
-          </div>
-            <div style="display: table-row;padding: 20px; ">
-              <div style="display: table-cell">Ordered On</div>
-              <div style="display: table-cell;padding-left:1vw; padding-right:1vw;">:</div>
-              <div style="display: table-cell">20 Dec 2019</div>
-          </div>
-          <div style="display: table-row; ">
-              <div style="display: table-cell;">Test Status</div>
-              <div style="display: table-cell;padding-left:1vw; padding-right:1vw;">:</div>
-              <div style="display: table-cell">Analysis Complete</div>
-          </div>
-      </div>
-  </div>
+    {% include
+    'main/_nurse_view.html' if session.get('user').get('role') == 'Nurse'  else  'main/_doctor_view.html' %}
 
-  <input type="radio" name="tabs" id="tabtwo">
-  <label for="tabtwo">My Team's Orders</label>
-  <div class="tab">
-        <div class = "mainButtons" onmousedown="window.location='/patient'">
-          <span style="font-weight:bold; font-size: 1.25em ;">Patient John Joe</span>
-          <div style="display: table-row; ">
-              <div style="display: table-cell; width: 35%;">Test Ordered</div>
-              <div style="display: table-cell;padding-left:1vw; padding-right:1vw;">:</div>
-              <div style="display: table-cell;">Full Blood Count ( FBC )</div>
-          </div>
-           <div style="display: table-row;padding 20px; ">
-              <div style="display: table-cell">Ordered On</div>
-              <div style="display: table-cell;padding-left:1vw; padding-right:1vw;">:</div>
-              <div style="display: table-cell">20 Dec 2019</div>
-          </div>
-           <div style="display: table-row;padding 20px; ">
-              <div style="display: table-cell">Ordered by</div>
-              <div style="display: table-cell;padding-left:1vw; padding-right:1vw;">:</div>
-              <div style="display: table-cell">Dr Chase</div>
-          </div>
-          <div style="display: table-row; ">
-              <div style="display: table-cell;">Test Status</div>
-              <div style="display: table-cell;padding-left:1vw; padding-right:1vw;">:</div>
-              <div style="display: table-cell">Analysis Complete</div>
-          </div>
-      </div>
-        <div class = "mainButtons" onmousedown="window.location='/patient'">
-          <span style="font-weight:bold; font-size: 1.25em ;">Patient Jane Joe</span>
-          <div style="display: table-row;">
-              <div style="display: table-cell; width: 35%;">Test Ordered</div>
-              <div style="display: table-cell;padding-left:1vw; padding-right:1vw;">:</div>
-              <div style="display: table-cell;">Renal Function Test</div>
-          </div>
-           <div style="display: table-row;padding 20px; ">
-              <div style="display: table-cell">Ordered On</div>
-              <div style="display: table-cell;padding-left:1vw; padding-right:1vw;">:</div>
-              <div style="display: table-cell">20 Dec 2019</div>
-          </div>
-           <div style="display: table-row;padding 20px; ">
-              <div style="display: table-cell">Ordered by</div>
-              <div style="display: table-cell;padding-left:1vw; padding-right:1vw;">:</div>
-              <div style="display: table-cell">Dr Tubb</div>
-          </div>
-          <div style="display: table-row; ">
-              <div style="display: table-cell;">Test Status</div>
-              <div style="display: table-cell;padding-left:1vw; padding-right:1vw;">:</div>
-              <div style="display: table-cell">Pending</div>
-          </div>
-      </div>
-  </div>
-
-  <input type="radio" name="tabs" id="tabthree">
-  <label for="tabthree">My Preferences</label>
-  <div class="tab">
-    <h1>User Preferences</h1>
-  </div>
+    <input type="radio" name="tabs" id="tabthree">
+    <label for="tabthree">My Preferences</label>
+    <div class="tab"><h1>User Preferences</h1></div>
 </div>
 {% endblock %}
