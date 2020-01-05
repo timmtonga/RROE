@@ -354,7 +354,7 @@ button:hover {
 .step.finish {
   background-color: #4CAF50;
 }
-            .modalDialog {
+    .modalDialog {
         position: fixed;
         font-family: Arial, Helvetica, sans-serif;
         top: 0;
@@ -374,7 +374,8 @@ button:hover {
         pointer-events: auto;
     }
     .modalDialog > div {
-        width: 90vw;
+        min-width: 20vw;
+        max-width: 90vw;
         position: relative;
         margin: 8vh auto 2vh auto;
         padding: 1%;

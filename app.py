@@ -91,7 +91,7 @@ def patient(patient_id=None):
     patient = db.get(patient_id)
     pt= { 'name': patient.get('name'), 'gender': 'male' if patient.get('gender') == 'M' else 'female',
           'dob': datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), 'id': patient_id}
-    return render_template('patient/show.html',pt_details = pt)
+    return render_template('patient/show.html',pt_details = pt, collect_sample=False)
 
 @app.route("/user/new")
 def new_user():

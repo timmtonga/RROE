@@ -1,11 +1,13 @@
 {% extends 'layout/application.html' %}
 {% block body %}
     <script type="text/javascript">
-        {% if session.get('user').get('role') == 'Nurse'  %}
-            navButtons = [["Finish", "window.location='/'", "Green", "Right"]]
-        {% else %}
-            navButtons = [["Finish", "window.location='/'", "Green", "Right"],
-                                      ["New Test", "window.location='/'", "Defaults", "Right"]]
+        navButtons = [["Finish", "window.location='/'", "Green", "Right"]]
+        {% if session.get('user').get('role') != 'Nurse'  %}
+            navButtons.push(["New Test", "showOrderDialog()", "Defaults", "Right"])
+        {% endif %}
+
+        {% if not collect_sample  %}
+            navButtons.push(["Draw Samples", "showDrawDialog()", "Defaults", "Right"])
         {% endif %}
      </script>
 
@@ -31,7 +33,7 @@
         </table>
     </div>
     <h2>Recent Lab Tests</h2>
-    <div style="border: 1px solid silver; padding: 10px;">
+    <div style="border: 1px solid silver; padding: 10px;" class="header">
         <div style="border:2px solid #0094ff;-webkit-border-top-left-radius:6px;-webkit-border-top-right-radius:6px;-moz-border-radius-topleft:6px;-moz-border-radius-topright:6px;border-top-left-radius:6px;border-top-right-radius:6px;width: 100%;margin-left: auto;margin-right:auto;font-size:12pt;">
         <h2 style="color:#fff;margin:0;background-color:#0094ff;font-size:14pt; padding: 15px;font-weight: bold;">
             Renal Function Test (20 December 2019)
@@ -54,11 +56,18 @@
                     <td style="border: 1px solid black;text-align: center;">18.00 - 55.00</td>
                 </tr>
             </table>
-
         </div>
       </div>
     </div>
+    <script>
+        function showOrderDialog(){
+            document.getElementById("modalContent").innerHTML = "Ordering Test {{now}}"
+            window.location='{{request.url}}#openModal'
+        }
 
-
-
+        function showDrawDialog(){
+            document.getElementById("modalContent").innerHTML = "Drawing Sample"
+            window.location='{{request.url}}#openModal'
+        }
+    </script>
 {% endblock %}
