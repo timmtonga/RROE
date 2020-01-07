@@ -1,0 +1,9 @@
+Test details and engine
+Order Entry dialog and submissions
+Map sample draws to right containers and figure out how to get all the right data
+Write better queries for the right data for index and patient view
+Patient view display data from patient record
+Figure out the consistent connection drops
+Integrate real time clock
+test relay printer
+test voltage reader and ask gerry on how to inteprete the values

@@ -1,10 +1,6 @@
 {% extends 'layout/application.html' %}
 
 {% block body %}
-<script type="text/javascript">
-    navButtons = [["Logout", "window.location='/login'", "Red", "Left"],
-        ["Change Location", "window.location='/select_location'", "lightGreen", "Right"]]
-</script>
 
 <div class="header">
     <table style="width: 100%;">
@@ -33,7 +29,7 @@
         <img src="/assets/images/barcode.png" style="height: 4vh; width: 7vw;">
     </div>
     <div style="display: table-cell">
-        <input type="text"  size="15" style="height: 8vh; vertical-align: middle;font-size:40px;">
+        <input type="text" id="barcode" size="15" style="height: 8vh; vertical-align: middle;font-size:40px;">
     </div>
 </div>
 <br/>
@@ -45,4 +41,12 @@
     <label for="tabthree">My Preferences</label>
     <div class="tab"><h1>User Preferences</h1></div>
 </div>
+
+<script type="text/javascript">
+    navButtons = [["Logout", "window.location='/login'", "Red", "Left"],
+        ["Change Location", "window.location='/select_location'", "lightGreen", "Right"]]
+
+    setTimeout(initializeListener(), 3000);
+</script>
+
 {% endblock %}

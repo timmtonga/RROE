@@ -73,6 +73,15 @@ def login():
     session["logged_in"] = None
     return render_template('user/login.html', error=error)
 
+@app.route("/user/new")
+def new_user():
+    return "New User Page"
+
+@app.route("/user/create", methods=["Post"])
+def create_user():
+    #password_hash = generate_password_hash("request.form['password']")
+    return "New user created"
+
 @app.route("/select_location", methods=["GET", "POST"])
 def select_location():
     error= None
@@ -93,15 +102,42 @@ def patient(patient_id=None):
           'dob': datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), 'id': patient_id}
     return render_template('patient/show.html',pt_details = pt, collect_sample=False)
 
-@app.route("/user/new")
-def new_user():
-    return "New User Page"
+#create a new lab test order
+@app.route("/test/create", methods=['POST'])
+def create_lab_order():
+    print(request.form['patient_id'])
+    print(request.form['specimen_type'])
+    print(request.form['test_type[]'])
+    print(request.form['clinical_history'])
+    print(request.form['priority'])
+    return redirect(url_for('patient', patient_id=request.form['patient_id']))
 
-@app.route("/user/create", methods=["Post"])
-def create_user():
-    #password_hash = generate_password_hash("request.form['password']")
-    return "New user created"
+#update lab test orders to specimen collected
+@app.route("/test/<test_id>/collect_specimen")
+def collect_specimens(test_id=None):
+    pat_id = 'DFOGLS'
+    try:
+        labelFile = open("/tmp/test_order.lbl", "w+")
+        labelFile.write("N\nq406\nQ203,027\nZT\n")
+        labelFile.write('A25,10,0,1,1,2,N,"James Phiri"\n')
+        labelFile.write('A25,40,0,1,1,2,N,"2 Jul, 2019"\n')
+        labelFile.write('b20,70,P,386,80,"James Phiri~XYXKRQ~M~19850115~4B~Dr Wangui~Septic Sores~201907111235~FBC^MPS^ESR~S"\n')
+        labelFile.write('A25,120,0,1,1,2,N,"FBC, MPS & ESR"\n')
+        labelFile.write("P1\n")
+        labelFile.close()
+        os.system('sh ~/print.sh /tmp/test_order.lbl')
+    except:
+        pass
+    return redirect(url_for('patient', patient_id=pat_id))
 
+#proces barcode from the main index page
+@app.route("/process_barcode/<barcode>")
+def barcode(barcode=None):
+    #write function to handle different types of barcodes that we expect
+    print(barcode)
+    return render_template('user/login.html')
+
+#Application callbacks
 @app.before_request
 def check_authentication():
     if request.path != "/login":
@@ -126,11 +162,7 @@ def locations_options():
 
 @app.context_processor
 def inject_user():
-    return {'current_user': {"username": "root", "name": "Dr Muzatifuna Wapulumuka "}}
-
-@app.context_processor
-def inject_patient():
-    return {'patient': {"npid": "P000-018", "name": "John Doe", "age": "23 years"}}
+    return {'current_user': session.get("user")}
 
 #Error handling pages
 @app.errorhandler(404)

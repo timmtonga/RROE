@@ -404,3 +404,45 @@ button:hover {
     .close:hover {
         background: #00d9ff;
     }
+
+
+
+            .Table
+            {
+                display: table;
+                width: 100%;
+            }
+            .Title
+            {
+                display: table-caption;
+                line-height: 7vh;
+                text-align: center;
+                font-weight: bold;
+                font-family: Arial, "Helvetica Neue", Helvetica, sans-serif; font-size: 16pt;
+            }
+            .Heading
+            {
+                display: table-row;
+                font-weight: bold;
+                text-align: center;
+            }
+            .Row
+            {
+                display: table-row;
+            }
+            .TitleCell
+            {
+                display: table-cell;
+                border: solid #336B87;
+                border-width: thin;
+                padding: 10px;
+                font-family: Arial, "Helvetica Neue", Helvetica, sans-serif; font-size: 14pt;
+            }
+            .Cell
+            {
+                display: table-cell;
+                border: solid #336B87;
+                border-width: thin;
+                padding: 10px;
+                font-family: Arial, "Helvetica Neue", Helvetica, sans-serif; font-size: 12pt;
+            }

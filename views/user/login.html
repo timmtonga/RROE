@@ -25,17 +25,17 @@
         </div>
     </div>
 
-    <div style="margin-left: auto;margin-right: auto;width: 60%; border: 1px solid silver;padding: 2%;">
+    <div style="margin-left: auto;margin-right: auto;width: 60%; border: 1px solid silver;padding: 1%;">
       <h1>Please login</h1>
       <form action="/login" name="loginForm" method="post">
           <h3>Username</h3>
-        <input type="text" placeholder="Username" name="username" class="input" value="{{
+        <input type="text" placeholder="Username" name="username" id="default" class="input" value="{{
           request.form.username }}" required style="width: 90%; font-size : 18pt;border-radius:5px;height: 7vh;">
           <h3>Password</h3>
-         <input type="password" placeholder="Password" required name="password" class="input" value="{{
+         <input type="password" placeholder="Password" required name="password"  id="input2" class="input" value="{{
           request.form.password }}" style="width: 90%; font-size : 18pt;border-radius:5px;height: 7vh;">
       </form>
-        <p class="error" id="errorField" style="font-size: 15pt;margin: 2%;">
+        <p class="error" id="errorField" style="font-size: 12spt;margin: 2%;">
             {% if error %}
             <strong>Error:</strong> {{ error }}
             {% endif %}
