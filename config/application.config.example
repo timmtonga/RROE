@@ -1,0 +1,9 @@
+{
+    "couch":{
+        "host":"localhost",
+        "user":"root",
+	"port": "my_port",
+        "passwd":"my secret password",
+    },
+    "facility":"My Test Facility"
+}

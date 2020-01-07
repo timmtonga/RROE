@@ -2,14 +2,22 @@
 #This is the main thread for the application
 
 import os
+import json
 from couchdb import Server
 from datetime import datetime
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, render_template,redirect,session,flash,request,url_for
 app = Flask(__name__, template_folder="views", static_folder="assets")
 
+config_file = "config/application.config"
+settings = {}
+with open(config_file) as json_file:
+    settings = json.load(json_file)
+
 #Connect to a couchdb instance
-couchConnection = Server('http://admin:rootpwd@127.0.0.1:5984/')
+couchConnection = Server("http://%s:%s@%s:%s/" %
+                         (settings["couch"]["user"],settings["couch"]["passwd"],
+                          settings["couch"]["host"],settings["couch"]["port"]))
 
 # Connect to a database or Create a Database
 try:
@@ -163,6 +171,11 @@ def locations_options():
 @app.context_processor
 def inject_user():
     return {'current_user': session.get("user")}
+
+@app.context_processor
+def inject_facility():
+    return {'current_facility': settings["facility"]}
+
 
 #Error handling pages
 @app.errorhandler(404)
