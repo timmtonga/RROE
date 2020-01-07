@@ -21,19 +21,19 @@ function hideDialog(url){
     window.location=url
 }
 
-//Function to focus on barcode input field
+//Function to focus on barcosde input field
 function checkBarcode()
 {
     var barcodeTxt = document.getElementById("barcode");
-    if (barcodeTxt.value.trim().match(/[A-Z0-9]+\$/)) {
+    if (barcodeTxt.value.trim().length > 1 && barcodeTxt.value.trim().length == barcode_length) {
         barcodeTxt.value = barcodeTxt.value.trim().replace(/\$/, "").replace(/\-/,"")
         if (barcodeTxt.value.toUpperCase().length >= 5)
         {
-            window.location = "/process_barcode/"+barcodeTxt.value.trim();
+            document.barcodeScan.submit()
         }
         else
         {
-            barcodeTxt.value = "";
+            //barcodeTxt.value = "";
             initializeListener();
         }
     }
@@ -41,6 +41,7 @@ function checkBarcode()
     {
         initializeListener();
     }
+    barcode_length = barcodeTxt.value.trim().length;
 }
 
 //Function to initialize listener for barcode scanning
@@ -111,7 +112,6 @@ function validateForm() {
                 if (document.querySelector('input[name ='+y[0].name +']:checked') == null){
                     valid = false;
                 }
-                console.log("required radio button")
                 break;
             case 'checkbox':
                 if (document.querySelector('input[name ="'+y[0].name +'"]:checked') == null){

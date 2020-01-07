@@ -14,7 +14,13 @@
     <div class="header">
         <table style="width:100%;">
             <tr>
-                <td rowspan="2"><img src="/assets/images/male.png" ></td>
+                <td rowspan="2">
+                    {% if (pt_details.get('gender').lower() == 'm' or pt_details.get('gender').lower() == 'male') %}
+                        <img src="/assets/images/male.png" >
+                    {% else %}
+                        <img src="/assets/images/female.png" >
+                    {% endif %}
+                </td>
                 <td><b>Patient Name</b></td>
                 <td>:</td>
                 <td><i>{{pt_details.get('name')}}</i></td>

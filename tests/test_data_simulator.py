@@ -155,7 +155,7 @@ def simulatePatients():
         dob = datetime.datetime.strptime('{} {}'.format(random.randint(1, 366), random.randint(1930,2019)), '%j %Y').strftime("%d-%m-%Y")
         # Creating document
         doc = {'_id': id, 'name': names[random.randint(0, (len(names)-1))] + ' ' + surnames[random.randint(0, (len(surnames)-1))],
-                    'dob': dob, 'gender': random.choice('FM'), 'type': 'patient',}
+                    'dob': dob, 'gender': random.choice('FM'), 'type': 'patient'}
 
         db.save(doc)
 

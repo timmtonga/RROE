@@ -139,11 +139,34 @@ def collect_specimens(test_id=None):
     return redirect(url_for('patient', patient_id=pat_id))
 
 #proces barcode from the main index page
-@app.route("/process_barcode/<barcode>")
-def barcode(barcode=None):
+@app.route("/process_barcode", methods=["POST"])
+def barcode():
     #write function to handle different types of barcodes that we expect
-    print(barcode)
-    return render_template('user/login.html')
+    barcode_segments = request.form['barcode'].split("~")
+    if (len(barcode_segments) == 1 ):
+        patient = db.get(barcode_segments[0].strip())
+        if patient == None:
+            error = "No patient with this record"
+            return redirect("home", error = error)
+        elif patient.get("type") != 'patient':
+            error = "No patient with this record"
+            return redirect("home", error = error)
+        else:
+            return redirect(url_for('patient', patient_id=barcode_segments[0].strip()))
+    elif (len(barcode_segments) == 5 ):
+        #This section is for the npid qr code
+        id = barcode_segments[1].strip()
+        patient = db.get(id)
+        if patient == None or patient.get("type") != 'patient':
+            doc = {'_id': id, 'name': barcode_segments[0], 'type': 'patient',
+                   'dob':  datetime.strptime(barcode_segments[2], "%d/%b/%Y").strftime("%d-%m-%Y"),
+                   'gender': barcode_segments[3]}
+            db.save(doc)
+        return redirect(url_for('patient', patient_id=id))
+    else:
+        error = "Wrong format for patient identifier. Please use the National patient Identifier"
+        return redirect("home", error = error)
+
 
 #Application callbacks
 @app.before_request

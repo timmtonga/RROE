@@ -29,7 +29,9 @@
         <img src="/assets/images/barcode.png" style="height: 4vh; width: 7vw;">
     </div>
     <div style="display: table-cell">
-        <input type="text" id="barcode" size="15" style="height: 8vh; vertical-align: middle;font-size:40px;">
+        <form action="/process_barcode" name="barcodeScan" method="post">
+            <input type="text" id="barcode" name="barcode" size="15" style="height: 8vh; vertical-align: middle;font-size:40px;">
+        </form>
     </div>
 </div>
 <br/>
@@ -45,7 +47,7 @@
 <script type="text/javascript">
     navButtons = [["Logout", "window.location='/login'", "Red", "Left"],
         ["Change Location", "window.location='/select_location'", "lightGreen", "Right"]]
-
+        barcode_length = 0;
     setTimeout(initializeListener(), 3000);
 </script>
 
