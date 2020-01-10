@@ -7,3 +7,4 @@ Figure out the consistent connection drops
 Integrate real time clock
 test relay printer
 test voltage reader and ask gerry on how to inteprete the values
+Add message alert display

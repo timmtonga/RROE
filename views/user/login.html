@@ -25,7 +25,7 @@
         </div>
     </div>
 
-    <div style="margin-left: auto;margin-right: auto;width: 60%; border: 1px solid silver;padding: 1%;">
+    <div style="margin-left: auto;margin-right: auto;width: 90%; border: 1px solid silver;padding: 1%;">
       <h1>Please login</h1>
       <form action="/login" name="loginForm" method="post">
           <h3>Username</h3>
@@ -35,18 +35,37 @@
          <input type="password" placeholder="Password" required name="password"  id="input2" class="input" value="{{
           request.form.password }}" style="width: 90%; font-size : 18pt;border-radius:5px;height: 7vh;">
       </form>
-        <p class="error" id="errorField" style="font-size: 12spt;margin: 2%;">
+        <p class="error" id="errorField" style="font-size: 12pt;">
             {% if error %}
             <strong>Error:</strong> {{ error }}
             {% endif %}
         </p>
     </div>
-    <div class="simple-keyboard" style="margin-left: auto;margin-right: auto;width: 60%; border: 1px solid silver;margin-top: 2vh;">
+    <div class="simple-keyboard" style="margin-left: auto;margin-right: auto;width: 90%; border: 1px solid silver;margin-top: 2vh;">
 
     </div>
     <script>
         function validateLogin() {
-                document.loginForm.submit()
+            var username = document.getElementById("default");
+            var password = document.getElementById("input2");
+
+            if(username.value.length <1)
+            {
+                username.className += " invalid";
+                document.getElementById('errorField').innerHTML = "Please enter a username."
+                return
+            }
+
+            if(password.value.trim().length <1)
+            {
+                username.className += " invalid";
+                document.getElementById('errorField').innerHTML = "Please enter a password."
+                password.className += " invalid";
+
+                return
+            }
+
+            document.loginForm.submit()
         }
     </script>
     <script src="{{url_for('static', filename='javascript/keyboard.js')}}"></script>

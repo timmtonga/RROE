@@ -38,11 +38,12 @@ def index():
                                 'ordered_on':datetime.fromtimestamp(float(item.value.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
                                 'patient_id': item.value.get('patient_id')})
     else:
-        for item in db.view('_design/tests/_view/testByOrderer',key='doctor16'):
-             records.append({'status': item.value.get('status'),'test': item.value.get('test_type'),
-                             'name': db.get(item.value.get('patient_id')).get('name'),
-                             'ordered_on':datetime.fromtimestamp(float(item.value.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
-                             'patient_id': item.value.get('patient_id')})
+        for item in db.view('_design/tests/_view/testByOrderer',key=session["user"]['username']):
+            if (item.value['status'] in ['Ordered', 'Specimen Collected', 'Analysis Complete', 'Rejected']):
+                 records.append({'status': item.value.get('status'),'test': item.value.get('test_type'),
+                                 'name': db.get(item.value.get('patient_id')).get('name'),
+                                 'ordered_on':datetime.fromtimestamp(float(item.value.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
+                                 'patient_id': item.value.get('patient_id')})
 
         my_team = []
         for provider in db.view("_design/users/_view/teams",key=session.get('user').get('team'), limit=1000):
@@ -108,16 +109,28 @@ def patient(patient_id=None):
     patient = db.get(patient_id)
     pt= { 'name': patient.get('name'), 'gender': 'male' if patient.get('gender') == 'M' else 'female',
           'dob': datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), 'id': patient_id}
-    return render_template('patient/show.html',pt_details = pt, collect_sample=False)
+    mango = {"selector": {  "type": "test","patient_id": patient_id}}
+    records =  db.find(mango)
+
+    return render_template('patient/show.html',pt_details = pt,tests=records, collect_sample=False)
 
 #create a new lab test order
 @app.route("/test/create", methods=['POST'])
 def create_lab_order():
-    print(request.form['patient_id'])
-    print(request.form['specimen_type'])
-    print(request.form['test_type[]'])
-    print(request.form['clinical_history'])
-    print(request.form['priority'])
+    for test in request.form.getlist('test_type[]'):
+        test = {
+                'ordered_by': session["user"]['username'],
+                'date_ordered': datetime.now().strftime('%s') ,
+                'status': 'Ordered',
+                'test_type': test,
+                'sample_type' : request.form['specimen_type'],
+                'type': 'test',
+                'Priority':request.form['priority'],
+                'ward': session["location"],
+                'patient_id': request.form['patient_id']
+            }
+    db.save(test)
+
     return redirect(url_for('patient', patient_id=request.form['patient_id']))
 
 #update lab test orders to specimen collected
@@ -182,7 +195,6 @@ def check_authentication():
         except:
             return redirect(url_for('login'))
 
-
 #Context processors. Used to get data in views
 @app.context_processor
 def inject_now():
@@ -199,6 +211,33 @@ def inject_user():
 def inject_facility():
     return {'current_facility': settings["facility"]}
 
+@app.context_processor
+def inject_specimen_types():
+    specimen_types = []
+    test_file = "test_details.json"
+    tests = {}
+    with open(test_file) as json_file:
+        tests = json.load(json_file)
+    for key, value in tests.items():
+        specimen_types.append([key,value['specimen_type_id']])
+    specimen_types.sort()
+    return {'specimen_types': [specimen_types[i * 2:(i + 1) * 2] for i in range((len(specimen_types) + 2 - 1) // 2 )] }
+
+@app.context_processor
+def inject_tests():
+    test_options = {}
+    test_file = "test_details.json"
+    with open(test_file) as json_file:
+        specimen_types = json.load(json_file)
+
+    for specimen_type, tests in specimen_types.items():
+        for test_name, test in tests['tests'].items():
+            if (test_options.get(test.get("test_type_id")) == None ):
+                test_options[test.get("test_type_id")] = {"name": test_name, "specimen_types" :[tests['specimen_type_id']] }
+            elif tests['specimen_type_id'] not in test_options[test.get("test_type_id")]["specimen_types"]:
+                test_options[test.get("test_type_id")]["specimen_types"].append(tests['specimen_type_id'])
+
+    return {"test_options":  test_options}
 
 #Error handling pages
 @app.errorhandler(404)
