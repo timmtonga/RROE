@@ -51,7 +51,6 @@ function initializeListener()
     timerHand = setTimeout(function () {
         checkBarcode();
     }, 3000);
-
 }
 
 //Wizard form javascript

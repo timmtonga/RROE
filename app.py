@@ -9,53 +9,63 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, render_template,redirect,session,flash,request,url_for
 app = Flask(__name__, template_folder="views", static_folder="assets")
 
+global db
 config_file = "config/application.config"
 settings = {}
 with open(config_file) as json_file:
     settings = json.load(json_file)
-
-#Connect to a couchdb instance
-couchConnection = Server("http://%s:%s@%s:%s/" %
-                         (settings["couch"]["user"],settings["couch"]["passwd"],
-                          settings["couch"]["host"],settings["couch"]["port"]))
-
-# Connect to a database or Create a Database
-try:
-    db = couchConnection['rroe_trial']
-except:
-    db = couchConnection.create('rroe_trial')
 
 #Root page of application
 @app.route("/")
 def index():
     records = []
     my_team_recs = []
+    #Based on role, pull the required information from the database
     if session["user"]["role"] == "Nurse":
-        for item in db.view('_design/tests/_view/testStatus'):
-            if (item.value['status'] in ['Ordered', 'Specimen Collected', 'Analysis Complete'] and item.value['ward'] == session.get('location')):
-                records.append({'status': item.value.get('status'),'test': item.value.get('test_type'),
-                                'name': db.get(item.value.get('patient_id')).get('name'),
-                                'ordered_on':datetime.fromtimestamp(float(item.value.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
-                                'patient_id': item.value.get('patient_id')})
-    else:
-        for item in db.view('_design/tests/_view/testByOrderer',key=session["user"]['username']):
-            if (item.value['status'] in ['Ordered', 'Specimen Collected', 'Analysis Complete', 'Rejected']):
-                 records.append({'status': item.value.get('status'),'test': item.value.get('test_type'),
-                                 'name': db.get(item.value.get('patient_id')).get('name'),
-                                 'ordered_on':datetime.fromtimestamp(float(item.value.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
-                                 'patient_id': item.value.get('patient_id')})
+        main_index_records = {
+            "selector": {
+                "type": "test",
+                "ward": session.get('location'),
+                "status": {"$in": ["Ordered","Specimen Collected","Analysis Complete", "Rejected"]}
+            }
+        }
 
+    else:
+        main_index_records = {
+            "selector": {
+                "type": "test",
+                "ordered_by": session["user"]['username'],
+                "status": {"$in": ["Ordered","Specimen Collected","Analysis Complete","Rejected"]}
+            }
+        }
+
+        #Get my team members and then all tests requested by members of my team
         my_team = []
         for provider in db.view("_design/users/_view/teams",key=session.get('user').get('team'), limit=1000):
             my_team.append(provider.value)
 
-        for provider in my_team:
-            for item in db.view('_design/tests/_view/testByOrderer',key=provider):
-                my_team_recs.append({'status': item.value.get('status'),'test': item.value.get('test_type'),
-                                'name': db.get(item.value.get('patient_id')).get('name'),
-                                'ordered_by': db.get(provider).get('name'),
-                                'ordered_on':datetime.fromtimestamp(float(item.value.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
-                                'patient_id': item.value.get('patient_id')})
+        #Get all records for my team that require attention
+        team_records = {
+            "selector": {
+                "type": "test",
+                "ordered_by": {"$in": my_team},
+                "status": {"$in": ["Ordered","Specimen Collected","Analysis Complete","Rejected"]}
+            }
+        }
+
+        for item in db.find(team_records):
+            my_team_recs.append({'status': item.get('status'),'test': item.get('test_type'),
+                            'name': db.get(item.get('patient_id')).get('name').title(),
+                            'ordered_by': db.get(item.get("ordered_by")).get('name').title(),
+                            'ordered_on':datetime.fromtimestamp(float(item.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
+                            'patient_id': item.get('patient_id')})
+
+
+    for item in db.find(main_index_records) :
+        records.append({'status': item.get('status'),'test': item.get('test_type'),
+                                 'name': db.get(item.get('patient_id')).get('name').title(),
+                                 'ordered_on':datetime.fromtimestamp(float(item.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
+                                 'patient_id': item.get('patient_id')})
 
     return render_template('main/index.html', orders = records, team_records = my_team_recs)
 
@@ -106,13 +116,26 @@ def select_location():
 
 @app.route("/patient/<patient_id>", methods=['GET'])
 def patient(patient_id=None):
+    draw_sample = False
+    if (request.args.get("sample_draw") != None) and (request.args.get("sample_draw") != None):
+            draw_sample = True
     patient = db.get(patient_id)
     pt= { 'name': patient.get('name'), 'gender': 'male' if patient.get('gender') == 'M' else 'female',
           'dob': datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), 'id': patient_id}
-    mango = {"selector": {  "type": "test","patient_id": patient_id}}
+    mango = {"selector": { "type": "test","patient_id": patient_id}}
     records =  db.find(mango)
 
-    return render_template('patient/show.html',pt_details = pt,tests=records, collect_sample=False)
+    return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=False, collect_samples=draw_sample)
+
+@app.route("/patient/<patient_id>/draw", methods=['GET'])
+def patient_draw_samples(patient_id=None):
+    patient = db.get(patient_id)
+    pt= { 'name': patient.get('name'), 'gender': 'male' if patient.get('gender') == 'M' else 'female',
+          'dob': datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), 'id': patient_id}
+    mango = {"selector": { "type": "test","patient_id": patient_id}}
+    records =  db.find(mango)
+
+    return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=True, collect_samples=True)
 
 #create a new lab test order
 @app.route("/test/create", methods=['POST'])
@@ -131,11 +154,14 @@ def create_lab_order():
             }
     db.save(test)
 
-    return redirect(url_for('patient', patient_id=request.form['patient_id']))
+    if request.form["sampleCollection"] == "Collect Now":
+        return redirect(url_for('patient_draw_samples', patient_id=request.form['patient_id']))
+    else:
+        return redirect(url_for('patient', patient_id=request.form['patient_id']))
 
 #update lab test orders to specimen collected
 @app.route("/test/<test_id>/collect_specimen")
-def collect_specimens(test_id=None):
+def collect_specimens(test_id=[]):
     pat_id = 'DFOGLS'
     try:
         labelFile = open("/tmp/test_order.lbl", "w+")
@@ -180,10 +206,30 @@ def barcode():
         error = "Wrong format for patient identifier. Please use the National patient Identifier"
         return redirect("home", error = error)
 
+def collapse_test_orders(orders = []):
+    if (("Full Blood Count" in orders) and ("Malaria Screening" in orders)):
+        pass
+        #pop those two out and combine them in one
+
+    pass
 
 #Application callbacks
 @app.before_request
+def initialize_connection():
+    #Connect to a couchdb instance
+    couchConnection = Server("http://%s:%s@%s:%s/" %
+                             (settings["couch"]["user"],settings["couch"]["passwd"],
+                              settings["couch"]["host"],settings["couch"]["port"]))
+    global db
+    # Connect to a database or Create a Database
+    try:
+        db = couchConnection[settings["couch"]["database"]]
+    except:
+        db = couchConnection.create(settings["couch"]["database"])
+
+@app.before_request
 def check_authentication():
+
     if request.path != "/login":
         try:
             session["logged_in"]

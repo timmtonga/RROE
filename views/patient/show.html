@@ -6,7 +6,7 @@
             navButtons.push(["New Test", "showOrderDialog()", "Defaults", "Right"])
         {% endif %}
 
-        {% if not collect_sample  %}
+        {% if  pending_orders  %}
             navButtons.push(["Draw Samples", "showDrawDialog()", "Defaults", "Right"])
         {% endif %}
      </script>
@@ -39,7 +39,7 @@
         </table>
     </div>
     <h2>Recent Lab Tests</h2>
-    <div style="border: 1px solid silver; padding: 10px;" class="header">
+    <div style="border: 1px solid silver; padding: 10px;height:70vh; overflow:auto;" class="header">
         {% for row in tests%}
             <div style="border:2px solid #07575B;border-radius:6px;width: 100%;margin:1% auto;font-size:12pt;">
             <div style="color:#fff;margin:0;background-color:#003B46;font-size:14pt; padding: 15px;font-weight: bold;" onmousedown="toggleDisplay('{{row['id']}}')">
@@ -75,7 +75,7 @@
         <div class="Table">
             <div class="Title">
                 Sample Collection
-                <div style="float: right;" onmousedown=hideDialog('{{request.url}}')>
+                <div style="float: right;" onmousedown=hideDialog('/patient/{{pt_details.get('id')}}')>
                     <img style="vertical-align: middle;" src="/assets/images/cancel.png">
                 </div>
             </div>
@@ -110,10 +110,9 @@
                     <p>Row 1 Column 2</p>
                 </div>
                 <div class="Cell">
-                    <button onmousedown="window.location='/test/1/collect_specimen'">
-                        <img style="height:5vh;width: 3vw;vertical-align: middle;" src="/assets/images/draw_sample.png">
+                    <button class="modalNVButton" onmousedown="window.location='/test/1/collect_specimen'">
+                        Draw Sample
                     </button>
-                    <button><img style="height:5vh;width: 3vw;vertical-align: middle;" src="/assets/images/delete.png"></button>
                 </div>
             </div>
             <div class="Row">
@@ -130,10 +129,9 @@
                     <p>Row 1 Column 2</p>
                 </div>
                 <div class="Cell">
-                    <button onmousedown="window.location='/test/1/collect_specimen'">
-                        <img style="height:5vh;width: 3vw;vertical-align: middle;" src="/assets/images/draw_sample.png">
+                    <button class="modalNVButton" onmousedown="window.location='/test/1/collect_specimen'">
+                        Draw Sample
                     </button>
-                    <button><img style="height:5vh;width: 3vw;vertical-align: middle;" src="/assets/images/delete.png"></button>
                 </div>
             </div>
             <div class="Row">
@@ -152,10 +150,9 @@
                     <p>Row 1 Column 2</p>
                 </div>
                 <div class="Cell">
-                    <button onmousedown="window.location='/test/1/collect_specimen'">
-                        <img style="height:5vh;width: 3vw;vertical-align: middle;" src="/assets/images/draw_sample.png">
+                    <button class="modalNVButton" onmousedown="window.location='/test/1/collect_specimen'">
+                        Draw Sample
                     </button>
-                    <button><img style="height:5vh;width: 3vw;vertical-align: middle;" src="/assets/images/delete.png"></button>
                 </div>
             </div>
             <div class="Row">
@@ -174,10 +171,9 @@
                     <p>Row 1 Column 2</p>
                 </div>
                 <div class="Cell">
-                    <button onmousedown="window.location='/test/1/collect_specimen'">
-                        <img style="height:5vh;width: 3vw;vertical-align: middle;" src="/assets/images/draw_sample.png">
+                    <button class="modalNVButton" onmousedown="window.location='/test/1/collect_specimen'">
+                        Draw Sample
                     </button>
-                    <button><img style="height:5vh;width: 3vw;vertical-align: middle;" src="/assets/images/delete.png"></button>
                 </div>
             </div>
         </div>
@@ -185,27 +181,27 @@
     <div id="orderModal" class="modalDialog">
         <div>
             <div style="height: 17%;text-align: center; border: 1px solid silver; padding:5px; border-radius: 5px 5px 0px 0px">
-            <span  style="font-weight:bold;font-size: 20pt;">Laboratory Test Order</span><hr/>
-            <table style="width:80%;">
-                <tr>
-                    <td >Patient</td><td>:</td>
-                    <td>{{ pt_details.get('name') }}</td>
-                </tr>
-                <tr>
-                    <td >Ordered By</td><td>:</td>
-                    <td>{{current_user['current_user']}}</td>
-                </tr>
-                <tr>
-                    <td>Order Date</td><td>:</td>
-                    <td>{{now}}</td>
-                </tr>
-            </table>
-        </div>
+                <span  style="font-weight:bold;font-size: 20pt;">Laboratory Test Order</span><hr/>
+                <table style="width:80%;">
+                    <tr>
+                        <td >Patient</td><td>:</td>
+                        <td>{{ pt_details.get('name') }}</td>
+                    </tr>
+                    <tr>
+                        <td >Ordered By</td><td>:</td>
+                        <td>{{current_user['current_user']}}</td>
+                    </tr>
+                    <tr>
+                        <td>Order Date</td><td>:</td>
+                        <td>{{now}}</td>
+                    </tr>
+                </table>
+            </div>
             <div style="height: 70%; overflow-y: auto;overflow-x: hidden;">
             <form id="regForm" method="post" action="/test/create">
                 <!-- One "tab" for each step in the form: -->
                 <div class="tab">
-                    <h2>Specimen Type</h2>
+                    <h2>Select specimen type for test(s)</h2>
                     <ul>
                         {% for i in specimen_types%}
                             <div style="display: table-row;">
@@ -232,7 +228,7 @@
                     </ul>
                 </div>
                 <div class="tab">
-                    <h2>Test Type</h2>
+                    <h2>Select test(s) to be performed:</h2>
                     <ul>
                         {% for test in test_options%}
                                 <li data-id="{{(',').join(test_options[test]['specimen_types']) }}" id="test-{{test}}-container" name="testOptions">
@@ -244,12 +240,13 @@
                     </ul>
                 </div>
                 <div class="tab">
-                    <h2>Clinical History</h2>
+                    <h2>Enter Clinical History</h2>
                     <input type="text" placeholder="Clinical history" name="clinical_history" id="default" class="input" value="{{
                       request.form.clinical_history }}" required style="width: 90%; font-size : 18pt;border-radius:5px;height: 7vh;">
                     <div class="simple-keyboard" style="width: 99%; border: 1px solid silver;margin-top: 2vh;"></div>
                 </div>
                 <div class="tab">
+                    <h2>Select priotity for test(s)</h2>
                     <ul>
                         <li>
                             <input type="radio" id="routine" value="Routine" name="priority" checked>
@@ -263,29 +260,45 @@
                         </li>
                     </ul>
                 </div>
+                <div class="tab">
+                    <h2>Collect specimen now?</h2>
+                    <ul>
+                        <li>
+                            <input type="radio" id="collect_now" value="Collect Now" name="sampleCollection" checked>
+                            <label for="collect_now">Yes</label>
+                            <div class="check"></div>
+                        </li>
+                        <li>
+                            <input type="radio" id="collect_later" value="Collect Later" name="sampleCollection">
+                            <label for="collect_later">No</label>
+                            <div class="check"></div>
+                        </li>
+                    </ul>
+                </div>
                 <input type="hidden" name="patient_name" value={{pt_details.get('name')}} >
                 <input type="hidden" name="patient_id" value={{pt_details.get('id')}} >
             </form>
         </div>
             <div style="height: 12%; margin-top: 1vh;border: 1px solid silver; padding:10px; border-radius: 0px 0px 5px 5px">
-            <table style="width:100%;">
-                <tr>
-                    <td>
-                        <a href="#close" title="Close" ><button type="button" class="modalNVButton red">Cancel</button></a>
-                    </td>
-                    <td style="text-align: center;">
-                        <span class="step"></span>
-                        <span class="step"></span>
-                        <span class="step"></span>
-                        <span class="step"></span>
-                    </td>
-                    <td style="text-align: right">
-                        <button type="button" id="prevBtn" class="modalNVButton" onclick="nextPrev(-1)">Previous</button>
-                        <button type="button" id="nextBtn" class="modalNVButton green" onclick="nextPrev(1)">Next</button>
-                    </td>
-                </tr>
-            </table>
-        </div>
+                <table style="width:100%;">
+                    <tr>
+                        <td>
+                            <a href="#close" title="Close" ><button type="button" class="modalNVButton red">Cancel</button></a>
+                        </td>
+                        <td style="text-align: center;">
+                            <span class="step"></span>
+                            <span class="step"></span>
+                            <span class="step"></span>
+                            <span class="step"></span>
+                            <span class="step"></span>
+                        </td>
+                        <td style="text-align: right">
+                            <button type="button" id="prevBtn" class="modalNVButton" onclick="nextPrev(-1)">Previous</button>
+                            <button type="button" id="nextBtn" class="modalNVButton green" onclick="nextPrev(1)">Next</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -301,15 +314,14 @@
 
         var currentTab = 0; // Current tab is set to be the first tab (0)
         function showOrderDialog(){
-            window.location='{{request.url}}#orderModal'
+            window.location='{{request.url.split("?")[0]}}#orderModal'
             showTab(0); // Display the current tab
         }
 
         function showDrawDialog(){
             document.getElementById("modalContent").innerHTML = document.getElementById("sampleDrawContent").innerHTML
-            window.location='{{request.url}}#openModal'
+            window.location='{{request.url.split("?")[0]}}#openModal'
         }
-
 
         function filterTests(id){
 
