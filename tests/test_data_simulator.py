@@ -23,7 +23,7 @@ except:
 
 orderers = []
 test_status = ["Ordered", "Specimen Collected", "Specimen Received", "Being Analyzed",
-               "Pending Verification", "Analysis Complete", "Reveiwed"]
+               "Pending Verification", "Analysis Complete", "Reviewed"]
 
 designations = {'N' : 'Nurse', 'S': 'Sister-in-charge' , 'M': 'Matron',
                 'I': 'Intern Medical Offcer','R': 'Registrar', 'C': 'Consultant'}
