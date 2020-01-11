@@ -50,11 +50,12 @@ def index():
                 "type": "test",
                 "ordered_by": {"$in": my_team},
                 "status": {"$in": ["Ordered","Specimen Collected","Analysis Complete","Rejected"]}
-            }
+            },"limit": 90
         }
 
         for item in db.find(team_records):
-            my_team_recs.append({'status': item.get('status'),'test': item.get('test_type'),
+            my_team_recs.append({'status': item.get('status'),
+                                 'test': db.find({"selector": {"type":"test_type","test_type_id": item.get('test_type')}, "fields": ["_id"]}),
                             'name': db.get(item.get('patient_id')).get('name').title(),
                             'ordered_by': db.get(item.get("ordered_by")).get('name').title(),
                             'ordered_on':datetime.fromtimestamp(float(item.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
@@ -62,7 +63,8 @@ def index():
 
 
     for item in db.find(main_index_records) :
-        records.append({'status': item.get('status'),'test': item.get('test_type'),
+        records.append({'status': item.get('status'),
+                                'test': db.find({"selector": {"type":"test_type","test_type_id": item.get('test_type')}, "fields": ["_id"]}),
                                  'name': db.get(item.get('patient_id')).get('name').title(),
                                  'ordered_on':datetime.fromtimestamp(float(item.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
                                  'patient_id': item.get('patient_id')})
@@ -117,13 +119,32 @@ def select_location():
 @app.route("/patient/<patient_id>", methods=['GET'])
 def patient(patient_id=None):
     draw_sample = False
+    records = []
     if (request.args.get("sample_draw") != None) and (request.args.get("sample_draw") != None):
             draw_sample = True
     patient = db.get(patient_id)
     pt= { 'name': patient.get('name'), 'gender': 'male' if patient.get('gender') == 'M' else 'female',
           'dob': datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), 'id': patient_id}
-    mango = {"selector": { "type": "test","patient_id": patient_id}}
-    records =  db.find(mango)
+    mango = {"selector": { "type": "test","patient_id": patient_id},
+             "fields": ["_id","status","Priority","ordered_by","date_ordered","test_type","sample_type","measures"], "limit": 90}
+
+    for test in  db.find(mango):
+        test["date_ordered"] =  datetime.fromtimestamp(float(test["date_ordered"])).strftime('%d %b %Y %H:%S')
+        test["test_details"] = db.find({"selector": {"type":"test_type","test_type_id": test.get('test_type')}, "fields": ["_id","measures"]})
+
+        try:
+            for measure in test.get("measures"):
+                test["numeric_measures"] = []
+                test["critical"] = {}
+                if test['test_details'][0]["measures"][measure].get("minimum") != None :
+                    test["numeric_measures"].append(measure)
+                    if float(test["measures"][measure]) < float(test['test_details'][0]["measures"][measure].get("minimum")):
+                        test["critical"][measure] = "low"
+                    elif float(test["measures"][measure]) > float(test['test_details'][0]["measures"][measure].get("maximum")):
+                        test["critical"][measure] = "high"
+        except:
+            pass
+        records.append(test)
 
     return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=False, collect_samples=draw_sample)
 
@@ -147,6 +168,7 @@ def create_lab_order():
                 'status': 'Ordered',
                 'test_type': test,
                 'sample_type' : request.form['specimen_type'],
+                'clinical_history': request.form['clinical_history'],
                 'type': 'test',
                 'Priority':request.form['priority'],
                 'ward': session["location"],

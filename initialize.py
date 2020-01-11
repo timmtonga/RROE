@@ -16,10 +16,11 @@ def initialize():
         print("File not accessible")
         return
 
-
     couchConnection = Server("http://%s:%s@%s:%s/" %
                              (settings["couch"]["user"],settings["couch"]["passwd"],
                               settings["couch"]["host"],settings["couch"]["port"]))
+
+    del couchConnection[settings["couch"]["database"]]
 
     global db
     # Connect to a database or Create a Database
@@ -51,8 +52,14 @@ def initialize_tests():
                 test_options[test.get("test_type_id")]["specimen_types"][tests.get('specimen_type_id')] = specimen_type
 
     for test_details in test_options:
-        db.save(test_options[test_details])
-        #db.save(test)
+        record = db.get(test_options[test_details]["_id"])
+        if record == None:
+            db.save(test_options[test_details])
+        else:
+            for key in test_options[test_details].keys():
+                record[key] = test_options[test_details][key]
+            db.save(record)
+
 
 def initialize_views():
     print("Initializing views")

@@ -44,29 +44,77 @@
             <div style="border:2px solid #07575B;border-radius:6px;width: 100%;margin:1% auto;font-size:12pt;">
             <div style="color:#fff;margin:0;background-color:#003B46;font-size:14pt; padding: 15px;font-weight: bold;" onmousedown="toggleDisplay('{{row['id']}}')">
                 <div style="display: table-row;">
-                    <div style="display: table-cell;width: 100%;">{{row['test_type']}} ({{ row['date_ordered'] }})</div>
-                    <div style="display: table-cell;" id="content1-status">View</div>
+                    <div style="display: table-cell;width: 100%;">{{row['test_details'][0]["_id"]}} (Current Status: {{row['status']}})</div>
+                    <div style="display: table-cell;" id="{{row['id']}}-status">View</div>
+                </div>
+                <div style="display: table-row;">
+                    <div style="display: table-cell;width: 100%;">Ordered On: {{ row['date_ordered'] }}</div>
+                    <div style="display: table-cell;">&nbsp;</div>
                 </div>
             </div>
-            <div id='{{row["id"]}}' style="padding: 10px" hidden="False">
-                <table style="width: 100%;margin-left: auto; margin-right: auto;border-collapse: collapse; line-height: 5vh;" >
-                    <tr>
-                        <th style="height: 50px;border: 1px solid black;">Measure</th>
-                        <th style="height: 50px;border: 1px solid black;">Value</th>
-                        <th style="height: 50px;border: 1px solid black;">Range</th>
-                    </tr>
-                    <tr>
-                        <td style="  border: 1px solid black;font-weight: bold;padding-left: 10px;">Creatinine </td>
-                        <td style="  border: 1px solid black;text-align: center;">0.95</td>
-                        <td style="  border: 1px solid black;text-align: center;">0.70 - 1.30</td>
-                    </tr>
-                    <tr>
-                        <td style="  border: 1px solid black;font-weight: bold;padding-left: 10px;">Urea </td>
-                        <td style="color: red;border: 1px solid black;text-align: center;">63.1 <span style='color: red; font-size: 2em;font-weight: bold;'>&#8593;</span></td>
-                        <td style="border: 1px solid black;text-align: center;">18.00 - 55.00</td>
-                    </tr>
-                </table>
-            </div>
+             <div id='{{row["id"]}}' style="padding: 10px" hidden="False">
+                {% if row['status'] == "Analysis Complete" or row['status'] == "Reviewed" %}
+                    <table style="width: 100%;margin-left: auto; margin-right: auto;border-collapse: collapse; line-height: 5vh;" >
+                        <tr>
+                            <th style="height: 50px;border: 1px solid black;">Measure</th>
+                            <th style="height: 50px;border: 1px solid black;">Value</th>
+                            <th style="height: 50px;border: 1px solid black;">Range</th>
+                        </tr>
+                        {% for measure in row.get("measures") %}
+                            <tr>
+                                <td style="border: 1px solid black;font-weight: bold;padding-left: 10px;">{{measure}} </td>
+                                {% if measure not in row['numeric_measures'] %}
+                                    <td style="border: 1px solid black;text-align: center;">
+                                        {{row["measures"][measure]}}
+                                    </td>
+                                    <td style="border: 1px solid black;text-align: center;">
+                                        &nbsp;
+                                    </td>
+                                {% else %}
+                                    {% if row["critical"].get(measure) == None  %}
+                                        <td style="border: 1px solid black;text-align: center;">
+                                            {{row["measures"][measure]}}
+                                        </td>
+                                    {% else %}
+                                        {% if row["critical"].get(measure) == "low" %}
+                                            <td style="color: red;border: 1px solid black;text-align: center;">
+                                                {{row["measures"][measure]}}<span style='color: red; font-size: 2em;font-weight: bold;'>&#8595;</span>
+                                            </td>
+                                        {% else%}
+                                            <td style="color: red;border: 1px solid black;text-align: center;">
+                                                {{row["measures"][measure]}}<span style='color: red; font-size: 2em;font-weight: bold;'>&#8593;</span>
+                                            </td>
+                                        {% endif %}
+                                    {% endif %}
+                                    <td style="border: 1px solid black;text-align: center;">
+                                        {{row['test_details'][0]["measures"][measure].get("minimum")}} - {{row['test_details'][0]["measures"][measure].get("maximum")}}
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% elif row['status'] == "Ordered" %}
+                    <b>Test Priority: </b>{{row.get("priority")}}<br><br>
+                    <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
+                    <b>Order Status:</b>{{row.get("status")}}<br>
+                 {% elif row['status'] == "Specimen Collected" %}
+                    <b>Test Priority: </b>{{row.get("priority")}}<br><br>
+                    <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
+                    <b>Order Status:</b>{{row.get("status")}}<br>
+                 {% elif row['status'] == "Specimen Received" %}
+                    <b>Test Priority: </b>{{row.get("priority")}}<br><br>
+                    <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
+                    <b>Order Status:</b>{{row.get("status")}}<br>
+                 {% elif row['status'] == "Being Analyzed" or row['status'] == "Pending Verification" %}
+                    <b>Test Priority: </b>{{row.get("priority")}}<br><br>
+                    <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
+                    <b>Order Status:</b>{{row.get("status")}}<br>
+                 {% elif row['status'] == "Rejected" %}
+                    <b>Test Priority: </b>{{row.get("priority")}}<br><br>
+                    <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
+                    <b>Reason for rejection:</b>{{row.get("rejection_reason", "")}}<br>
+                {% endif %}
+             </div>
         </div>
         {% endfor %}
     </div>
