@@ -44,11 +44,15 @@
             <div style="border:2px solid #07575B;border-radius:6px;width: 100%;margin:1% auto;font-size:12pt;">
             <div style="color:#fff;margin:0;background-color:#003B46;font-size:14pt; padding: 15px;font-weight: bold;" onmousedown="toggleDisplay('{{row['id']}}')">
                 <div style="display: table-row;">
-                    <div style="display: table-cell;width: 100%;">{{row['test_details'][0]["_id"]}} (Current Status: {{row['status']}})</div>
-                    <div style="display: table-cell;" id="{{row['id']}}-status">View</div>
+                    <div style="display: table-cell;width: 100%;">{{row['test_details'][0]["_id"]}}</div>
+                    <div style="display: table-cell;">&nbsp;</div>
                 </div>
                 <div style="display: table-row;">
                     <div style="display: table-cell;width: 100%;">Ordered On: {{ row['date_ordered'] }}</div>
+                    <div style="display: table-cell;" id="{{row['id']}}-status">View</div>
+                </div>
+                <div style="display: table-row;">
+                    <div style="display: table-cell;width: 100%;">Current Status: {{row['status']}}</div>
                     <div style="display: table-cell;">&nbsp;</div>
                 </div>
             </div>
