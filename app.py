@@ -170,6 +170,7 @@ def collect_specimens(test_id=[]):
         labelFile.write('A25,40,0,1,1,2,N,"2 Jul, 2019"\n')
         labelFile.write('b20,70,P,386,80,"James Phiri~XYXKRQ~M~19850115~4B~Dr Wangui~Septic Sores~201907111235~FBC^MPS^ESR~S"\n')
         labelFile.write('A25,120,0,1,1,2,N,"FBC, MPS & ESR"\n')
+        labelFile.write('A25,150,0,1,1,2,N,%s \n' % datetime.utcnow().strftime("%d-%b-%y %H:%M"))
         labelFile.write("P1\n")
         labelFile.close()
         os.system('sh ~/print.sh /tmp/test_order.lbl')

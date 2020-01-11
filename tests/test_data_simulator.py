@@ -1,17 +1,26 @@
 from couchdb import Server # importing couchdb
 from couchdb.design import ViewDefinition
 import random
+import json
 import datetime
 from werkzeug.security import generate_password_hash
 
-couch = Server('http://admin:rootpwd@127.0.0.1:5984/')
-del couch['rroe_trial']
+config_file = "config/application.config"
+settings = {}
 
-# Creating Database
+with open(config_file) as json_file:
+    settings = json.load(json_file)
+
+couchConnection = Server("http://%s:%s@%s:%s/" %
+                         (settings["couch"]["user"],settings["couch"]["passwd"],
+                          settings["couch"]["host"],settings["couch"]["port"]))
+
+del couchConnection[settings["couch"]["database"]]
+# Connect to a database or Create a Database
 try:
-    db = couch['rroe_trial']
+    db = couchConnection[settings["couch"]["database"]]
 except:
-    db = couch.create('rroe_trial')
+    db = couchConnection.create(settings["couch"]["database"])
 
 orderers = []
 test_status = ["Ordered", "Specimen Collected", "Specimen Received", "Being Analyzed",
