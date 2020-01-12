@@ -1,4 +1,5 @@
 import os
+import csv
 import json
 from couchdb import Server
 from couchdb.design import ViewDefinition
@@ -60,6 +61,21 @@ def initialize_tests():
                 record[key] = test_options[test_details][key]
             db.save(record)
 
+    with open('test_type_details_edited.csv') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        for row in csv_reader:
+            if line_count == 0:
+                line_count += 1
+            else:
+                record = db.get(row[1])
+                if record == None:
+                    pass
+                else:
+                    if record.get("specimen_requirements") == None:
+                        record["specimen_requirements"] = {}
+                    record["specimen_requirements"][row[4]] ={"container" : row[7], "volume": row[6].split(" ")[0], "units" : row[6].split(" ")[1], "type_of_specimen": row[5]}
+                    db.save(record)
 
 def initialize_views():
     print("Initializing views")

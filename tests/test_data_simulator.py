@@ -101,6 +101,7 @@ def simulatePatients():
                     'dob': dob, 'gender': random.choice('FM'), 'type': 'patient'}
 
         db.save(doc)
+'''
 
         nTests = random.randint(0,10)
 
@@ -151,6 +152,7 @@ def simulatePatients():
 
             test['date_ordered'] = test['date_ordered'].strftime("%s")
             db.save(test)
+'''
 
 def simulateMeasures(measures):
     test_measures = {}

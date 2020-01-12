@@ -119,7 +119,7 @@ def select_location():
 @app.route("/patient/<patient_id>", methods=['GET'])
 def patient(patient_id=None):
     draw_sample = False
-    pending_sample = False
+    pending_sample = []
     records = []
     if (request.args.get("sample_draw") != None) and (request.args.get("sample_draw") != None):
             draw_sample = True
@@ -127,13 +127,19 @@ def patient(patient_id=None):
     pt= { 'name': patient.get('name'), 'gender': 'male' if patient.get('gender') == 'M' else 'female',
           'dob': datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), 'id': patient_id}
     mango = {"selector": { "type": "test","patient_id": patient_id},
-             "fields": ["_id","status","Priority","ordered_by","date_ordered","test_type","sample_type","measures"], "limit": 90}
+             "fields": ["_id","status","Priority","ordered_by","date_ordered","test_type","sample_type","measures","specimen_types","clinical_history"], "limit": 90}
 
     for test in  db.find(mango):
         test["date_ordered"] =  datetime.fromtimestamp(float(test["date_ordered"])).strftime('%d %b %Y %H:%S')
-        test["test_details"] = db.find({"selector": {"type":"test_type","test_type_id": test.get('test_type')}, "fields": ["_id","measures"]})
+        test["test_details"] = db.find({"selector": {"type":"test_type","test_type_id": test.get('test_type')}, "fields": ["_id","measures", "specimen_requirements"]})
         if test["status"] == "Ordered" :
-            pending_sample = True
+            pending_sample .append({"test_id":test["_id"],
+                                    "specimen_type": test["test_details"][0]["specimen_requirements"][test["sample_type"]]["type_of_specimen"],
+                                    "test_type": test["test_details"][0]["_id"],
+                                    "container": test["test_details"][0]["specimen_requirements"][test["sample_type"]]["container"],
+                                   "volume":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["volume"],
+                                   "units":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["units"]
+                                    })
         try:
             for measure in test.get("measures"):
                 test["numeric_measures"] = []
@@ -330,6 +336,13 @@ def inject_tests():
                 test_options[test.get("test_type_id")]["specimen_types"].append(tests['specimen_type_id'])
 
     return {"test_options":  test_options}
+
+@app.context_processor
+def inject_containers():
+    return {"containers": {'Sterile container': "blue_top_urine.png",
+                           'Red top': "red_top.jpg", 'Baktech':"bactec.png",
+                           'Conical container': "conical_contatiner.jpeg",
+            'EDTA': 'purple_top.jpg', 'yellow top': "yellow_top.jpg"}}
 
 #Error handling pages
 @app.errorhandler(404)
