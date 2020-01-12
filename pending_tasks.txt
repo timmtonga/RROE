@@ -1,9 +1,7 @@
 Test details and engine
-Map sample draws to right containers and figure out how to get all the right data
 Use db for test preprocessors
 Show next activity
 Rank actions rected vs analysis complete vs analysis complete with critical values
-test relay printer with pdf417 and qr-code
 test voltage reader and ask gerry on how to inteprete the values (12 == 100%, 9.5 =0%)
 Add units to results
 Logic to trim printed text 84 chars max
