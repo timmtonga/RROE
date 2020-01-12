@@ -1,7 +1,10 @@
-<input type="radio" name="tabs" id="tabone" checked="checked">
-  <label for="tabone">Pending Orders</label>
-  <div class="tab">
-      {%  for i in orders %}
+<div class="maintab">
+  <button class="maintablinks" onclick="showMainTab(event, 'teamOrders')" id="defaultOpen">Pending Orders</button>
+  <button class="maintablinks" onclick="showMainTab(event, 'preferences')">My Preferences</button>
+</div>
+
+<div id="pendingOrders" class="maintabcontent">
+        {%  for i in orders %}
           <div class = "mainButtons" onmousedown="window.location='/patient/{{i.get('patient_id')}}'">
               <span style="font-weight:bold; font-size: 1.25em ;">{{i.get('name')}}</span>
               <div style="display: table-row; ">
@@ -21,4 +24,8 @@
               </div>
           </div>
       {% endfor %}
-  </div>
+</div>
+
+<div id="preferences" class="maintabcontent">
+  <h1>User Preferences</h1>
+</div>

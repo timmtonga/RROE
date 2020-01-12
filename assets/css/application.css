@@ -95,53 +95,46 @@ body {
         text-align:right;
     }
 
-    .tabs {
-        display: flex;
-        flex-wrap: wrap; // make sure it wraps
-    }
-    .tabs label {
-        order: 1; // Put the labels first
-        display: block;
-        padding: 1rem 2rem;
-        margin-right: 0.2rem;
-        cursor: pointer;
-        background: #90CAF9;
-        font-weight: bold;
-        transition: background ease 0.2s;
-    }
-    .tabs .tab {
-        order: 99; // Put the tabs last
-        flex-grow: 1;
-        width: 96vw;
-        display: none;
-        padding: 1rem;
-        background: #fff;
-        border: 1px solid silver;
-        height: 60vh;
-        overflow:auto;
-    }
-    .tabs input[type="radio"] {
-        display: none;
-    }
-    .tabs input[type="radio"]:checked + label {
-        background: #fff;
-    }
-    .tabs input[type="radio"]:checked + label + .tab {
-        display: block;
-    }
+/* Style the tab */
+.maintab {
+  overflow: hidden;
+  border-bottom: 1px solid #ccc;
+  background-color: #ffffff;
+}
 
-    @media (max-width: 45em) {
-        .tabs .tab,
-        .tabs label {
-            order: initial;
-        }
-        .tabs label {
-            width: 100%;
-            margin-right: 0;
-            margin-top: 0.2rem;
-        }
-    }
+/* Style the buttons inside the tab */
+.maintab button {
+  background-color: inherit;
+  float: left;
+  border: 1px solid #ccc;
+  outline: none;
+  min-width: 15vw;
+  cursor: pointer;
+  padding: 1rem 2rem;
+  transition: 0.3s;
+  font-size: 17px;
+  font-weight: bold;
+  transition: background ease 0.2s;
+  margin-right: 0.2rem;
+}
 
+
+/* Create an active/current tablink class */
+.maintab button.active {
+  background-color: #90CAF9;
+}
+
+/* Style the tab content */
+.maintabcontent {
+  width: 96vw;
+  display: none;
+  border: 1px solid #ccc;
+  border-top: none;
+  padding: 1rem;
+  background: #fff;
+  height: 60vh;
+  overflow:auto;
+}
 
     .mainButtons {
         margin-left: auto;
