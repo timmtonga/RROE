@@ -159,17 +159,26 @@ def patient(patient_id=None):
 @app.route("/patient/<patient_id>/draw", methods=['GET'])
 def patient_draw_samples(patient_id=None):
     records = []
+    pending_sample = []
     if (request.args.get("sample_draw") != None) and (request.args.get("sample_draw") != None):
             draw_sample = True
     patient = db.get(patient_id)
     pt= { 'name': patient.get('name'), 'gender': 'male' if patient.get('gender') == 'M' else 'female',
           'dob': datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), 'id': patient_id}
     mango = {"selector": { "type": "test","patient_id": patient_id},
-             "fields": ["_id","status","Priority","ordered_by","date_ordered","test_type","sample_type","measures"], "limit": 90}
+             "fields": ["_id","status","Priority","ordered_by","date_ordered","test_type","sample_type","measures","specimen_types","clinical_history"], "limit": 90}
 
     for test in  db.find(mango):
         test["date_ordered"] =  datetime.fromtimestamp(float(test["date_ordered"])).strftime('%d %b %Y %H:%S')
-        test["test_details"] = db.find({"selector": {"type":"test_type","test_type_id": test.get('test_type')}, "fields": ["_id","measures"]})
+        test["test_details"] = db.find({"selector": {"type":"test_type","test_type_id": test.get('test_type')}, "fields": ["_id","measures", "specimen_requirements"]})
+        if test["status"] == "Ordered" :
+            pending_sample .append({"test_id":test["_id"],
+                                    "specimen_type": test["test_details"][0]["specimen_requirements"][test["sample_type"]]["type_of_specimen"],
+                                    "test_type": test["test_details"][0]["_id"],
+                                    "container": test["test_details"][0]["specimen_requirements"][test["sample_type"]]["container"],
+                                   "volume":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["volume"],
+                                   "units":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["units"]
+                                    })
 
         try:
             for measure in test.get("measures"):
@@ -185,7 +194,7 @@ def patient_draw_samples(patient_id=None):
             pass
         records.append(test)
 
-    return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=True, collect_samples=True, requires_keyboard=True)
+    return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=pending_sample, collect_samples=True, requires_keyboard=True)
 
 #create a new lab test order
 @app.route("/test/create", methods=['POST'])
@@ -212,22 +221,28 @@ def create_lab_order():
 
 #update lab test orders to specimen collected
 @app.route("/test/<test_id>/collect_specimen")
-def collect_specimens(test_id=[]):
-    pat_id = 'DFOGLS'
+def collect_specimens(test_id):
+    tests = db.find({"selector" : {"type": "test", "_id": {"$in": test_id.split("^")}}})
+    if tests == None or tests == []:
+        return redirect( url_for("index", error = "Tests not found"))
+    patient = db.get(tests[0]["patient_id"])
+    dr = db.get(tests[0]["ordered_by"])
+
     try:
         labelFile = open("/tmp/test_order.lbl", "w+")
         labelFile.write("N\nq406\nQ203,027\nZT\n")
-        labelFile.write('A25,10,0,1,1,2,N,"James Phiri"\n')
-        labelFile.write('A25,40,0,1,1,2,N,"2 Jul, 2019"\n')
-        labelFile.write('b20,70,P,386,80,"James Phiri~XYXKRQ~M~19850115~4B~Dr Wangui~Septic Sores~201907111235~FBC^MPS^ESR~S"\n')
-        labelFile.write('A25,120,0,1,1,2,N,"FBC, MPS & ESR"\n')
-        labelFile.write('A25,150,0,1,1,2,N,%s \n' % datetime.utcnow().strftime("%d-%b-%y %H:%M"))
+        labelFile.write('A5,10,0,1,1,2,N,"%s"\n' % patient["name"])
+        labelFile.write('A5,40,0,1,1,2,N,"%s (%s)"\n' % (datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), patient["gender"][0]) )
+        labelFile.write('b5,70,P,386,80,"%s~%s~%s~19850115~4B~Dr Wangui~Septic Sores~201907111235~FBC^MPS^ESR~S"\n' %
+                        (patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0]))
+        labelFile.write('A5,170,0,1,1,2,N,"%s"\n' % "3,4")
+        labelFile.write('A260,170,0,1,1,2,N,"%s" \n' % datetime.now().strftime("%d-%b %H:%M"))
         labelFile.write("P1\n")
         labelFile.close()
         os.system('sh ~/print.sh /tmp/test_order.lbl')
     except:
         pass
-    return redirect(url_for('patient', patient_id=pat_id))
+    return redirect(url_for('patient', patient_id=patient.get("_id")))
 
 #proces barcode from the main index page
 @app.route("/process_barcode", methods=["POST"])
@@ -241,7 +256,7 @@ def barcode():
             return redirect("home", error = error)
         elif patient.get("type") != 'patient':
             error = "No patient with this record"
-            return redirect("home", error = error)
+            return redirect( url_for("home", error = error))
         else:
             return redirect(url_for('patient', patient_id=barcode_segments[0].strip()))
     elif (len(barcode_segments) == 5 ):
@@ -256,9 +271,9 @@ def barcode():
         return redirect(url_for('patient', patient_id=id))
     else:
         error = "Wrong format for patient identifier. Please use the National patient Identifier"
-        return redirect("home", error = error)
+        return redirect( url_for("home", error = error))
 
-def collapse_test_orders(orders = []):
+def collapse_test_orders(orders):
     if (("Full Blood Count" in orders) and ("Malaria Screening" in orders)):
         pass
         #pop those two out and combine them in one

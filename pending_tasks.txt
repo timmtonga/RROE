@@ -8,3 +8,4 @@ test voltage reader and ask gerry on how to inteprete the values (12 == 100%, 9.
 Add units to results
 Logic to trim printed text 84 chars max
 Review required containter type
+location to id map

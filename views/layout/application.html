@@ -2,7 +2,7 @@
     <head>
         <title>RROE</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/application.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/application.css') }}">
         <script src="{{url_for('static', filename='javascript/application.js')}}"></script>
     </head>
     <body >
@@ -17,14 +17,18 @@
         </div>
     </body>
 
-    <script type="text/javascript">
-        addNavButtons()
-        {% if collect_samples  %}
-                showDrawDialog()
-        {% endif %}
-    </script>
     {% if requires_keyboard  %}
         <script src="{{url_for('static', filename='javascript/keyboard.js')}}"></script>
         <script src="{{url_for('static', filename='javascript/keyboard_init.js')}}"></script>
     {% endif %}
+    <script type="text/javascript">
+       document.onreadystatechange = function () {
+          if (document.readyState == "interactive") {
+                       addNavButtons()
+          }
+        }
+       {% if collect_samples  %}
+            showDrawDialog()
+        {% endif %}
+     </script>
 </html>
