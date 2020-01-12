@@ -223,18 +223,27 @@ def create_lab_order():
 @app.route("/test/<test_id>/collect_specimen")
 def collect_specimens(test_id):
     tests = db.find({"selector" : {"type": "test", "_id": {"$in": test_id.split("^")}}})
+    test_ids = []
     if tests == None or tests == []:
         return redirect( url_for("index", error = "Tests not found"))
     patient = db.get(tests[0]["patient_id"])
-    dr = db.get(tests[0]["ordered_by"])
+    dr = db.get(tests[0]["ordered_by"])["name"].split(" ")
+    wards = {"4A":"19","4B":"20","MSS":"44","MHDU":"56"}
 
     try:
+        for test in tests:
+            test["status"] = "Specimen Collected"
+            test_ids.append(test["test_type"])
+            db.save(test)
         labelFile = open("/tmp/test_order.lbl", "w+")
         labelFile.write("N\nq406\nQ203,027\nZT\n")
         labelFile.write('A5,10,0,1,1,2,N,"%s"\n' % patient["name"])
         labelFile.write('A5,40,0,1,1,2,N,"%s (%s)"\n' % (datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), patient["gender"][0]) )
-        labelFile.write('b5,70,P,386,80,"%s~%s~%s~19850115~4B~Dr Wangui~Septic Sores~201907111235~FBC^MPS^ESR~S"\n' %
-                        (patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0]))
+        labelFile.write('b5,70,P,386,80,"%s~%s~%s~%s~%s~%s~%s~%s~%s~%s"\n' %
+                        (patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0],
+                         datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d%m%y"),
+                         wards[tests[0]["ward"]] ,dr[0][0]+ " "+ dr[1],tests[0]["clinical_history"],
+                         datetime.now().strftime("%s"), ("^").join(test_ids), tests[0]["Priority"][0] ) )
         labelFile.write('A5,170,0,1,1,2,N,"%s"\n' % "3,4")
         labelFile.write('A260,170,0,1,1,2,N,"%s" \n' % datetime.now().strftime("%d-%b %H:%M"))
         labelFile.write("P1\n")
@@ -281,7 +290,6 @@ def collapse_test_orders(orders):
     pass
 
 #Application callbacks
-@app.before_request
 def initialize_connection():
     #Connect to a couchdb instance
     couchConnection = Server("http://%s:%s@%s:%s/" %
@@ -296,7 +304,7 @@ def initialize_connection():
 
 @app.before_request
 def check_authentication():
-
+    initialize_connection()
     if request.path != "/login":
         try:
             session["logged_in"]
