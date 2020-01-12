@@ -6,7 +6,7 @@
             navButtons.push(["New Test", "showOrderDialog()", "Defaults", "Right"])
         {% endif %}
 
-        {% if  not pending_orders  %}
+        {% if  pending_orders  %}
             navButtons.push(["Draw Samples", "showDrawDialog()", "Defaults", "Right"])
         {% endif %}
      </script>
@@ -401,6 +401,5 @@
             }
         }
     </script>
-    <script src="{{url_for('static', filename='javascript/keyboard.js')}}"></script>
-    <script src="{{url_for('static', filename='javascript/keyboard_init.js')}}"></script>
+
 {% endblock %}

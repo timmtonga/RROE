@@ -92,7 +92,7 @@ def login():
 
     session["user"] = None
     session["logged_in"] = None
-    return render_template('user/login.html', error=error)
+    return render_template('user/login.html', error=error, requires_keyboard=True)
 
 @app.route("/user/new")
 def new_user():
@@ -119,6 +119,39 @@ def select_location():
 @app.route("/patient/<patient_id>", methods=['GET'])
 def patient(patient_id=None):
     draw_sample = False
+    pending_sample = False
+    records = []
+    if (request.args.get("sample_draw") != None) and (request.args.get("sample_draw") != None):
+            draw_sample = True
+    patient = db.get(patient_id)
+    pt= { 'name': patient.get('name'), 'gender': 'male' if patient.get('gender') == 'M' else 'female',
+          'dob': datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), 'id': patient_id}
+    mango = {"selector": { "type": "test","patient_id": patient_id},
+             "fields": ["_id","status","Priority","ordered_by","date_ordered","test_type","sample_type","measures"], "limit": 90}
+
+    for test in  db.find(mango):
+        test["date_ordered"] =  datetime.fromtimestamp(float(test["date_ordered"])).strftime('%d %b %Y %H:%S')
+        test["test_details"] = db.find({"selector": {"type":"test_type","test_type_id": test.get('test_type')}, "fields": ["_id","measures"]})
+        if test["status"] == "Ordered" :
+            pending_sample = True
+        try:
+            for measure in test.get("measures"):
+                test["numeric_measures"] = []
+                test["critical"] = {}
+                if test['test_details'][0]["measures"][measure].get("minimum") != None :
+                    test["numeric_measures"].append(measure)
+                    if float(test["measures"][measure]) < float(test['test_details'][0]["measures"][measure].get("minimum")):
+                        test["critical"][measure] = "low"
+                    elif float(test["measures"][measure]) > float(test['test_details'][0]["measures"][measure].get("maximum")):
+                        test["critical"][measure] = "high"
+        except:
+            pass
+        records.append(test)
+
+    return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=pending_sample, collect_samples=draw_sample, requires_keyboard=True)
+
+@app.route("/patient/<patient_id>/draw", methods=['GET'])
+def patient_draw_samples(patient_id=None):
     records = []
     if (request.args.get("sample_draw") != None) and (request.args.get("sample_draw") != None):
             draw_sample = True
@@ -146,17 +179,7 @@ def patient(patient_id=None):
             pass
         records.append(test)
 
-    return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=False, collect_samples=draw_sample)
-
-@app.route("/patient/<patient_id>/draw", methods=['GET'])
-def patient_draw_samples(patient_id=None):
-    patient = db.get(patient_id)
-    pt= { 'name': patient.get('name'), 'gender': 'male' if patient.get('gender') == 'M' else 'female',
-          'dob': datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), 'id': patient_id}
-    mango = {"selector": { "type": "test","patient_id": patient_id}}
-    records =  db.find(mango)
-
-    return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=True, collect_samples=True)
+    return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=True, collect_samples=True, requires_keyboard=True)
 
 #create a new lab test order
 @app.route("/test/create", methods=['POST'])

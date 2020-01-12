@@ -23,4 +23,8 @@
                 showDrawDialog()
         {% endif %}
     </script>
+    {% if requires_keyboard  %}
+        <script src="{{url_for('static', filename='javascript/keyboard.js')}}"></script>
+        <script src="{{url_for('static', filename='javascript/keyboard_init.js')}}"></script>
+    {% endif %}
 </html>
