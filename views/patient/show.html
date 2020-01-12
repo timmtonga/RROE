@@ -6,7 +6,7 @@
             navButtons.push(["New Test", "showOrderDialog()", "Defaults", "Right"])
         {% endif %}
 
-        {% if  pending_orders  %}
+        {% if  not pending_orders  %}
             navButtons.push(["Draw Samples", "showDrawDialog()", "Defaults", "Right"])
         {% endif %}
      </script>
@@ -150,25 +150,6 @@
             </div>
             <div class="Row">
                 <div class="Cell">
-                    <p>Pericardial Fluid</p>
-                </div>
-                <div class="Cell">
-                    <p>Sterile Fluid Analysis <br>Culture and Sensitivity</p>
-                </div>
-                <div class="Cell" style="text-align: center">
-                    <p>6 ml</p>
-                </div>
-                <div class="Cell" style="text-align: center">
-                    <p>Row 1 Column 2</p>
-                </div>
-                <div class="Cell">
-                    <button class="modalNVButton" onmousedown="window.location='/test/1/collect_specimen'">
-                        Draw Sample
-                    </button>
-                </div>
-            </div>
-            <div class="Row">
-                <div class="Cell">
                     <p>Peritoneal Fluid</p>
                 </div>
                 <div class="Cell">
@@ -178,7 +159,7 @@
                     <p>3 ml</p>
                 </div>
                 <div class="Cell" style="text-align: center">
-                    <p>Row 1 Column 2</p>
+                    <img style="vertical-align: middle;height:4vh;width:2vw;" src="/assets/images/red_top.jpg">
                 </div>
                 <div class="Cell">
                     <button class="modalNVButton" onmousedown="window.location='/test/1/collect_specimen'">
@@ -199,7 +180,7 @@
                     <p>9 ml</p>
                 </div>
                 <div class="Cell" style="text-align: center">
-                    <p>Row 1 Column 2</p>
+                    <img style="vertical-align: middle;height:4vh;width:2vw;" src="/assets/images/purple_top.jpg">
                 </div>
                 <div class="Cell">
                     <button class="modalNVButton" onmousedown="window.location='/test/1/collect_specimen'">
@@ -220,7 +201,28 @@
                     <p>9 ml</p>
                 </div>
                 <div class="Cell" style="text-align: center">
-                    <p>Row 1 Column 2</p>
+                    <img style="vertical-align: middle;height:4vh;width:2vw;" src="/assets/images/red_top.jpg">
+                </div>
+                <div class="Cell">
+                    <button class="modalNVButton" onmousedown="window.location='/test/1/collect_specimen'">
+                        Draw Sample
+                    </button>
+                </div>
+            </div>
+            <div class="Row">
+                <div class="Cell">
+                    <p>Urine</p>
+                </div>
+                <div class="Cell">
+                    <p>
+                        Urine Analysis
+                    </p>
+                </div>
+                <div class="Cell" style="text-align: center">
+                    <p>9 ml</p>
+                </div>
+                <div class="Cell" style="text-align: center">
+                    <img style="vertical-align: middle;height:4vh;width:2vw;" src="/assets/images/blue_top_urine.png">
                 </div>
                 <div class="Cell">
                     <button class="modalNVButton" onmousedown="window.location='/test/1/collect_specimen'">
