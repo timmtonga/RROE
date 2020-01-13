@@ -103,7 +103,7 @@ def users():
 def create_user():
     user = db.get(request.form['username'])
     if user == None:
-        provider = {'type': "user","name" : "Admin User" ,  "_id": request.form['username'],'password_hash': generate_password_hash('password'),
+        provider = {'type': "user","name" : request.form["name"] ,  "_id": request.form['username'],'password_hash': generate_password_hash('password'),
         "role": request.form['role'],   'designation': request.form['designation']}
         if request.form['role'] == "Doctor":
             provider["team"] = request.form["team"]
@@ -114,7 +114,7 @@ def create_user():
     else:
       current_users = db.find({"selector": { "type": "user"}, "limit": 200})
       return render_template("user/index.html", requires_keyboard=True, users =current_users, error="Username already exists")
-    return "New user created"
+    return redirect(url_for("users",success =  "New user created"))
 
 @app.route("/select_location", methods=["GET", "POST"])
 def select_location():

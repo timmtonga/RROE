@@ -45,15 +45,18 @@
 
     <div id="userModal" class="modalDialog">
         <div>
-            <div style="height: 80%; overflow-y: auto;overflow-x: hidden;">
+            <div style="height: 87%; overflow-y: auto;overflow-x: hidden;">
                 <form id="regForm" method="post" action="/user/create">
                     <div class="tab">
                         <h2>User Details</h2>
+                        <h3>Full Name</h3>
+                        <input type="text" placeholder="Full name" name="name" minlength="6"  id="default" class="input" value="{{
+                      request.form.lname }}" required style="width: 90%; font-size : 18pt;border-radius:5px;height: 7vh;">
                         <h3>Username</h3>
-                              <input type="text" placeholder="Username" name="username" id="default" class="input" value="{{
+                              <input type="text" placeholder="Username" minlength="6" name="username" id="input3" class="input" value="{{
           request.form.username }}" required style="width: 90%; font-size : 18pt;border-radius:5px;height: 7vh;">
                       <h3>Password</h3>
-                     <input type="password" placeholder="Password" name="password"  id="input2" class="input" value="{{
+                     <input type="password" placeholder="Password" name="password" minlength="6"  id="input4" class="input" value="{{
                       request.form.password }}" required style="width: 90%; font-size : 18pt;border-radius:5px;height: 7vh;">
                             <div class="simple-keyboard" style="width: 99%; border: 1px solid silver;margin-top: 2vh;"></div>
                     </div>
@@ -110,6 +113,16 @@
                     <div class="tab">
                         <h2>Allocation</h2>
                         <ul>
+                            <li data-id="doc" name="allocationOptions">
+                                <input type="radio" id="short_stay" value="MSS" name="team" >
+                                <label for="short_stay">Short Stay</label>
+                                <div class="check"></div>
+                            </li>
+                            <li data-id="doc" name="allocationOptions">
+                                <input type="radio" id="opd" value="OPD" name="team" >
+                                <label for="opd">OPD</label>
+                                <div class="check"></div>
+                            </li>
                             <li data-id="doc" name="allocationOptions">
                                 <input type="radio" id="team_a" value="Team A" name="team" >
                                 <label for="team_a">Team A</label>
