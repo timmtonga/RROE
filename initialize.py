@@ -3,6 +3,7 @@ import csv
 import json
 from couchdb import Server
 from couchdb.design import ViewDefinition
+from werkzeug.security import generate_password_hash
 
 global db
 
@@ -32,6 +33,7 @@ def initialize():
 
     initialize_tests()
     initialize_views()
+    create_user()
 
 def initialize_tests():
     print("Initializing tests")
@@ -76,6 +78,11 @@ def initialize_tests():
                         record["specimen_requirements"] = {}
                     record["specimen_requirements"][row[4]] ={"container" : row[7], "volume": row[6].split(" ")[0], "units" : row[6].split(" ")[1], "type_of_specimen": row[5]}
                     db.save(record)
+
+def create_user():
+    provider = {'type': "user","name" : "Admin User" ,  "_id": "admin",'password_hash': generate_password_hash('password'),
+        "role": 'Administrator',   'designation':"Administrator","team": "All"}
+    db.save(provider)
 
 def initialize_views():
     print("Initializing views")

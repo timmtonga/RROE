@@ -56,7 +56,11 @@
 </div>
 
 <div id="preferences" class="maintabcontent">
-  <h1>User Preferences</h1>
+  {% if session.get('user').get('role') == 'Administrator' %}
+    <div class = "mainButtons" onmousedown="window.location='/users'">
+          Create User
+      </div>
+{% endif %}
 </div>
 
 

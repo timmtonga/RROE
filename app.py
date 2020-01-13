@@ -94,13 +94,26 @@ def login():
     session["logged_in"] = None
     return render_template('user/login.html', error=error, requires_keyboard=True)
 
-@app.route("/user/new")
-def new_user():
-    return "New User Page"
+@app.route("/users")
+def users():
+    current_users = db.find({"selector": { "type": "user"}, "limit": 200})
+    return render_template("user/index.html", requires_keyboard=True, users =current_users)
 
-@app.route("/user/create", methods=["Post"])
+@app.route("/user/create", methods=["POST"])
 def create_user():
-    #password_hash = generate_password_hash("request.form['password']")
+    user = db.get(request.form['username'])
+    if user == None:
+        provider = {'type': "user","name" : "Admin User" ,  "_id": request.form['username'],'password_hash': generate_password_hash('password'),
+        "role": request.form['role'],   'designation': request.form['designation']}
+        if request.form['role'] == "Doctor":
+            provider["team"] = request.form["team"]
+        else:
+            provider["ward"] = request.form["wardAllocation"]
+
+        db.save(provider)
+    else:
+      current_users = db.find({"selector": { "type": "user"}, "limit": 200})
+      return render_template("user/index.html", requires_keyboard=True, users =current_users, error="Username already exists")
     return "New user created"
 
 @app.route("/select_location", methods=["GET", "POST"])
