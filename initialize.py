@@ -22,7 +22,7 @@ def initialize():
                              (settings["couch"]["user"],settings["couch"]["passwd"],
                               settings["couch"]["host"],settings["couch"]["port"]))
 
-    del couchConnection[settings["couch"]["database"]]
+    #del couchConnection[settings["couch"]["database"]]
 
     global db
     # Connect to a database or Create a Database
