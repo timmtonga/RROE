@@ -225,7 +225,7 @@ def create_lab_order():
                 'ward': session["location"],
                 'patient_id': request.form['patient_id']
             }
-    db.save(test)
+        db.save(test)
 
     if request.form["sampleCollection"] == "Collect Now":
         return redirect(url_for('patient_draw_samples', patient_id=request.form['patient_id']))
