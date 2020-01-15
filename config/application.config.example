@@ -6,5 +6,11 @@
         "passwd":"my secret password",
         "database":"mydatabase"
     },
+    "iblis": {
+        "host": "localhost",
+        "user":"username",
+        "password":"pasword",
+        "database":"blis_database"
+    },
     "facility":"My Test Facility"
 }

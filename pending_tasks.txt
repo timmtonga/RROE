@@ -7,3 +7,7 @@ Add units to results
 Logic to trim printed text 84 chars max
 Review required containter type
 location to id map
+write username to lab barcode
+new test statuses test_statuses = {1:"Specimen Received",2:"Specimen Received",
+                 3:"Being Analyzed",4:"Pending Verification",5:"Analysis Complete",6:"Not Done",7:"Not Done",8:"Rejected"}
+
