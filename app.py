@@ -240,15 +240,13 @@ def collect_specimens(test_id):
     if tests == None or tests == []:
         return redirect( url_for("index", error = "Tests not found"))
     patient = db.get(tests[0]["patient_id"])
-    dr = db.get(tests[0]["ordered_by"])["name"]
-    if len(dr.split(" ")) > 1:
-        dr = dr[0][0] + " " + dr.split(" ")[1]
-
+    dr = tests[0]["ordered_by"]
     wards = {"4A":"19","4B":"20","MSS":"44","MHDU":"56"}
 
     for test in tests:
         test["status"] = "Specimen Collected"
-        test_ids.append(test["test_type"])
+        test["collected_by"] = session["user"]['username']
+        test_ids.append(db.find({"selector": {"type":"test_type","test_type_id": test["test_type"]}, "fields": ["short_name"]})[0]["short_name"])
         db.save(test)
 
     test_string = [patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0],
@@ -260,12 +258,12 @@ def collect_specimens(test_id):
     labelFile.write("N\nq406\nQ203,027\nZT\n")
     labelFile.write('A5,10,0,1,1,2,N,"%s"\n' % patient["name"])
     labelFile.write('A5,40,0,1,1,2,N,"%s (%s)"\n' % (datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), patient["gender"][0]) )
-    labelFile.write('b5,70,P,386,80,"%s"\n' % ("~").join(test_string))
-    labelFile.write('A5,170,0,1,1,2,N,"%s"\n' % "3,4")
+    labelFile.write('b5,70,P,386,80,"%s$"\n' % ("~").join(test_string))
+    labelFile.write('A5,170,0,1,1,2,N,"%s"\n' % (",").join(test_ids))
     labelFile.write('A260,170,0,1,1,2,N,"%s" \n' % datetime.now().strftime("%d-%b %H:%M"))
     labelFile.write("P1\n")
     labelFile.close()
-    os.system('sh ~/print.sh /tmp/test_order.lbl')
+    os.system('sudo sh ~/print.sh /tmp/test_order.lbl')
 
     return redirect(url_for('patient', patient_id=patient.get("_id")))
 
