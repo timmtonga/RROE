@@ -286,9 +286,19 @@ def barcode():
         #This section is for the npid qr code
         id = barcode_segments[1].strip()
         patient = db.get(id)
+
         if patient == None or patient.get("type") != 'patient':
+            dob_format = "%d/%b/%Y"
+            if "??" in barcode_segments[2].split("/"):
+                if "??" == barcode_segments[2].split("/")[0] and "??" == barcode_segments[2].split("/")[1]:
+                    dob_format = "??/??/%Y"
+                elif "??" == barcode_segments[2].split("/")[0] and "??" != barcode_segments[2].split("/")[1]:
+                    dob_format = "??/%b/%Y"
+                elif "??" != barcode_segments[2].split("/")[0] and "??" == barcode_segments[2].split("/")[1]:
+                    dob_format = "%d/??/%Y"
+
             doc = {'_id': id, 'name': barcode_segments[0], 'type': 'patient',
-                   'dob':  datetime.strptime(barcode_segments[2], "%d/%b/%Y").strftime("%d-%m-%Y"),
+                   'dob':  datetime.strptime(barcode_segments[2], dob_format).strftime("%d-%m-%Y"),
                    'gender': barcode_segments[3]}
             db.save(doc)
         return redirect(url_for('patient', patient_id=id))
