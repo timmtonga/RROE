@@ -14,12 +14,8 @@ config_file = "config/application.config"
 settings = {}
 with open(config_file) as json_file:
     settings = json.load(json_file)
-
 if settings["using_rpi"] == "True":
-    import RPi.GPIO as GPIO
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setwarnings(False)
-    GPIO.setup(23,GPIO.OUT)
+    from utils.led_control import ledControl
 
 #Root page of application
 @app.route("/")
@@ -337,10 +333,11 @@ def initialize_connection():
 @app.before_request
 def check_authentication():
     initialize_connection()
-    if request.path == "/" and settings["using_rpi"] == "True":
-        turn_led_on()
-    else:
-        turn_led_off()
+    if settings["using_rpi"] == "True":
+        if request.path == "/":
+            ledControl.turn_led_on()
+        else:
+            ledControl.turn_led_off()
 
     if request.path != "/login":
         try:
@@ -416,12 +413,6 @@ def not_found_error(error):
 @app.errorhandler(500)
 def internal_error(error):
     return render_template('main/500.html'), 500
-
-def turn_led_on():
-    GPIO.output(23,GPIO.HIGH)
-
-def turn_led_off():
-    GPIO.output(23,GPIO.LOW)
 
 if __name__ =='__main__':
     app.secret_key = os.urandom(25)
