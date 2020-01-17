@@ -335,9 +335,9 @@ def check_authentication():
     initialize_connection()
     if settings["using_rpi"] == "True":
         if request.path == "/":
-            ledControl.turn_led_on()
+            ledControl().turn_led_on()
         else:
-            ledControl.turn_led_off()
+            ledControl().turn_led_off()
 
     if request.path != "/login":
         try:
