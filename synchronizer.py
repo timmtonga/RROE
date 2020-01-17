@@ -44,7 +44,7 @@ def check_pending():
                 test["lims_id"] = myTest[0]
         else:
             #if test has accession number
-            query = "SELECT id, test_status_id from tests where id = " % test.get("lims_id")
+            query = "SELECT id, test_status_id from tests where id = %s" % test.get("lims_id")
             mycursor.execute(query)
             myTest = mycursor.fetchone()
 
