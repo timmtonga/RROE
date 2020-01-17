@@ -237,6 +237,7 @@ def create_lab_order():
 def collect_specimens(test_id):
     tests = db.find({"selector" : {"type": "test", "_id": {"$in": test_id.split("^")}}})
     test_ids = []
+    test_names = []
     if tests == None or tests == []:
         return redirect( url_for("index", error = "Tests not found"))
     patient = db.get(tests[0]["patient_id"])
@@ -246,7 +247,8 @@ def collect_specimens(test_id):
     for test in tests:
         test["status"] = "Specimen Collected"
         test["collected_by"] = session["user"]['username']
-        test_ids.append(db.find({"selector": {"type":"test_type","test_type_id": test["test_type"]}, "fields": ["short_name"]})[0]["short_name"])
+        test_ids.append(test["test_type"])
+        test_names.append(db.find({"selector": {"type":"test_type","test_type_id": test["test_type"]}, "fields": ["short_name"]})[0]["short_name"])
         db.save(test)
 
     test_string = [patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0],
@@ -259,7 +261,7 @@ def collect_specimens(test_id):
     labelFile.write('A5,10,0,1,1,2,N,"%s"\n' % patient["name"])
     labelFile.write('A5,40,0,1,1,2,N,"%s (%s)"\n' % (datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), patient["gender"][0]) )
     labelFile.write('b5,70,P,386,80,"%s$"\n' % ("~").join(test_string))
-    labelFile.write('A5,170,0,1,1,2,N,"%s"\n' % (",").join(test_ids))
+    labelFile.write('A5,170,0,1,1,2,N,"%s"\n' % (",").join(test_names))
     labelFile.write('A260,170,0,1,1,2,N,"%s" \n' % datetime.now().strftime("%d-%b %H:%M"))
     labelFile.write("P1\n")
     labelFile.close()
