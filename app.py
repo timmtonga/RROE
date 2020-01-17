@@ -337,7 +337,7 @@ def initialize_connection():
 @app.before_request
 def check_authentication():
     initialize_connection()
-    if request.path != "/" and settings["using_rpi"] == "True":
+    if request.path == "/" and settings["using_rpi"] == "True":
         turn_led_on()
     else:
         turn_led_off()
