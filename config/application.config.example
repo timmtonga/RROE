@@ -12,5 +12,6 @@
         "password":"pasword",
         "database":"blis_database"
     },
-    "facility":"My Test Facility"
+    "facility":"My Test Facility",
+    "using_rpi": False
 }

@@ -371,7 +371,7 @@ def inject_tests():
                 test_options[test.get("test_type_id")] = {"name": test_name, "specimen_types" :[tests['specimen_type_id']] }
             elif tests['specimen_type_id'] not in test_options[test.get("test_type_id")]["specimen_types"]:
                 test_options[test.get("test_type_id")]["specimen_types"].append(tests['specimen_type_id'])
-
+    test_options = sorted(test_options.items(), key=lambda e: e[1]["name"])
     return {"test_options":  test_options}
 
 @app.context_processor

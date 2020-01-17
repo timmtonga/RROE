@@ -224,9 +224,9 @@
                     <h2>Select test(s) to be performed:</h2>
                     <ul>
                         {% for test in test_options%}
-                                <li data-id="{{(',').join(test_options[test]['specimen_types']) }}" id="test-{{test}}-container" name="testOptions">
-                                    <input type="checkbox" required id="test-{{test}}" value="{{test}}" name="test_type[]">
-                                    <label for="test-{{test}}">{{test_options[test]['name']}}</label>
+                           <li data-id="{{(',').join(test[1]['specimen_types']) }}" id="test-{{test[0]}}-container" name="testOptions">
+                                    <input type="checkbox" required id="test-{{test[0]}}" value="{{test[0]}}" name="test_type[]">
+                                    <label for="test-{{test[0]}}">{{ test[1]['name']}}</label>
                                     <div class="select"></div>
                                 </li>
                         {% endfor %}
