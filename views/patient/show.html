@@ -39,7 +39,7 @@
         </table>
     </div>
     <h2>Recent Lab Tests</h2>
-    <div style="border: 1px solid silver; padding: 10px;height:70vh; overflow:auto;" class="header">
+    <div style="border: 1px solid silver; padding: 10px;height:65vh; overflow:auto;" class="header">
         {% for row in tests%}
             <div style="border:2px solid #07575B;border-radius:6px;width: 100%;margin:1% auto;font-size:12pt;">
             <div style="color:#fff;margin:0;background-color:#003B46;font-size:14pt; padding: 15px;font-weight: bold;" onmousedown="toggleDisplay('{{row['id']}}')">
@@ -104,7 +104,8 @@
                  {% elif row['status'] == "Specimen Collected" %}
                     <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
                     <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
-                    <b>Order Status:</b>{{row.get("status")}}<br>
+                    <b>Order Status:</b>{{row.get("status")}}<br><br>
+                    <button>Re-print Barcode</button>
                  {% elif row['status'] == "Specimen Received" %}
                     <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
                     <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>

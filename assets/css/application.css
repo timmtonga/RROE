@@ -7,7 +7,6 @@ body {
     user-select: none;
     background-color: #f1f1f1;
     margin: 0px;
-    padding-top:0.5vh;
     font-size: 15px;
     font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 }
@@ -15,7 +14,7 @@ body {
     margin-top: 0.5vh;
     margin-bottom: 0.5vh;
     padding-left:0.5vw;
-    height: 89vh;
+    height: 85vh;
     overflow: hidden;
 }
 
@@ -87,10 +86,22 @@ body {
         height: 10vh;
         text-align:right;
     }
-
-    .nvHeader {
-        top: 0;
-        background-color: #0F4C81;
+    .high{
+        background: #346B00;
+        height:100%;
+        vertical-align: middle;
+    }
+    .medium{
+        background: #DB9501;
+        height:100%;
+        vertical-align: middle;
+    }
+    .low{
+        background: #8D230F;
+        height:100%;
+        vertical-align: middle;
+    }
+    .nvheader {
         height: 5vh;
         text-align:right;
     }

@@ -6,6 +6,28 @@
         <script src="{{url_for('static', filename='javascript/application.js')}}"></script>
     </head>
     <body >
+        <div style="height: 5vh; background-color: #011A27;color:#fef;font-weight:bold;font-size:13pt;top:0px;">
+            <div style="display:table; width: 100%;">
+                <div style="display: table-row; ">
+                    <div style="display: table-cell">
+                        <img src="/assets/images/appIcon.png" style="height: 5vh; width: 5vw;">
+                    </div>
+                    <div style="display: table-cell; vertical-align: middle;text-align:center;width: 100%;">
+                        <a href="/login" style="text-decoration: none;font-weight:bold; color: #fff">Results Review and Order Entry System</a>
+                    </div>
+                    <div style="display: table-cell; vertical-align:middle;padding-right: 3px;">
+                            {{now}}
+                    </div>
+                    <div style="display: table-cell; vertical-align:middle;padding-right: 3px;">
+                        <div style="border: 2px solid grey; height: 3vh;width:6vw;">
+                            <div style="width:{{current_power}}%" class="{{power_class}}">
+                                &nbsp;
+                            </div>
+                        </div>
+                    </div>
+                </div>
+             </div>
+        </div>
         <div class="mainDiv">
             {% block body %}
             {% endblock %}

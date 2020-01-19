@@ -27,5 +27,22 @@
 </div>
 
 <div id="preferences" class="maintabcontent">
-  <h1>User Preferences</h1>
+    <div style="display: table; padding-top: 10px;padding-left: 10px;margin-left: auto;margin-right: auto;">
+        <div style="display: table-row">
+            <div style="display: table-cell;width: 15vw;text-align: center;" onmousedown="window.location='/user/{{ session['user']['username']}}/update_password'">
+                <img src="/assets/images/change_password.png">
+            </div>
+            <div style="display: table-cell;width: 15vw;text-align: center;" onmousedown="window.location='/user/{{ session['user']['username']}}/score_card'">
+                <img src="/assets/images/score_card.png">
+            </div>
+        </div>
+        <div style="display: table-row">
+            <div style="display: table-cell;text-align: center;font-size: 1.4em;" onmousedown="window.location='/user/{{ session['user']['username']}}/update_password'">
+                Change Password
+            </div>
+            <div style="display: table-cell;text-align: center;font-size: 1.4em;" onmousedown="window.location='/user/{{ session['user']['username']}}/score_card'">
+                My Score Card
+            </div>
+        </div>
+    </div>
 </div>

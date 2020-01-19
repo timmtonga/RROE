@@ -6,24 +6,6 @@
         navButtons = [["Cancel", "window.location='/login'", "Red", "Left"],
             ["Login", "validateLogin()", "Green", "Right"]]
     </script>
-    <div style="display:table; width: 100%;">
-        <div style="display: table-row; ">
-            <div style="display: table-cell">
-                <img src="/assets/images/appIcon.png" style="height: 5vh; width: 5vw;">
-            </div>
-            <div style="display: table-cell; vertical-align: bottom;text-align:center;width: 100%;">
-                <a href="/login" style="text-decoration: none;font-size:16pt;font-weight:bold;">Results Review and Order Entry System</a>
-            </div>
-            <div style="display: table-cell; vertical-align:top;padding-right: 3px;">
-                <span>Power</span>
-                <div style="border: 1px solid black; height: 3vh;">
-                    <div style="width: 100%;height:100%; background-color: green;vertical-align: central;text-align: center;color: #ffdddd;">
-                        100%
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <div style="margin-left: auto;margin-right: auto;width: 95%; border: 1px solid silver;padding: 1%;margin-top:5vh;">
       <h1>Please login</h1>
@@ -32,8 +14,7 @@
         <input type="text" placeholder="Username" name="username" id="default" class="input" value="{{
           request.form.username }}" required style="width: 90%; font-size : 18pt;border-radius:5px;height: 7vh;">
           <h3>Password</h3>
-         <input type="password" placeholder="Password" required name="password"  id="input2" class="input" value="{{
-          request.form.password }}" style="width: 90%; font-size : 18pt;border-radius:5px;height: 7vh;">
+         <input type="password" placeholder="Password" required name="password"  id="input2" class="input" style="width: 90%; font-size : 18pt;border-radius:5px;height: 7vh;">
       </form>
         <p class="error" id="errorField" style="font-size: 12pt;">
             {% if error %}

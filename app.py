@@ -7,15 +7,20 @@ from couchdb import Server
 from datetime import datetime
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, render_template,redirect,session,flash,request,url_for
+
 app = Flask(__name__, template_folder="views", static_folder="assets")
 
+#Main application configuration
 global db
 config_file = "config/application.config"
 settings = {}
 with open(config_file) as json_file:
     settings = json.load(json_file)
+
+#optional configuration when running on rpi
 if settings["using_rpi"] == "True":
     from utils.led_control import ledControl
+    from utils.voltage_checker import CheckVoltage
 
 #Root page of application
 @app.route("/")
@@ -63,7 +68,7 @@ def index():
                             'ordered_on':datetime.fromtimestamp(float(item.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
                             'patient_id': item.get('patient_id')})
 
-
+    #query for records to display on the main page
     for item in db.find(main_index_records) :
         records.append({'status': item.get('status'),
                                 'test': db.find({"selector": {"type":"test_type","test_type_id": item.get('test_type')}, "fields": ["_id"]}),
@@ -73,6 +78,7 @@ def index():
 
     return render_template('main/index.html', orders = records, team_records = my_team_recs)
 
+#route to login page
 @app.route("/login", methods=["GET", "POST"])
 def login():
     error= None
@@ -105,7 +111,8 @@ def users():
 def create_user():
     user = db.get(request.form['username'])
     if user == None:
-        provider = {'type': "user","name" : request.form["name"] ,  "_id": request.form['username'],'password_hash': generate_password_hash('password'),
+        provider = {'type': "user","name" : request.form["name"] ,  "_id": request.form['username'],
+                    'password_hash': generate_password_hash(request.form["password"]),
         "role": request.form['role'],   'designation': request.form['designation']}
         if request.form['role'] == "Doctor":
             provider["team"] = request.form["team"]
@@ -117,6 +124,19 @@ def create_user():
       current_users = db.find({"selector": { "type": "user"}, "limit": 200})
       return render_template("user/index.html", requires_keyboard=True, users =current_users, error="Username already exists")
     return redirect(url_for("users",success =  "New user created"))
+
+@app.route("/user/<user_id>/update_password", methods=["GET", "POST"])
+def change_password(user_id=None):
+    if request.method == "POST":
+        user = db.get(user_id)
+        if user == None:
+            return redirect(url_for("index", error = "User not found"))
+        else:
+            user["password_hash"] =  generate_password_hash(request.form["password"])
+            db.save(user)
+            return redirect(url_for("index"))
+    else:
+        return render_template("user/update_password.html", requires_keyboard=True,username = user_id)
 
 @app.route("/select_location", methods=["GET", "POST"])
 def select_location():
@@ -280,10 +300,10 @@ def barcode():
         patient = db.get(barcode_segments[0].strip())
         if patient == None:
             error = "No patient with this record"
-            return redirect("home", error = error)
+            return redirect(url_for("indec", error = error))
         elif patient.get("type") != 'patient':
             error = "No patient with this record"
-            return redirect( url_for("home", error = error))
+            return redirect( url_for("index", error = error))
         else:
             return redirect(url_for('patient', patient_id=barcode_segments[0].strip()))
     elif (len(barcode_segments) == 5 ):
@@ -308,7 +328,7 @@ def barcode():
         return redirect(url_for('patient', patient_id=id))
     else:
         error = "Wrong format for patient identifier. Please use the National patient Identifier"
-        return redirect( url_for("home", error = error))
+        return redirect( url_for("index", error = error))
 
 def collapse_test_orders(orders):
     if (("Full Blood Count" in orders) and ("Malaria Screening" in orders)):
@@ -353,7 +373,7 @@ def check_authentication():
 #Context processors. Used to get data in views
 @app.context_processor
 def inject_now():
-    return {'now': datetime.utcnow().strftime("%d-%b-%y %H:%M")}
+    return {'now': datetime.now().strftime("%H:%M%p")}
 
 def locations_options():
     return [["MSS", "Medical Short Stay"], ["4A", "Medical Female Ward"], ["4B", "Medical Male Ward"], ["MHDU", "Medical HDU"]]
@@ -377,6 +397,22 @@ def inject_specimen_types():
         specimen_types.append([key,value['specimen_type_id']])
     specimen_types.sort()
     return {'specimen_types': [specimen_types[i * 2:(i + 1) * 2] for i in range((len(specimen_types) + 2 - 1) // 2 )] }
+
+@app.context_processor
+def inject_power():
+    if settings["using_rpi"] == "True":
+        voltage = CheckVoltage().getVoltage()
+        if voltage > 70:
+            rating = "high"
+        elif voltage > 30 and voltage < 70:
+            rating = "medium"
+        else:
+            rating = "low"
+    else:
+        voltage=  100
+        rating =  "high"
+
+    return {"current_power": voltage, "power_class": rating}
 
 @app.context_processor
 def inject_tests():
