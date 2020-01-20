@@ -20,7 +20,7 @@ with open(config_file) as json_file:
 #optional configuration when running on rpi
 if settings["using_rpi"] == "True":
     from utils.led_control import ledControl
-    from utils.voltage_checker import CheckVoltage
+    #from utils.voltage_checker import CheckVoltage
 
 #Root page of application
 @app.route("/")
@@ -401,7 +401,7 @@ def inject_specimen_types():
 @app.context_processor
 def inject_power():
     if settings["using_rpi"] == "True":
-        voltage = CheckVoltage().getVoltage()
+        voltage = 100 #CheckVoltage().getVoltage()
         if voltage > 70:
             rating = "high"
         elif voltage > 30 and voltage < 70:
