@@ -313,13 +313,13 @@ def barcode():
 
         if patient == None or patient.get("type") != 'patient':
             dob_format = "%d/%b/%Y"
-            if "??" in barcode_segments[2].split("/"):
-                if "??" == barcode_segments[2].split("/")[0] and "??" == barcode_segments[2].split("/")[1]:
-                    dob_format = "??/??/%Y"
-                elif "??" == barcode_segments[2].split("/")[0] and "??" != barcode_segments[2].split("/")[1]:
-                    dob_format = "??/%b/%Y"
-                elif "??" != barcode_segments[2].split("/")[0] and "??" == barcode_segments[2].split("/")[1]:
-                    dob_format = "%d/??/%Y"
+
+            if "??" == barcode_segments[2].split("/")[0] and "???" == barcode_segments[2].split("/")[1]:
+                dob_format = "??/???/%Y"
+            elif "??" == barcode_segments[2].split("/")[0] and "???" != barcode_segments[2].split("/")[1]:
+                dob_format = "??/%b/%Y"
+            elif "??" != barcode_segments[2].split("/")[0] and "???" == barcode_segments[2].split("/")[1]:
+                dob_format = "%d/???/%Y"
 
             doc = {'_id': id, 'name': barcode_segments[0], 'type': 'patient',
                    'dob':  datetime.strptime(barcode_segments[2], dob_format).strftime("%d-%m-%Y"),
