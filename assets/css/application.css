@@ -108,9 +108,10 @@ body {
 
 /* Style the tab */
 .maintab {
+  width: 96vw;
   overflow: hidden;
   border-bottom: 1px solid #ccc;
-  background-color: #ffffff;
+  background-color: #f1f1f1;
 }
 
 /* Style the buttons inside the tab */
