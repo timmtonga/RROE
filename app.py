@@ -3,6 +3,7 @@
 
 import os
 import json
+import csv
 from couchdb import Server
 from datetime import datetime
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -300,7 +301,7 @@ def barcode():
         patient = db.get(barcode_segments[0].strip())
         if patient == None:
             error = "No patient with this record"
-            return redirect(url_for("indec", error = error))
+            return redirect(url_for("index", error = error))
         elif patient.get("type") != 'patient':
             error = "No patient with this record"
             return redirect( url_for("index", error = error))
@@ -429,6 +430,24 @@ def inject_tests():
                 test_options[test.get("test_type_id")]["specimen_types"].append(tests['specimen_type_id'])
     test_options = sorted(test_options.items(), key=lambda e: e[1]["name"])
     return {"test_options":  test_options}
+
+@app.context_processor
+def inject_panels():
+    panels = []
+    with open('test_panels.csv') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        for row in csv_reader:
+            if line_count == 0:
+                line_count += 1
+            else:
+                line_count += 1
+                panels.append({"panel": row[1], "tests": row[3].replace("|", ","), "specimen_type": row[4].replace("|", ",")})
+
+    panels = sorted(panels, key=lambda e: e["panel"])
+    print(panels)
+    return {"panels":  panels}
+
 
 @app.context_processor
 def inject_containers():

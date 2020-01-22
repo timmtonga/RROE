@@ -223,6 +223,13 @@
                 <div class="tab">
                     <h2>Select test(s) to be performed:</h2>
                     <ul>
+                        {% for test_panel in panels%}
+                           <li data-id="{{test_panel['specimen_type']}}" id="test-panel-{{test_panel['panel']}}-container" name="testOptions">
+                                    <input type="checkbox" required id="test-{{test_panel['panel']}}" value="{{test_panel['tests']}}" name="test_type[]">
+                                    <label for="test-{{test_panel['panel']}}">{{ test_panel['panel'] }}</label>
+                                    <div class="select"></div>
+                                </li>
+                        {% endfor %}
                         {% for test in test_options%}
                            <li data-id="{{(',').join(test[1]['specimen_types']) }}" id="test-{{test[0]}}-container" name="testOptions">
                                     <input type="checkbox" required id="test-{{test[0]}}" value="{{test[0]}}" name="test_type[]">

@@ -25,6 +25,7 @@ def check_pending():
     })
     connect_to_blis()
     for test in pending_tests:
+        print(test["_id"])
         myTest = None
         mycursor = mysqldb.cursor()
         #Does test have test has accession number or lims id?
@@ -41,7 +42,8 @@ def check_pending():
                 query = "SELECT id, test_status_id from tests where test_type_id = "+test.get("test_type")+" and requested_by = '"+test.get("ordered_by") +"' and visit_id in (select id from visits where patient_id = "+str(patient_id)+" and created_at between '"+datetime.utcfromtimestamp(float(test.get("date_ordered"))).strftime("%Y-%m-%d %H:%M")+"' and now()) order by id desc"
                 mycursor.execute(query)
                 myTest = mycursor.fetchone()
-                test["lims_id"] = myTest[0]
+                if myTest != None:
+                    test["lims_id"] = myTest[0]
         else:
             #if test has accession number
             query = "SELECT id, test_status_id from tests where id = %s" % test.get("lims_id")
