@@ -32,7 +32,7 @@ def index():
     if session["user"]["role"] == "Nurse":
         main_index_records = {
             "selector": {
-                "type": "test",
+                "type": {"$in": ["test","test panel"]},
                 "ward": session.get('location'),
                 "status": {"$in": ["Ordered","Specimen Collected","Analysis Complete", "Rejected"]}
             }
@@ -41,7 +41,7 @@ def index():
     else:
         main_index_records = {
             "selector": {
-                "type": "test",
+                "type": {"$in": ["test","test panel"]},
                 "ordered_by": session["user"]['username'],
                 "status": {"$in": ["Ordered","Specimen Collected","Analysis Complete","Rejected"]}
             }
@@ -456,7 +456,7 @@ def inject_panels():
                 panels.append({"panel": row[1], "tests": row[3], "specimen_type": row[4].replace("|", ",")})
 
     panels = sorted(panels, key=lambda e: e["panel"])
-    return {"panels":  panels}
+    return {"panels":  []}
 
 @app.context_processor
 def inject_containers():
