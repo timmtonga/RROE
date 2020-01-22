@@ -49,7 +49,7 @@ def index():
 
         #Get my team members and then all tests requested by members of my team
         my_team = []
-        for provider in db.view("_design/users/_view/teams",key=session.get('user').get('team'), limit=1000):
+        for provider in db.view("_design/users/_view/teams",key=session.get('user').get('team'), limit=100):
             my_team.append(provider.value)
 
         #Get all records for my team that require attention
@@ -58,11 +58,11 @@ def index():
                 "type": "test",
                 "ordered_by": {"$in": my_team},
                 "status": {"$in": ["Ordered","Specimen Collected","Analysis Complete","Rejected"]}
-            },"limit": 90
+            },"limit": 50
         }
 
         for item in db.find(team_records):
-            my_team_recs.append({'status': item.get('status'),
+            my_team_recs.append({'status': item.get('status'),'date':float(item.get('date_ordered')),
                                  'test': db.find({"selector": {"type":"test_type","test_type_id": item.get('test_type')}, "fields": ["_id"]}),
                             'name': db.get(item.get('patient_id')).get('name').title(),
                             'ordered_by': db.get(item.get("ordered_by")).get('name').title(),
@@ -71,12 +71,15 @@ def index():
 
     #query for records to display on the main page
     for item in db.find(main_index_records) :
-        records.append({'status': item.get('status'),
+        records.append({'status': item.get('status'),"date":float(item.get('date_ordered')),
                                 'test': db.find({"selector": {"type":"test_type","test_type_id": item.get('test_type')}, "fields": ["_id"]}),
                                  'name': db.get(item.get('patient_id')).get('name').title(),
                                  'ordered_on':datetime.fromtimestamp(float(item.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
                                  'patient_id': item.get('patient_id')})
 
+    #sort by date descending
+    records = sorted(records, key=lambda e: e["date"], reverse= True)
+    my_team_recs = sorted(my_team_recs, key=lambda e: e["date"], reverse= True)
     return render_template('main/index.html', orders = records, team_records = my_team_recs)
 
 #route to login page
@@ -163,9 +166,10 @@ def patient(patient_id=None):
     pt= { 'name': patient.get('name'), 'gender': 'male' if patient.get('gender') == 'M' else 'female',
           'dob': datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), 'id': patient_id}
     mango = {"selector": { "type": "test","patient_id": patient_id},
-             "fields": ["_id","status","Priority","ordered_by","date_ordered","test_type","sample_type","measures","specimen_types","clinical_history"], "limit": 90}
+             "fields": ["_id","status","Priority","ordered_by","date_ordered","test_type","sample_type","measures","specimen_types","clinical_history"], "limit": 50}
 
     for test in  db.find(mango):
+        test["date"] = float(test["date_ordered"])
         test["date_ordered"] =  datetime.fromtimestamp(float(test["date_ordered"])).strftime('%d %b %Y %H:%S')
         test["test_details"] = db.find({"selector": {"type":"test_type","test_type_id": test.get('test_type')}, "fields": ["_id","measures", "specimen_requirements"]})
         if test["status"] == "Ordered" :
@@ -189,7 +193,7 @@ def patient(patient_id=None):
         except:
             pass
         records.append(test)
-
+    records = sorted(records, key=lambda e: e["date"], reverse= True)
     return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=pending_sample, collect_samples=draw_sample, requires_keyboard=True)
 
 @app.route("/patient/<patient_id>/draw", methods=['GET'])
@@ -205,6 +209,7 @@ def patient_draw_samples(patient_id=None):
              "fields": ["_id","status","Priority","ordered_by","date_ordered","test_type","sample_type","measures","specimen_types","clinical_history"], "limit": 90}
 
     for test in  db.find(mango):
+        test["date"] = float(test["date_ordered"])
         test["date_ordered"] =  datetime.fromtimestamp(float(test["date_ordered"])).strftime('%d %b %Y %H:%S')
         test["test_details"] = db.find({"selector": {"type":"test_type","test_type_id": test.get('test_type')}, "fields": ["_id","measures", "specimen_requirements"]})
         if test["status"] == "Ordered" :
@@ -229,26 +234,32 @@ def patient_draw_samples(patient_id=None):
         except:
             pass
         records.append(test)
-
+    records = sorted(records, key=lambda e: e["date"], reverse= True)
     return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=pending_sample, collect_samples=True, requires_keyboard=True)
 
 #create a new lab test order
 @app.route("/test/create", methods=['POST'])
 def create_lab_order():
     for test in request.form.getlist('test_type[]'):
-        test = {
+        new_test = {
                 'ordered_by': session["user"]['username'],
                 'date_ordered': datetime.now().strftime('%s') ,
                 'status': 'Ordered',
-                'test_type': test,
                 'sample_type' : request.form['specimen_type'],
                 'clinical_history': request.form['clinical_history'],
-                'type': 'test',
                 'Priority':request.form['priority'],
                 'ward': session["location"],
                 'patient_id': request.form['patient_id']
             }
-        db.save(test)
+        if len(test.split("|")) > 1:
+            new_test['type'] =  "test panel"
+            new_test['tests'] = {}
+            for type in test.split("|"):
+                new_test['tests'][type] = {}
+        else:
+             new_test['type'] =  'test'
+             new_test['test_type'] = test
+        db.save(new_test)
 
     if request.form["sampleCollection"] == "Collect Now":
         return redirect(url_for('patient_draw_samples', patient_id=request.form['patient_id']))
@@ -442,12 +453,10 @@ def inject_panels():
                 line_count += 1
             else:
                 line_count += 1
-                panels.append({"panel": row[1], "tests": row[3].replace("|", ","), "specimen_type": row[4].replace("|", ",")})
+                panels.append({"panel": row[1], "tests": row[3], "specimen_type": row[4].replace("|", ",")})
 
     panels = sorted(panels, key=lambda e: e["panel"])
-    print(panels)
     return {"panels":  panels}
-
 
 @app.context_processor
 def inject_containers():
