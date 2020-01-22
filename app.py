@@ -2,6 +2,7 @@
 #This is the main thread for the application
 
 import os
+import re
 import json
 import csv
 from couchdb import Server
@@ -156,11 +157,11 @@ def select_location():
     return render_template('user/select_location.html', error=error, options=locations_options())
 
 @app.route("/patient/<patient_id>", methods=['GET'])
-def patient(patient_id=None):
+def patient(patient_id):
     draw_sample = False
     pending_sample = []
     records = []
-    if (request.args.get("sample_draw") != None) and (request.args.get("sample_draw") != None):
+    if (request.args.get("sample_draw") == "True"):
             draw_sample = True
     patient = db.get(patient_id)
     pt= { 'name': patient.get('name'), 'gender': 'male' if patient.get('gender') == 'M' else 'female',
@@ -180,62 +181,27 @@ def patient(patient_id=None):
                                    "volume":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["volume"],
                                    "units":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["units"]
                                     })
+
         try:
+            test["numeric_measures"] = []
+            test["critical"] = {}
             for measure in test.get("measures"):
-                test["numeric_measures"] = []
-                test["critical"] = {}
                 if test['test_details'][0]["measures"][measure].get("minimum") != None :
                     test["numeric_measures"].append(measure)
-                    if float(test["measures"][measure]) < float(test['test_details'][0]["measures"][measure].get("minimum")):
-                        test["critical"][measure] = "low"
-                    elif float(test["measures"][measure]) > float(test['test_details'][0]["measures"][measure].get("maximum")):
-                        test["critical"][measure] = "high"
+                    test_measure =  re.sub(r'[^0-9\.]', '', test["measures"][measure])
+                    try:
+                        if float(test_measure) < float(test['test_details'][0]["measures"][measure].get("minimum")):
+                            test["critical"][measure] = "low"
+                        elif float(test_measure) > float(test['test_details'][0]["measures"][measure].get("maximum")):
+                            test["critical"][measure] = "high"
+                    except:
+                        pass
         except:
             pass
+
         records.append(test)
     records = sorted(records, key=lambda e: e["date"], reverse= True)
     return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=pending_sample, collect_samples=draw_sample, requires_keyboard=True)
-
-@app.route("/patient/<patient_id>/draw", methods=['GET'])
-def patient_draw_samples(patient_id=None):
-    records = []
-    pending_sample = []
-    if (request.args.get("sample_draw") != None) and (request.args.get("sample_draw") != None):
-            draw_sample = True
-    patient = db.get(patient_id)
-    pt= { 'name': patient.get('name'), 'gender': 'male' if patient.get('gender') == 'M' else 'female',
-          'dob': datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), 'id': patient_id}
-    mango = {"selector": { "type": "test","patient_id": patient_id},
-             "fields": ["_id","status","Priority","ordered_by","date_ordered","test_type","sample_type","measures","specimen_types","clinical_history"], "limit": 90}
-
-    for test in  db.find(mango):
-        test["date"] = float(test["date_ordered"])
-        test["date_ordered"] =  datetime.fromtimestamp(float(test["date_ordered"])).strftime('%d %b %Y %H:%S')
-        test["test_details"] = db.find({"selector": {"type":"test_type","test_type_id": test.get('test_type')}, "fields": ["_id","measures", "specimen_requirements"]})
-        if test["status"] == "Ordered" :
-            pending_sample .append({"test_id":test["_id"],
-                                    "specimen_type": test["test_details"][0]["specimen_requirements"][test["sample_type"]]["type_of_specimen"],
-                                    "test_type": test["test_details"][0]["_id"],
-                                    "container": test["test_details"][0]["specimen_requirements"][test["sample_type"]]["container"],
-                                   "volume":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["volume"],
-                                   "units":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["units"]
-                                    })
-
-        try:
-            for measure in test.get("measures"):
-                test["numeric_measures"] = []
-                test["critical"] = {}
-                if test['test_details'][0]["measures"][measure].get("minimum") != None :
-                    test["numeric_measures"].append(measure)
-                    if float(test["measures"][measure]) < float(test['test_details'][0]["measures"][measure].get("minimum")):
-                        test["critical"][measure] = "low"
-                    elif float(test["measures"][measure]) > float(test['test_details'][0]["measures"][measure].get("maximum")):
-                        test["critical"][measure] = "high"
-        except:
-            pass
-        records.append(test)
-    records = sorted(records, key=lambda e: e["date"], reverse= True)
-    return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=pending_sample, collect_samples=True, requires_keyboard=True)
 
 #create a new lab test order
 @app.route("/test/create", methods=['POST'])
@@ -262,7 +228,7 @@ def create_lab_order():
         db.save(new_test)
 
     if request.form["sampleCollection"] == "Collect Now":
-        return redirect(url_for('patient_draw_samples', patient_id=request.form['patient_id']))
+        return redirect(url_for('patient', patient_id=request.form['patient_id'], sample_draw=True))
     else:
         return redirect(url_for('patient', patient_id=request.form['patient_id']))
 

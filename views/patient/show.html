@@ -240,7 +240,7 @@
                     </ul>
                 </div>
                 <div class="tab">
-                    <h2>Enter Clinical History</h2>
+                    <h2>Enter Clinical Information/History</h2>
                     <input type="text" placeholder="Clinical history" name="clinical_history" id="default" class="input" value="{{
                       request.form.clinical_history }}" required style="width: 90%; font-size : 18pt;border-radius:5px;height: 7vh;">
                     <div class="simple-keyboard" style="width: 99%; border: 1px solid silver;margin-top: 2vh;"></div>
@@ -320,7 +320,7 @@
 
         function showDrawDialog(){
             document.getElementById("modalContent").innerHTML = document.getElementById("sampleDrawContent").innerHTML
-            window.location='{{request.url.split("?")[0]}}#openModal'
+            window.location='{{request.url}}#openModal'
         }
 
         function filterTests(id){
