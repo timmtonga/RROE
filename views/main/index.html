@@ -54,7 +54,17 @@
             barcode_length = 0;
         document.getElementById("defaultOpen").click();
         setTimeout(initializeListener(), 3000);
+
+        function choosePath(patient,test, status){
+            if(status == "Analysis Complete"){
+                window.location = "/test/"+test+"/review"
+            }
+            else{
+                window.location = "/patient/" + patient
+            }
+        }
     </script>
+
 
 {% endif %}
 

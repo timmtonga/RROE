@@ -4,7 +4,7 @@
 import os
 import re
 import json
-import csv
+from utils import misc
 from couchdb import Server
 from datetime import datetime
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -14,10 +14,7 @@ app = Flask(__name__, template_folder="views", static_folder="assets")
 
 #Main application configuration
 global db
-config_file = "config/application.config"
-settings = {}
-with open(config_file) as json_file:
-    settings = json.load(json_file)
+settings = misc.initialize_settings()
 
 #optional configuration when running on rpi
 if settings["using_rpi"] == "True":
@@ -56,32 +53,135 @@ def index():
         #Get all records for my team that require attention
         team_records = {
             "selector": {
-                "type": "test",
+                "type": {"$in": ["test","test panel"]},
                 "ordered_by": {"$in": my_team},
                 "status": {"$in": ["Ordered","Specimen Collected","Analysis Complete","Rejected"]}
             },"limit": 50
         }
 
         for item in db.find(team_records):
-            my_team_recs.append({'status': item.get('status'),'date':float(item.get('date_ordered')),
-                                 'test': db.find({"selector": {"type":"test_type","test_type_id": item.get('test_type')}, "fields": ["_id"]}),
+            team_test_detail = {'status': item.get('status'),'date':float(item.get('date_ordered')),"id": item["_id"],
                             'name': db.get(item.get('patient_id')).get('name').title(),
                             'ordered_by': db.get(item.get("ordered_by")).get('name').title(),
                             'ordered_on':datetime.fromtimestamp(float(item.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
-                            'patient_id': item.get('patient_id')})
+                            "id": item["_id"],'patient_id': item.get('patient_id')}
 
+            if item.get("type") == "test":
+               team_test_detail['test'] = db.find({"selector": {"type":"test_type","test_type_id": item.get('test_type')}, "fields": ["_id"]})[0]["_id"]
+            else:
+                team_test_detail['test'] = item.get('panel_type')
+            my_team_recs.append(team_test_detail)
     #query for records to display on the main page
     for item in db.find(main_index_records) :
-        records.append({'status': item.get('status'),"date":float(item.get('date_ordered')),
-                                'test': db.find({"selector": {"type":"test_type","test_type_id": item.get('test_type')}, "fields": ["_id"]}),
+        test_detail = {'status': item.get('status'),"date":float(item.get('date_ordered')),
                                  'name': db.get(item.get('patient_id')).get('name').title(),
                                  'ordered_on':datetime.fromtimestamp(float(item.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
-                                 'patient_id': item.get('patient_id')})
+                                 "id": item["_id"],'patient_id': item.get('patient_id')}
+
+        if item.get("type") == "test":
+            test_detail['test'] = db.find({"selector": {"type":"test_type","test_type_id": item.get('test_type')}, "fields": ["_id"]})[0]["_id"]
+        else:
+            test_detail['test'] = item.get('panel_type')
+        records.append(test_detail)
 
     #sort by date descending
     records = sorted(records, key=lambda e: e["date"], reverse= True)
     my_team_recs = sorted(my_team_recs, key=lambda e: e["date"], reverse= True)
-    return render_template('main/index.html', orders = records, team_records = my_team_recs)
+    return render_template('main/index.html', orders = records, team_records = my_team_recs, current_facility = misc.current_facility())
+
+#proces barcode from the main index page
+@app.route("/process_barcode", methods=["POST"])
+def barcode():
+    #write function to handle different types of barcodes that we expect
+    barcode_segments = request.form['barcode'].split("~")
+    if (len(barcode_segments) == 1 ):
+        patient = db.get(barcode_segments[0].strip())
+        if patient == None:
+            error = "No patient with this record"
+            return redirect(url_for("index", error = error))
+        elif patient.get("type") != 'patient':
+            error = "No patient with this record"
+            return redirect( url_for("index", error = error))
+        else:
+            return redirect(url_for('patient', patient_id=barcode_segments[0].strip()))
+    elif (len(barcode_segments) == 5 ):
+        #This section is for the npid qr code
+        id = barcode_segments[1].strip()
+        patient = db.get(id)
+
+        if patient == None or patient.get("type") != 'patient':
+            dob_format = "%d/%b/%Y"
+
+            if "??" == barcode_segments[2].split("/")[0] and "???" == barcode_segments[2].split("/")[1]:
+                dob_format = "??/???/%Y"
+            elif "??" == barcode_segments[2].split("/")[0] and "???" != barcode_segments[2].split("/")[1]:
+                dob_format = "??/%b/%Y"
+            elif "??" != barcode_segments[2].split("/")[0] and "???" == barcode_segments[2].split("/")[1]:
+                dob_format = "%d/???/%Y"
+
+            doc = {'_id': id, 'name': barcode_segments[0], 'type': 'patient',
+                   'dob':  datetime.strptime(barcode_segments[2], dob_format).strftime("%d-%m-%Y"),
+                   'gender': barcode_segments[3]}
+            db.save(doc)
+        return redirect(url_for('patient', patient_id=id))
+    else:
+        error = "Wrong format for patient identifier. Please use the National patient Identifier"
+        return redirect( url_for("index", error = error))
+
+###### PATIENT ROUTES ###########
+@app.route("/patient/<patient_id>", methods=['GET'])
+def patient(patient_id):
+    draw_sample = False
+    pending_sample = []
+    records = []
+    if (request.args.get("sample_draw") == "True"):
+            draw_sample = True
+
+    #get patient details and arrange them in a way that is needed
+    patient = db.get(patient_id)
+    pt= { 'name': patient.get('name'), 'gender': 'male' if patient.get('gender') == 'M' else 'female',
+          "age": misc.calculate_age(datetime.strptime(patient.get('dob'), "%d-%m-%Y").date()),
+          'dob': datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), 'id': patient_id}
+
+    #get tests for pateint
+    mango = {"selector": { "type": "test","patient_id": patient_id},
+             "fields": ["_id","status","Priority","ordered_by","date_ordered","test_type","sample_type","measures","specimen_types","clinical_history"], "limit": 50}
+
+    for test in  db.find(mango):
+        test["date"] = float(test["date_ordered"])
+        test["date_ordered"] =  datetime.fromtimestamp(float(test["date_ordered"])).strftime('%d %b %Y %H:%S')
+        test["test_details"] = db.find({"selector": {"type":"test_type","test_type_id": test.get('test_type')}, "fields": ["_id","measures", "specimen_requirements"]})
+        if test["status"] == "Ordered" :
+            pending_sample .append({"test_id":test["_id"],
+                                    "specimen_type": test["test_details"][0]["specimen_requirements"][test["sample_type"]]["type_of_specimen"],
+                                    "test_type": test["test_details"][0]["_id"],
+                                    "container": test["test_details"][0]["specimen_requirements"][test["sample_type"]]["container"],
+                                   "volume":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["volume"],
+                                   "units":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["units"]
+                                    })
+
+        try:
+            test["numeric_measures"] = []
+            test["critical"] = {}
+            for measure in test.get("measures"):
+                if test['test_details'][0]["measures"][measure].get("minimum") != None :
+                    test["numeric_measures"].append(measure)
+                    test_measure =  re.sub(r'[^0-9\.]', '', test["measures"][measure])
+                    try:
+                        if float(test_measure) < float(test['test_details'][0]["measures"][measure].get("minimum")):
+                            test["critical"][measure] = "low"
+                        elif float(test_measure) > float(test['test_details'][0]["measures"][measure].get("maximum")):
+                            test["critical"][measure] = "high"
+                    except:
+                        pass
+        except:
+            pass
+
+        records.append(test)
+    records = sorted(records, key=lambda e: e["date"], reverse= True)
+    return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=pending_sample, containers =  misc.container_options(),collect_samples=draw_sample, requires_keyboard=True)
+
+###### USER ROUTES ###########
 
 #route to login page
 @app.route("/login", methods=["GET", "POST"])
@@ -107,6 +207,7 @@ def login():
     session["logged_in"] = None
     return render_template('user/login.html', error=error, requires_keyboard=True)
 
+#route to main user management page
 @app.route("/users")
 def users():
     current_users = db.find({"selector": { "type": "user"}, "limit": 200})
@@ -156,53 +257,7 @@ def select_location():
     session["location"] = None
     return render_template('user/select_location.html', error=error, options=locations_options())
 
-@app.route("/patient/<patient_id>", methods=['GET'])
-def patient(patient_id):
-    draw_sample = False
-    pending_sample = []
-    records = []
-    if (request.args.get("sample_draw") == "True"):
-            draw_sample = True
-    patient = db.get(patient_id)
-    pt= { 'name': patient.get('name'), 'gender': 'male' if patient.get('gender') == 'M' else 'female',
-          'dob': datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), 'id': patient_id}
-    mango = {"selector": { "type": "test","patient_id": patient_id},
-             "fields": ["_id","status","Priority","ordered_by","date_ordered","test_type","sample_type","measures","specimen_types","clinical_history"], "limit": 50}
-
-    for test in  db.find(mango):
-        test["date"] = float(test["date_ordered"])
-        test["date_ordered"] =  datetime.fromtimestamp(float(test["date_ordered"])).strftime('%d %b %Y %H:%S')
-        test["test_details"] = db.find({"selector": {"type":"test_type","test_type_id": test.get('test_type')}, "fields": ["_id","measures", "specimen_requirements"]})
-        if test["status"] == "Ordered" :
-            pending_sample .append({"test_id":test["_id"],
-                                    "specimen_type": test["test_details"][0]["specimen_requirements"][test["sample_type"]]["type_of_specimen"],
-                                    "test_type": test["test_details"][0]["_id"],
-                                    "container": test["test_details"][0]["specimen_requirements"][test["sample_type"]]["container"],
-                                   "volume":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["volume"],
-                                   "units":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["units"]
-                                    })
-
-        try:
-            test["numeric_measures"] = []
-            test["critical"] = {}
-            for measure in test.get("measures"):
-                if test['test_details'][0]["measures"][measure].get("minimum") != None :
-                    test["numeric_measures"].append(measure)
-                    test_measure =  re.sub(r'[^0-9\.]', '', test["measures"][measure])
-                    try:
-                        if float(test_measure) < float(test['test_details'][0]["measures"][measure].get("minimum")):
-                            test["critical"][measure] = "low"
-                        elif float(test_measure) > float(test['test_details'][0]["measures"][measure].get("maximum")):
-                            test["critical"][measure] = "high"
-                    except:
-                        pass
-        except:
-            pass
-
-        records.append(test)
-    records = sorted(records, key=lambda e: e["date"], reverse= True)
-    return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=pending_sample, collect_samples=draw_sample, requires_keyboard=True)
-
+###### LAB ORDER ROUTES ###########
 #create a new lab test order
 @app.route("/test/create", methods=['POST'])
 def create_lab_order():
@@ -218,19 +273,19 @@ def create_lab_order():
                 'patient_id': request.form['patient_id']
             }
         if len(test.split("|")) > 1:
-            new_test['type'] =  "test panel"
             new_test['tests'] = {}
-            for type in test.split("|"):
-                new_test['tests'][type] = {}
+            new_test['type'] =  "test panel"
+            new_test["panel_type"] = test.replace( "|","")
+            panel_details = db.get(new_test["panel_type"])
+            if panel_details != None:
+                for test in panel_details.get("tests"):
+                    new_test['tests'][db.get(test)["test_type_id"]] = {}
         else:
              new_test['type'] =  'test'
              new_test['test_type'] = test
         db.save(new_test)
 
-    if request.form["sampleCollection"] == "Collect Now":
-        return redirect(url_for('patient', patient_id=request.form['patient_id'], sample_draw=True))
-    else:
-        return redirect(url_for('patient', patient_id=request.form['patient_id']))
+    return redirect(url_for('patient', patient_id=request.form['patient_id'], sample_draw=(request.form["sampleCollection"] == "Collect Now")))
 
 #update lab test orders to specimen collected
 @app.route("/test/<test_id>/collect_specimen")
@@ -247,6 +302,7 @@ def collect_specimens(test_id):
     for test in tests:
         test["status"] = "Specimen Collected"
         test["collected_by"] = session["user"]['username']
+        test["collected_at"] = datetime.now().strftime('%s')
         test_ids.append(test["test_type"])
         test_names.append(db.find({"selector": {"type":"test_type","test_type_id": test["test_type"]}, "fields": ["short_name"]})[0]["short_name"])
         db.save(test)
@@ -269,53 +325,22 @@ def collect_specimens(test_id):
 
     return redirect(url_for('patient', patient_id=patient.get("_id")))
 
-#proces barcode from the main index page
-@app.route("/process_barcode", methods=["POST"])
-def barcode():
-    #write function to handle different types of barcodes that we expect
-    barcode_segments = request.form['barcode'].split("~")
-    if (len(barcode_segments) == 1 ):
-        patient = db.get(barcode_segments[0].strip())
-        if patient == None:
-            error = "No patient with this record"
-            return redirect(url_for("index", error = error))
-        elif patient.get("type") != 'patient':
-            error = "No patient with this record"
-            return redirect( url_for("index", error = error))
-        else:
-            return redirect(url_for('patient', patient_id=barcode_segments[0].strip()))
-    elif (len(barcode_segments) == 5 ):
-        #This section is for the npid qr code
-        id = barcode_segments[1].strip()
-        patient = db.get(id)
+@app.route("/test/<test_id>/review_ajax")
+@app.route("/test/<test_id>/review")
+def review_test(test_id):
+    test = db.get(test_id)
+    test["status"] = "Reviewed" if test.get("status") == "Analysis Complete" else "Specimen Rejected"
+    test["reviewed_by"] = session["user"]['username']
+    test["reviewed_at"] = datetime.now().strftime('%s')
+    db.save(test)
 
-        if patient == None or patient.get("type") != 'patient':
-            dob_format = "%d/%b/%Y"
-
-            if "??" == barcode_segments[2].split("/")[0] and "???" == barcode_segments[2].split("/")[1]:
-                dob_format = "??/???/%Y"
-            elif "??" == barcode_segments[2].split("/")[0] and "???" != barcode_segments[2].split("/")[1]:
-                dob_format = "??/%b/%Y"
-            elif "??" != barcode_segments[2].split("/")[0] and "???" == barcode_segments[2].split("/")[1]:
-                dob_format = "%d/???/%Y"
-
-            doc = {'_id': id, 'name': barcode_segments[0], 'type': 'patient',
-                   'dob':  datetime.strptime(barcode_segments[2], dob_format).strftime("%d-%m-%Y"),
-                   'gender': barcode_segments[3]}
-            db.save(doc)
-        return redirect(url_for('patient', patient_id=id))
+    if "review_ajax" in request.path.split("/"):
+        return "Success"
     else:
-        error = "Wrong format for patient identifier. Please use the National patient Identifier"
-        return redirect( url_for("index", error = error))
+        return redirect(url_for('patient', patient_id=test['patient_id']))
 
-def collapse_test_orders(orders):
-    if (("Full Blood Count" in orders) and ("Malaria Screening" in orders)):
-        pass
-        #pop those two out and combine them in one
 
-    pass
-
-#Application callbacks
+###### APPLICATION CALLBACKS ###########
 def initialize_connection():
     #Connect to a couchdb instance
     couchConnection = Server("http://%s:%s@%s:%s/" %
@@ -348,7 +373,8 @@ def check_authentication():
         except:
             return redirect(url_for('login'))
 
-#Context processors. Used to get data in views
+###### APPLICATION CONTEXT PROCESSORS ###########
+# Used to get data in views
 @app.context_processor
 def inject_now():
     return {'now': datetime.now().strftime("%H:%M%p")}
@@ -361,20 +387,17 @@ def inject_user():
     return {'current_user': session.get("user")}
 
 @app.context_processor
-def inject_facility():
-    return {'current_facility': settings["facility"]}
-
-@app.context_processor
 def inject_specimen_types():
-    specimen_types = []
-    test_file = "test_details.json"
-    tests = {}
-    with open(test_file) as json_file:
-        tests = json.load(json_file)
-    for key, value in tests.items():
-        specimen_types.append([key,value['specimen_type_id']])
-    specimen_types.sort()
-    return {'specimen_types': [specimen_types[i * 2:(i + 1) * 2] for i in range((len(specimen_types) + 2 - 1) // 2 )] }
+    tests = db.find({"selector": {"type": "test_type"},"fields": ["specimen_types"]})
+    options = []
+
+    for i in tests:
+        for t in i["specimen_types"]:
+            if [i["specimen_types"][t],t ] not in options:
+                options.append([i["specimen_types"][t],t ])
+
+    options.sort()
+    return {'specimen_types': [options[i * 2:(i + 1) * 2] for i in range((len(options) + 2 - 1) // 2 )] }
 
 @app.context_processor
 def inject_power():
@@ -394,42 +417,22 @@ def inject_power():
 
 @app.context_processor
 def inject_tests():
-    test_options = {}
-    test_file = "test_details.json"
-    with open(test_file) as json_file:
-        specimen_types = json.load(json_file)
+    options = {}
+    tests = db.find({ "selector": {"type": "test_type"},"fields": ["_id","test_type_id","specimen_types"],"limit":500})
+    for test in tests:
+        options[test["test_type_id"]] =  {"name": test["_id"], "specimen_types" :test["specimen_types"].keys()}
 
-    for specimen_type, tests in specimen_types.items():
-        for test_name, test in tests['tests'].items():
-            if (test_options.get(test.get("test_type_id")) == None ):
-                test_options[test.get("test_type_id")] = {"name": test_name, "specimen_types" :[tests['specimen_type_id']] }
-            elif tests['specimen_type_id'] not in test_options[test.get("test_type_id")]["specimen_types"]:
-                test_options[test.get("test_type_id")]["specimen_types"].append(tests['specimen_type_id'])
-    test_options = sorted(test_options.items(), key=lambda e: e[1]["name"])
-    return {"test_options":  test_options}
+    options = sorted(options.items(), key=lambda e: e[1]["name"])
+    return {"test_options":  options}
 
 @app.context_processor
 def inject_panels():
-    panels = []
-    with open('test_panels.csv') as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        line_count = 0
-        for row in csv_reader:
-            if line_count == 0:
-                line_count += 1
-            else:
-                line_count += 1
-                panels.append({"panel": row[1], "tests": row[3], "specimen_type": row[4].replace("|", ",")})
-
-    panels = sorted(panels, key=lambda e: e["panel"])
-    return {"panels":  []}
-
-@app.context_processor
-def inject_containers():
-    return {"containers": {'Sterile container': "blue_top_urine.png",
-                           'Red top': "red_top.jpg", 'Baktech':"bactec.png",
-                           'Conical container': "conical_contatiner.jpeg",
-            'EDTA': 'purple_top.jpg', 'yellow top': "yellow_top.jpg"}}
+    options = {}
+    panels = db.find({ "selector": {"type": "panels"},"fields": ["_id","specimen_types"],"limit":500})
+    for panel in panels:
+        options[panel["_id"]] =  {"name": panel["_id"], "specimen_types" : panel["specimen_types"].keys()}
+    options = sorted(options.items(), key=lambda e: e[1]["name"])
+    return {"panel_options":  options}
 
 #Error handling pages
 @app.errorhandler(404)

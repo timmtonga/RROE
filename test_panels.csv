@@ -1,10 +1,10 @@
-id,name,short_name,tests,Specimen Types
-1,CSF Analysis,CSF,5|4|7|3|6,2
-2,Urinalysis,UA,13|11|12,12
-3,Sterile Fluid Analysis,StFL,5|4|7|3|8,4|5|6|7
-4,MC&S,MCS,4|3,1|2|3|4|5|6|7|8|9|10|11|12|15|17|18|22
-9,Thyroid Function Tests,TFT,91|89|92|90|88,3
-10,Prostrate Specific Antigens,PSA,100|101,3
-12,Hepatitis test (Paeds),HepB+C,124|125,3
-13,Urinalysis (Paeds),UA (Paeds),127|126|128,12
-14,CSF Analysis (Paeds),CSF (Paeds),131|135|134|132|133,2
+id,name,short_name,tests,Specimen Types,Orderable
+1,CSF Analysis,CSF,5|4|7|3|6,2,1
+2,Urinalysis,UA,13|11|12,12,1
+3,Sterile Fluid Analysis,StFL,5|4|7|3|8,4|5|6|7,1
+4,MC&S,MCS,4|3,1|2|3|4|5|6|7|8|9|10|11|12|15|17|18|22,1
+9,Thyroid Function Tests,TFT,91|89|92|90|88,3,1
+10,Prostrate Specific Antigens,PSA,100|101,3,1
+13,Urinalysis (Paeds),UA (Paeds),127|126|128,12,1
+14,CSF Analysis (Paeds),CSF (Paeds),131|135|134|132|133,2,1
+0,Urea & Electrolytes,U & E,33|36,3,0

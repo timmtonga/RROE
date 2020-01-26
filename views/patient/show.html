@@ -26,7 +26,7 @@
                 <td><i>{{pt_details.get('name')}}</i></td>
                 <td><b>Age</b></td>
                 <td>:</td>
-                <td><i>&nbsp;</i></td>
+                <td><i>{{ pt_details.get('age') }}</i></td>
             </tr>
             <tr>
                 <td><b>Patient ID</b></td>
@@ -42,7 +42,7 @@
     <div style="border: 1px solid silver; padding: 10px;height:65vh; overflow:auto;" class="header">
         {% for row in tests%}
             <div style="border:2px solid #07575B;border-radius:6px;width: 100%;margin:1% auto;font-size:12pt;">
-            <div style="color:#fff;margin:0;background-color:#003B46;font-size:14pt; padding: 15px;font-weight: bold;" onmousedown="toggleDisplay('{{row['id']}}')">
+            <div style="color:#fff;margin:0;background-color:#003B46;font-size:14pt; padding: 15px;font-weight: bold;" onmousedown="toggleDisplay('{{row['id']}}', '{{row['status']}}')">
                 <div style="display: table-row;">
                     <div style="display: table-cell;width: 100%;">{{row['test_details'][0]["_id"]}}</div>
                     <div style="display: table-cell;">&nbsp;</div>
@@ -105,6 +105,7 @@
                     <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
                     <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
                     <b>Order Status:</b>{{row.get("status")}}<br>
+                    <button>Re-print Barcode</button><br/>
                  {% elif row['status'] == "Specimen Received" %}
                     <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
                     <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
@@ -113,7 +114,7 @@
                     <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
                     <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
                     <b>Order Status:</b>{{row.get("status")}}<br>
-                 {% elif row['status'] == "Rejected" %}
+                 {% elif row['status'] == "Rejected" or row['status'] == "Specimen Rejected" or row['status'] == "Test Rejected"%}
                     <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
                     <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
                     <b>Reason for rejection:</b>{{row.get("rejection_reason", "")}}<br>
@@ -223,12 +224,12 @@
                 <div class="tab">
                     <h2>Select test(s) to be performed:</h2>
                     <ul>
-                        {% for test_panel in panels%}
-                           <li data-id="{{test_panel['specimen_type']}}" id="test-panel-{{test_panel['panel']}}-container" name="testOptions">
-                                    <input type="checkbox" required id="test-{{test_panel['panel']}}" value="{{test_panel['tests']}}" name="test_type[]">
-                                    <label for="test-{{test_panel['panel']}}">{{ test_panel['panel'] }}</label>
+                        {% for test_panel in panel_options %}
+                           <li data-id="{{(',').join(test_panel[1]['specimen_types'])}}" id="test-panel-{{test_panel[1]['name']}}-container" name="testOptions">
+                                    <input type="checkbox" required id="test-{{test_panel[1]['name']}}" value="|{{test_panel[1]['name']}}|" name="test_type[]">
+                                    <label for="test-{{test_panel[1]['name']}}">{{ test_panel[1]['name'] }}</label>
                                     <div class="select"></div>
-                                </li>
+                           </li>
                         {% endfor %}
                         {% for test in test_options%}
                            <li data-id="{{(',').join(test[1]['specimen_types']) }}" id="test-{{test[0]}}-container" name="testOptions">
@@ -304,12 +305,15 @@
 
     <script>
         selected =null
-        function toggleDisplay(id){
+        function toggleDisplay(id, test_status){
             var state= {true: "View", false: "Hide"}
             div = document.getElementById(id)
             var status = div.hidden;
             div.hidden = !status;
             document.getElementById(id+"-status").innerHTML = state[!status]
+            if (test_status == "Analysis Complete" || test_status == "Rejected"){
+                testReviewed(id)
+            }
         }
 
         var currentTab = 0; // Current tab is set to be the first tab (0)
@@ -345,6 +349,19 @@
                     options[i].style.display= "block";
                 }
             }
+        }
+
+        function testReviewed(id){
+            var xhr = new XMLHttpRequest();
+            var url = "/test/"+id+"/review_ajax";
+            xhr.open("GET", url, true);
+            xhr.setRequestHeader("Content-Type", "application/text");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    console.log(xhr.responseText);
+                }
+            };
+            xhr.send();
         }
     </script>
 
