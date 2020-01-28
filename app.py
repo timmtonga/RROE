@@ -356,7 +356,7 @@ def collect_specimens(test_id):
     labelFile.write('A5,10,0,1,1,2,N,"%s"\n' % patient["name"])
     labelFile.write('A5,40,0,1,1,2,N,"%s (%s)"\n' % (datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), patient["gender"][0]) )
     labelFile.write('b5,70,P,386,80,"%s$"\n' % ("~").join(test_string))
-    labelFile.write('A5,170,0,1,1,2,N,"%s"\n' % (",").join(test_names))
+    labelFile.write('A20,170,0,1,1,2,N,"%s"\n' % (",").join(test_names))
     labelFile.write('A260,170,0,1,1,2,N,"%s" \n' % datetime.now().strftime("%d-%b %H:%M"))
     labelFile.write("P1\n")
     labelFile.close()
