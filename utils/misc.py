@@ -17,10 +17,27 @@ def calculate_age(birth_date):
 
 
 def collapse_test_orders(orders):
-    if (("Full Blood Count" in orders) and ("Malaria Screening" in orders)):
-        pass
-        #pop those two out and combine them in one
-    pass
+    collapsed_orders = []
+    tests_by_depts = {}
+    for order in orders:
+            if order.get("type") == "test panel":
+                collapsed_orders.append(order)
+            else:
+                if tests_by_depts.get(order.get("department")) == None:
+                    tests_by_depts[order.get("department")] = {order.get("specimen_type"):[]}
+                try:
+                    tests_by_depts[order.get("department")][order.get("specimen_type")].append(order)
+                except:
+                    pass
+
+    for dept in tests_by_depts.keys():
+        for specimen_type in tests_by_depts[dept].keys():
+            if len(tests_by_depts[dept][specimen_type]) == 1:
+                collapsed_orders.append(tests_by_depts[dept][specimen_type][0])
+            else:
+                collapsed_orders += ([tests_by_depts[dept][specimen_type][i * 3:(i + 1) * 3] for i in range((len(tests_by_depts[dept][specimen_type]) + 3 - 1) // 3 )])
+
+    return collapsed_orders
 
 def initialize_settings():
     settings = {}
@@ -39,7 +56,7 @@ def current_facility():
         return "Undefined"
 
 def container_options():
-    return {"containers": {'Sterile container': "blue_top_urine.png",
+    return {'Sterile container': "blue_top_urine.png",
                            'Red top': "red_top.jpg", 'Baktech':"bactec.png",
                            'Conical container': "conical_contatiner.jpeg",
-            'EDTA': 'purple_top.jpg', 'yellow top': "yellow_top.jpg"}}
+            'EDTA': 'purple_top.jpg', 'yellow top': "yellow_top.jpg"}

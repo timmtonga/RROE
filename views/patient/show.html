@@ -44,7 +44,7 @@
             <div style="border:2px solid #07575B;border-radius:6px;width: 100%;margin:1% auto;font-size:12pt;">
             <div style="color:#fff;margin:0;background-color:#003B46;font-size:14pt; padding: 15px;font-weight: bold;" onmousedown="toggleDisplay('{{row['id']}}', '{{row['status']}}')">
                 <div style="display: table-row;">
-                    <div style="display: table-cell;width: 100%;">{{row['test_details'][0]["_id"]}}</div>
+                    <div style="display: table-cell;width: 100%;">{{row['test_name']}}</div>
                     <div style="display: table-cell;">&nbsp;</div>
                 </div>
                 <div style="display: table-row;">
@@ -114,7 +114,7 @@
                     <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
                     <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
                     <b>Order Status:</b>{{row.get("status")}}<br>
-                 {% elif row['status'] == "Rejected" or row['status'] == "Specimen Rejected" or row['status'] == "Test Rejected"%}
+                 {% elif row['status'] == "Rejected" or row['status'] == "Specimen Rejected" or row['status'] == "Test Rejected" or row['status'] == "Not Done"%}
                     <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
                     <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
                     <b>Reason for rejection:</b>{{row.get("rejection_reason", "")}}<br>
@@ -155,12 +155,13 @@
                     <p>{{test["specimen_type"]}}</p>
                 </div>
                 <div class="Cell">
-                    <p>{{test["test_type"]}}</p>
+                    <p>{{test["test_name"]}}</p>
                 </div>
                 <div class="Cell" style="text-align: center">
                     <p>{{test["volume"]}} {{test["units"]}}</p>
                 </div>
                 <div class="Cell" style="text-align: center">
+
                     <img style="vertical-align: middle;height:4vh;width:2vw;" src="/assets/images/{{containers[test['container']]}}">
                 </div>
                 <div class="Cell">

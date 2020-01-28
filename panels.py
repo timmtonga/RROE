@@ -31,7 +31,7 @@ with open('test_panels.csv') as csv_file:
             line_count += 1
         else:
             line_count += 1
-            panel = {"_id" : row[1], "specimen_types": {}, "orderable":True, "tests":[], "type":"panels", "panel_id": row[0]}
+            panel = {"_id" : row[1], "specimen_types": {}, "orderable":True, "tests":[], "type":"panels", "panel_id": row[0], "short_name":row[2]}
             if row[5] == "0":
                 panel["orderable"] = False
                 panel["panel_id"] = None

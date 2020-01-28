@@ -3,6 +3,7 @@ Pull reason for rejection and not done
 pull panel test results
 Reprint Button
 Logic to trim printed text 84 chars max
+Test short names on list not always visible
 Show next activity
 Add units to results
 Review required container type

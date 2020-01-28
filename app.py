@@ -144,21 +144,41 @@ def patient(patient_id):
           'dob': datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), 'id': patient_id}
 
     #get tests for pateint
-    mango = {"selector": { "type": "test","patient_id": patient_id},
-             "fields": ["_id","status","Priority","ordered_by","date_ordered","test_type","sample_type","measures","specimen_types","clinical_history"], "limit": 50}
+    mango = {"selector": {"type": {"$in": ["test","test panel"]},"patient_id": patient_id},
+             "fields": ["_id","type","status","Priority","ordered_by","date_ordered","test_type","sample_type","measures","specimen_types","clinical_history","panel_type"], "limit": 50}
 
     for test in  db.find(mango):
         test["date"] = float(test["date_ordered"])
         test["date_ordered"] =  datetime.fromtimestamp(float(test["date_ordered"])).strftime('%d %b %Y %H:%S')
-        test["test_details"] = db.find({"selector": {"type":"test_type","test_type_id": test.get('test_type')}, "fields": ["_id","measures", "specimen_requirements"]})
-        if test["status"] == "Ordered" :
-            pending_sample .append({"test_id":test["_id"],
+        if test.get("type") == "test":
+            test["test_details"] = db.find({"selector": {"type":"test_type","test_type_id": test.get('test_type')}, "fields": ["_id","measures", "specimen_requirements", "department"]})
+            test["test_name"] = test['test_details'][0]["_id"]
+            if test["status"] == "Ordered":
+                pending_sample .append({"test_id":test["_id"],
                                     "specimen_type": test["test_details"][0]["specimen_requirements"][test["sample_type"]]["type_of_specimen"],
-                                    "test_type": test["test_details"][0]["_id"],
+                                    "test_type": test["test_details"][0]["_id"],"department": test["test_details"][0]["department"],
                                     "container": test["test_details"][0]["specimen_requirements"][test["sample_type"]]["container"],
                                    "volume":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["volume"],
-                                   "units":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["units"]
+                                   "units":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["units"],
+                                    "test_name": test['test_details'][0]["_id"]
                                     })
+        elif  test.get("type") == "test panel":
+
+            test["test_name"] = test["panel_type"]
+            panel_details = {"test_id":test["_id"],
+                                                "specimen_type": specimen_type_map(test['sample_type']),
+                                                "test_name": test["panel_type"]
+                                                }
+            if test["status"] == "Ordered":
+                if panel_details["specimen_type"] == "Urine":
+                    panel_details["container"] = 'Conical container'
+                    panel_details["volume"] = "15 "
+                    panel_details["units"] = "ml"
+                else:
+                    panel_details["container"] = 'Red top'
+                    panel_details["volume"] = "4"
+                    panel_details["units"] = "ml"
+                pending_sample .append(panel_details)
 
         try:
             test["numeric_measures"] = []
@@ -290,7 +310,7 @@ def create_lab_order():
 #update lab test orders to specimen collected
 @app.route("/test/<test_id>/collect_specimen")
 def collect_specimens(test_id):
-    tests = db.find({"selector" : {"type": "test", "_id": {"$in": test_id.split("^")}}})
+    tests = db.find({"selector" : {"type":{"$in": ["test","test panel"]}, "_id": {"$in": test_id.split("^")}}})
     test_ids = []
     test_names = []
     if tests == None or tests == []:
@@ -303,14 +323,33 @@ def collect_specimens(test_id):
         test["status"] = "Specimen Collected"
         test["collected_by"] = session["user"]['username']
         test["collected_at"] = datetime.now().strftime('%s')
-        test_ids.append(test["test_type"])
-        test_names.append(db.find({"selector": {"type":"test_type","test_type_id": test["test_type"]}, "fields": ["short_name"]})[0]["short_name"])
-        db.save(test)
-
-    test_string = [patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0],
+        if test["type"] == "test":
+            test_ids.append(test["test_type"])
+            test_names.append(db.find({"selector": {"type":"test_type","test_type_id": test["test_type"]}, "fields": ["short_name"]})[0]["short_name"])
+            test_string = [patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0],
                      datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%s"),
                      wards[tests[0]["ward"]] ,dr,tests[0]["clinical_history"],tests[0]["sample_type"],
                      datetime.now().strftime("%s"), ("^").join(test_ids), tests[0]["Priority"][0] ]
+        else:
+            panel = db.get(test["panel_type"])
+            test_names.append(panel.get("short_name"))
+            if panel.get("orderable"):
+                test_ids.append(panel["panel_id"])
+                test_string = [patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0],
+                     datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%s"),
+                     wards[tests[0]["ward"]] ,dr,tests[0]["clinical_history"],tests[0]["sample_type"],
+                     datetime.now().strftime("%s"), ("^").join(test_ids), tests[0]["Priority"][0],"P" ]
+            else:
+                for test_type_id in db.find({"selector": {"type":"test_type","_id": {"$in": panel["tests"]}}, "fields": ["test_type_id"]}):
+                    test_ids.append(test_type_id.get("test_type_id"))
+
+                test_string = [patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0],
+                         datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%s"),
+                         wards[tests[0]["ward"]] ,dr,tests[0]["clinical_history"],tests[0]["sample_type"],
+                         datetime.now().strftime("%s"), ("^").join(test_ids), tests[0]["Priority"][0]]
+        db.save(test)
+
+
 
     labelFile = open("/tmp/test_order.lbl", "w+")
     labelFile.write("N\nq406\nQ203,027\nZT\n")
@@ -373,6 +412,17 @@ def check_authentication():
         except:
             return redirect(url_for('login'))
 
+##### MISC Functions ###################
+
+def specimen_type_map(type):
+    tests = db.find({"selector": {"type": "test_type"},"fields": ["specimen_types"]})
+    options = []
+    for i in tests:
+        for t in i["specimen_types"]:
+            if type == t:
+                return i["specimen_types"][t]
+
+    return "Unknown"
 ###### APPLICATION CONTEXT PROCESSORS ###########
 # Used to get data in views
 @app.context_processor

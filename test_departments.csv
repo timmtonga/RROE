@@ -1,0 +1,115 @@
+id,name,short_name,department
+3,"Gram Stain",GS,Microbiology
+4,"Culture & Sensitivity",C&S,Microbiology
+5,"Cell Count",ClCt,Microbiology
+6,"India Ink",II,Microbiology
+7,Differential,Diff,Microbiology
+8,"ZN Stain",ZN,Microbiology
+10,"TB Tests",TB,Microbiology
+11,"Urine Macroscopy",UA,Parasitology
+12,"Urine Microscopy",UA,Parasitology
+13,"Urine Chemistries",UA,Parasitology
+14,"Stool Analysis",StoA,Parasitology
+15,"Malaria Screening",MalScr,Parasitology
+16,"Blood Parasites Screen",BF,Parasitology
+17,"Semen Analysis",SA,Parasitology
+18,"HVS analysis",HVS,Parasitology
+19,"Syphilis Test",STS,Serology
+20,"Hepatitis B Test",HBsAg,Serology
+21,"Hepatitis C Test",HCVAB,Serology
+25,"C-reactive protein",CRP,Serology
+26,Measles,Meas,Serology
+27,Rubella,Rub,Serology
+28,CD4,CD4,"Flow Cytometry"
+29,"ABO Blood Grouping",ABO,"Blood Bank"
+30,Cross-match,Xmatch,"Blood Bank"
+32,"Liver Function Tests",LFT,Biochemistry
+33,"Renal Function Test",RFT,Biochemistry
+34,Lipogram,LIPO,Biochemistry
+35,FBC,FBC,Haematology
+36,Electrolytes,E,Biochemistry
+37,Enzymes,,Biochemistry
+38,Glucose,GLU,Biochemistry
+39,"Prothrombin Time",PT,Haematology
+40,APTT,APTT,Haematology
+41,INR,INR,Haematology
+42,ESR,ESR,Haematology
+43,"Sickling Test",NULL,Haematology
+44,"Pregnancy Test",PT(ßHCG),Serology
+45,"Manual Differential & Cell Morphology",PRSM,Haematology
+46,"Pancreatic Function Test",PFT,Biochemistry
+47,"Direct Coombs Test",,"Blood Bank"
+48,Calcium,Ca,Biochemistry
+49,Phosphorus,PHO,Biochemistry
+50,Magnesium,Mg,Biochemistry
+51,"Creatinine Kinase",CK,Biochemistry
+52,"Uric Acid",UASR,Biochemistry
+53,"ESBL Test",ESBL,Microbiology
+54,"APTT Ratio","APTT Ratio",Haematology
+55,Fibronogen,PF,Haematology
+56,"50:50 Normal Plasma",,Haematology
+57,"50:50 Mix FVIII Deficient",,Haematology
+58,"50:50 Mix F-IX Deficient",,Haematology
+59,"Factor VIII Assay",,Haematology
+60,"Factor IX Assay",,Haematology
+61,TT,TT,Haematology
+62,"Coagulation Assay",,Haematology
+63,"Cardiac Function Tests",CFT,Biochemistry
+64,Minerals,,Biochemistry
+65,BioMarkers,,Biochemistry
+66,"Iron Studies",,Biochemistry
+67,HbA1c,,Biochemistry
+68,Microalbumin,MAL,Biochemistry
+69,Microprotein,MPR,Biochemistry
+70,"Von Willebrand Factor",vWf,Haematology
+71,"Viral Load",VL,DNA/PCR
+72,"CSF CrAg LFA",CrAg,Microbiology
+86,"Bleeding Time",BT,Haematology
+87,PSA,PSA,Biochemistry
+88,"Total Triiodothyronine",TT3,Immunochemistry
+89,"Free Triiodothyronine",FT3,Immunochemistry
+90,"Total Thyroxine",TT4,Immunochemistry
+91,"Free Thyroxine",FT4,Immunochemistry
+92,"Thyroid Stimulating Hormone",TSH,Immunochemistry
+93,"Parathyroid Hormone",PTH,Immunochemistry
+95,"Carcinoembryonic Antigen",CEA,Immunochemistry
+96,"Cancer Antigen 15-3",CA15-3,Immunochemistry
+97,"Cancer Antigen 19-9",CA19-9,Immunochemistry
+98,"Cancer Antigen 125",CA125,Immunochemistry
+99,"alpha fetoprotein",AFP,Immunochemistry
+100,"Free Prostrate Specific Antigen",FPSA,Immunochemistry
+101,"Total Prostrate Specific Antigen",TPSA,Immunochemistry
+102,"Beta Human Chorionic Gonatropin",B-HCG,Immunochemistry
+103,"Follicle Stimulating Hormone",FSH,Immunochemistry
+104,"Luteinising Hormone",LH,Immunochemistry
+105,Estrogen,E2,Immunochemistry
+106,Progesterone,PROGEST,Immunochemistry
+107,Testosterone,TESTO,Immunochemistry
+108,Estradiol,ESTRADIOL,Immunochemistry
+109,Prolactin,PROLACTIN,Immunochemistry
+110,"Hormone Binding Globulin",SHBG,Immunochemistry
+111,"Hepatitis A",HAV,Immunochemistry
+112,"Hepatitis B",HBV,Immunochemistry
+113,"Hepatitis C",HCV,Immunochemistry
+114,"Hepatitis E",HEV,Immunochemistry
+115,"FBC (Paeds)","FBC (Paeds)","Paediatric Lab "
+116,"Electrolytes (Paeds)","Electrolytes (Paeds)","Paediatric Lab "
+117,"Liver Function Tests (Paeds)",LFTs,"Paediatric Lab "
+118,"Renal Function Tests (Paeds)","Renal Function Tests (Paeds)","Paediatric Lab "
+119,"Lipogram (Paeds)","Lipogram (Paeds)","Paediatric Lab "
+120,"Glucose (Paeds)","Glucose (Paeds)","Paediatric Lab "
+121,"HbA1c (Paeds)",HbA1c,"Paediatric Lab "
+122,"Minerals (Paeds)","Minerals (Paeds)","Paediatric Lab "
+123,"Syphilis (Paeds)","STS (Paeds)","Paediatric Lab "
+124,"Hepatitis B test (Paeds)",HepB,"Paediatric Lab "
+125,"Hepatitis C test (Paeds)",HepC,"Paediatric Lab "
+126,"Urine Macroscopy (Paeds)",,"Paediatric Lab "
+127,"Urine chemistry (paeds)",,"Paediatric Lab "
+128,"Urine Microscopy (Paeds)",,"Paediatric Lab "
+129,"Malaria Screening (Paeds)",MalScr,"Paediatric Lab "
+130,"Stool Analysis (Paeds)",StoA,"Paediatric Lab "
+131,"Cell Count (Paeds)","ClCt (Paeds)","Paediatric Lab "
+132,"Gram Stain (Paeds)","GS (Paeds)","Paediatric Lab "
+133,"India Ink (Paeds)","II (Paeds)","Paediatric Lab "
+134,"Differential (Paeds)","Diff (Paeds)","Paediatric Lab "
+135,"Culture & Sensitivity (Paeds)","C&S (Paeds)","Paediatric Lab "
