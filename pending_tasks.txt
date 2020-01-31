@@ -1,9 +1,9 @@
 Test details and engine
+Nurse ability to add tests ordered
 Pull reason for rejection and not done
 pull panel test results
 Reprint Button
 Logic to trim printed text 84 chars max
-
 Show next activity
 Add units to results
 Review required container type
