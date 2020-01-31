@@ -26,6 +26,10 @@ if settings["using_rpi"] == "True":
 def index():
     records = []
     my_team_recs = []
+    test_names = {}
+    tests = db.find({ "selector": {"type": "test_type"},"fields": ["_id","test_type_id"],"limit":5000})
+    for test in tests:
+        test_names[test["test_type_id"]] =  test["_id"]
     #Based on role, pull the required information from the database
     if session["user"]["role"] == "Nurse":
         main_index_records = {
@@ -67,7 +71,7 @@ def index():
                             "id": item["_id"],'patient_id': item.get('patient_id')}
 
             if item.get("type") == "test":
-               team_test_detail['test'] = db.find({"selector": {"type":"test_type","test_type_id": item.get('test_type')}, "fields": ["_id"]})[0]["_id"]
+               team_test_detail['test'] = test_names[item.get('test_type')]
             else:
                 team_test_detail['test'] = item.get('panel_type')
             my_team_recs.append(team_test_detail)
@@ -79,7 +83,7 @@ def index():
                                  "id": item["_id"],'patient_id': item.get('patient_id')}
 
         if item.get("type") == "test":
-            test_detail['test'] = db.find({"selector": {"type":"test_type","test_type_id": item.get('test_type')}, "fields": ["_id"]})[0]["_id"]
+            test_detail['test'] = test_names[item.get('test_type')]
         else:
             test_detail['test'] = item.get('panel_type')
         records.append(test_detail)
