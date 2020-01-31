@@ -231,6 +231,13 @@ def login():
     session["logged_in"] = None
     return render_template('user/login.html', error=error, requires_keyboard=True)
 
+#Route to handle logging out
+@app.route("/logout")
+def logout():
+    session["user"] = None
+    session["logged_in"] = None
+    return render_template('user/login.html', requires_keyboard=True)
+
 #route to main user management page
 @app.route("/users")
 def users():
@@ -405,7 +412,7 @@ def check_authentication():
         else:
             ledControl().turn_led_off()
 
-    if request.path != "/login":
+    if request.path != "/login" or request.path == "/logout":
         try:
             session["logged_in"]
             if request.path != "/select_location":
