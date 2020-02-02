@@ -15,7 +15,6 @@ def calculate_age(birth_date):
     else:
       return str(int(age_in_days / 365.2425)) + " years"
 
-
 def collapse_test_orders(orders):
     collapsed_orders = []
     tests_by_depts = {}
