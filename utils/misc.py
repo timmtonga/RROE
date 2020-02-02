@@ -55,7 +55,7 @@ def current_facility():
         return "Undefined"
 
 def container_options():
-    return {'Sterile container': "blue_top_urine.png",
+    return {'Sterile container': "blue_top_urine.png", "Swab":"swab.jpg",
                            'Red top': "red_top.jpg", 'Baktech':"bactec.png",
                            'Conical container': "conical_contatiner.jpeg",
             'EDTA': 'purple_top.jpg', 'yellow top': "yellow_top.jpg"}

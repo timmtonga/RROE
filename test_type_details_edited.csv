@@ -6,9 +6,9 @@ test_type_id,name,short_name,targetTAT,specimen_type_id,specimen_type,minimum_vo
 3,Gram Stain,GS,1 hr,5,Ascitic Fluid,3 ml,Sterile container
 3,Gram Stain,GS,1 hr,6,Pericardial Fluid,3 ml,Sterile container
 3,Gram Stain,GS,1 hr,7,Peritoneal Fluid,3 ml,Sterile container
-3,Gram Stain,GS,1 hr,8,HVS,3 ml,Sterile container
-3,Gram Stain,GS,1 hr,9,Swabs,3 ml,Sterile container
-3,Gram Stain,GS,1 hr,10,Pus,3 ml,Sterile container
+3,Gram Stain,GS,1 hr,8,HVS,3 ml,Swab
+3,Gram Stain,GS,1 hr,9,Swabs,3 ml,Swab
+3,Gram Stain,GS,1 hr,10,Pus,3 ml,Swab
 3,Gram Stain,GS,1 hr,11,Stool,3 g,Conical container
 3,Gram Stain,GS,1 hr,12,Urine,3 ml,Conical container
 3,Gram Stain,GS,1 hr,13,Other,3 ml,Conical container
@@ -20,9 +20,9 @@ test_type_id,name,short_name,targetTAT,specimen_type_id,specimen_type,minimum_vo
 4,Culture & Sensitivity,C&S,7 days,5,Ascitic Fluid,3 ml,Red top
 4,Culture & Sensitivity,C&S,7 days,6,Pericardial Fluid,3 ml,Red top
 4,Culture & Sensitivity,C&S,7 days,7,Peritoneal Fluid,3 ml,Red top
-4,Culture & Sensitivity,C&S,7 days,8,HVS,3 ml,Sterile container
-4,Culture & Sensitivity,C&S,7 days,9,Swabs,3 ml,Sterile container
-4,Culture & Sensitivity,C&S,7 days,10,Pus,3 ml,Sterile container
+4,Culture & Sensitivity,C&S,7 days,8,HVS,3 ml,Swab
+4,Culture & Sensitivity,C&S,7 days,9,Swabs,3 ml,Swab
+4,Culture & Sensitivity,C&S,7 days,10,Pus,3 ml,Swab
 4,Culture & Sensitivity,C&S,7 days,11,Stool,3 g,Sterile container
 4,Culture & Sensitivity,C&S,7 days,12,Urine,3 ml,Sterile container
 4,Culture & Sensitivity,C&S,7 days,13,Other,3 ml,Sterile container
@@ -56,7 +56,7 @@ test_type_id,name,short_name,targetTAT,specimen_type_id,specimen_type,minimum_vo
 10,TB Tests,TB,5 hrs,5,Ascitic Fluid,3 ml,Red top
 10,TB Tests,TB,5 hrs,6,Pericardial Fluid,3 ml,Red top
 10,TB Tests,TB,5 hrs,7,Peritoneal Fluid,3 ml,Red top
-10,TB Tests,TB,5 hrs,10,Pus,3 ml,Sterile container
+10,TB Tests,TB,5 hrs,10,Pus,3 ml,Swab
 10,TB Tests,TB,5 hrs,22, tissue biopsy,3 ml,Sterile container
 11,Urine Macroscopy,UA,30 min,12,Urine,3 ml,Sterile container
 12,Urine Microscopy,UA,30 min,12,Urine,3 ml,Sterile container
@@ -65,7 +65,7 @@ test_type_id,name,short_name,targetTAT,specimen_type_id,specimen_type,minimum_vo
 15,Malaria Screening,MalScr,30 min,3,Blood,3 ml,EDTA
 16,Blood Parasites Screen,BF,1 hr,3,Blood,3 ml,EDTA
 17,Semen Analysis,SA,30 min,15,Semen,3 ml,Sterile container
-18,HVS analysis,HVS,30 min,8,HVS,3 ml,Sterile container
+18,HVS analysis,HVS,30 min,8,HVS,3 ml,Swab
 19,Syphilis Test,STS,30 min,3,Blood,3 ml,Red top
 20,Hepatitis B Test,HBsAg,30 min,3,Blood,3 ml,Red top
 21,Hepatitis C Test,HCVAB,30 min,3,Blood,3 ml,Red top
@@ -103,9 +103,9 @@ test_type_id,name,short_name,targetTAT,specimen_type_id,specimen_type,minimum_vo
 53,ESBL Test,ESBL,,5,Ascitic Fluid,3 ml,EDTA
 53,ESBL Test,ESBL,,6,Pericardial Fluid,3 ml,EDTA
 53,ESBL Test,ESBL,,7,Peritoneal Fluid,3 ml,EDTA
-53,ESBL Test,ESBL,,8,HVS,3 ml,EDTA
+53,ESBL Test,ESBL,,8,HVS,3 ml,Swab
 53,ESBL Test,ESBL,,9,Swabs,3 ml,EDTA
-53,ESBL Test,ESBL,,10,Pus,3 ml,EDTA
+53,ESBL Test,ESBL,,10,Pus,3 ml,Swab
 53,ESBL Test,ESBL,,12,Urine,3 ml,EDTA
 54,APTT Ratio,APTT Ratio,24hrs,3,Blood,3 ml,EDTA
 55,Fibronogen,PF,24hrs,3,Blood,3 ml,EDTA
@@ -185,9 +185,9 @@ test_type_id,name,short_name,targetTAT,specimen_type_id,specimen_type,minimum_vo
 132,Gram Stain (Paeds),GS (Paeds),1hr,5,Ascitic Fluid,3 ml,Red top
 132,Gram Stain (Paeds),GS (Paeds),1hr,6,Pericardial Fluid,3 ml,Red top
 132,Gram Stain (Paeds),GS (Paeds),1hr,7,Peritoneal Fluid,3 ml,Red top
-132,Gram Stain (Paeds),GS (Paeds),1hr,8,HVS,3 ml,EDTA
-132,Gram Stain (Paeds),GS (Paeds),1hr,9,Swabs,3 ml,EDTA
-132,Gram Stain (Paeds),GS (Paeds),1hr,10,Pus,3 ml,Sterile container
+132,Gram Stain (Paeds),GS (Paeds),1hr,8,HVS,3 ml,Swab
+132,Gram Stain (Paeds),GS (Paeds),1hr,9,Swabs,3 ml,Swab
+132,Gram Stain (Paeds),GS (Paeds),1hr,10,Pus,3 ml,Swab
 132,Gram Stain (Paeds),GS (Paeds),1hr,11,Stool,3 g,Sterile container
 132,Gram Stain (Paeds),GS (Paeds),1hr,12,Urine,3 ml,Sterile container
 132,Gram Stain (Paeds),GS (Paeds),1hr,13,Other,3 ml,Sterile container
@@ -206,9 +206,9 @@ test_type_id,name,short_name,targetTAT,specimen_type_id,specimen_type,minimum_vo
 135,Culture & Sensitivity (Paeds),C&S (Paeds),7 days,5,Ascitic Fluid,3 ml,Conical container
 135,Culture & Sensitivity (Paeds),C&S (Paeds),7 days,6,Pericardial Fluid,3 ml,Conical container
 135,Culture & Sensitivity (Paeds),C&S (Paeds),7 days,7,Peritoneal Fluid,3 ml,Conical container
-135,Culture & Sensitivity (Paeds),C&S (Paeds),7 days,8,HVS,3 ml,Sterile container
-135,Culture & Sensitivity (Paeds),C&S (Paeds),7 days,9,Swabs,3 ml,Sterile container
-135,Culture & Sensitivity (Paeds),C&S (Paeds),7 days,10,Pus,3 ml,Sterile container
+135,Culture & Sensitivity (Paeds),C&S (Paeds),7 days,8,HVS,3 ml,Swab
+135,Culture & Sensitivity (Paeds),C&S (Paeds),7 days,9,Swabs,3 ml,Swab
+135,Culture & Sensitivity (Paeds),C&S (Paeds),7 days,10,Pus,3 ml,Swab
 135,Culture & Sensitivity (Paeds),C&S (Paeds),7 days,11,Stool,3 g,Sterile container
 135,Culture & Sensitivity (Paeds),C&S (Paeds),7 days,12,Urine,3 ml,Conical container
 135,Culture & Sensitivity (Paeds),C&S (Paeds),7 days,13,Other,3 ml,Sterile container
