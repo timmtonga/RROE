@@ -1,10 +1,8 @@
 {% extends 'layout/application.html' %}
 {% block body %}
     <script type="text/javascript">
-        navButtons = [["Finish", "window.location='/'", "Green", "Right"]]
-        {% if session.get('user').get('role') != 'Nurse'  %}
-            navButtons.push(["New Test", "showOrderDialog()", "Defaults", "Right"])
-        {% endif %}
+        navButtons = [["Finish", "window.location='/'", "Green", "Right"],["New Test", "showOrderDialog()", "Defaults", "Right"]]
+
 
         {% if  pending_orders != [] %}
             navButtons.push(["Draw Samples", "showDrawDialog()", "Defaults", "Right"])
@@ -161,7 +159,7 @@
                 </div>
                 <div class="Cell" style="text-align: center">
 
-                    <img style="vertical-align: middle;height:4vh;width:2vw;" src="/assets/images/{{containers[test['container']]}}">
+                    <img style="vertical-align: middle;height:12vh;width:inherit;" src="/assets/images/{{containers[test['container']]}}">
                 </div>
                 <div class="Cell">
                     <button class="modalNVButton" onmousedown="window.location='/test/{{test['test_id']}}/collect_specimen'">
@@ -240,6 +238,22 @@
                         {% endfor %}
                     </ul>
                 </div>
+                {% if session.get('user').get('role') == 'Nurse'  %}
+                    <div class="tab">
+                    <h2>Select person who ordered test(s)</h2>
+                    <ul>
+                        {% for i in doctors%}
+                                <li>
+                                    <input type='radio' id='type-{{i[1]}}' value="{{i[1]}}" required name='ordered_by' >
+                                    <label for='type-{{i[1]}}'>{{i[0]}}</label>
+                                    <div class='check'></div>
+                                </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                    <input type="hidden" name="ordered_by'" value={{session["user"]['username']}} >
+                {% endif %}
                 <div class="tab">
                     <h2>Enter Clinical Information/History</h2>
                     <input type="text" placeholder="Clinical history" name="clinical_history" id="default" class="input" value="{{
@@ -289,6 +303,9 @@
                         <td style="text-align: center;">
                             <span class="step"></span>
                             <span class="step"></span>
+                           {% if session.get('user').get('role') == 'Nurse'  %}
+                                <span class="step"></span>
+                            {% endif %}
                             <span class="step"></span>
                             <span class="step"></span>
                             <span class="step"></span>

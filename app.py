@@ -203,7 +203,8 @@ def patient(patient_id):
 
         records.append(test)
     records = sorted(records, key=lambda e: e["date"], reverse= True)
-    return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=pending_sample, containers =  misc.container_options(),collect_samples=draw_sample, requires_keyboard=True)
+    return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=pending_sample, containers =  misc.container_options(),
+                           collect_samples=draw_sample, doctors = prescribers(),requires_keyboard=True)
 
 ###### USER ROUTES ###########
 
@@ -294,7 +295,7 @@ def select_location():
 def create_lab_order():
     for test in request.form.getlist('test_type[]'):
         new_test = {
-                'ordered_by': session["user"]['username'],
+                'ordered_by': request.form['ordered_by'],
                 'date_ordered': datetime.now().strftime('%s') ,
                 'status': 'Ordered',
                 'sample_type' : request.form['specimen_type'],
@@ -389,6 +390,15 @@ def review_test(test_id):
     else:
         return redirect(url_for('patient', patient_id=test['patient_id']))
 
+###### DB CALLS ################
+
+def prescribers():
+    providers = []
+    users = db.find({"selector": {"type": "user", "role": "Doctor"}, "fields": ["_id", "name"]})
+    for user in users:
+        providers.append([user['name'], user['_id']])
+
+    return providers
 
 ###### APPLICATION CALLBACKS ###########
 def initialize_connection():

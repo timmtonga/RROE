@@ -33,7 +33,8 @@ def initialize():
 
     initialize_tests()
     initialize_views()
-    create_user()
+    if db.get("admin") == None:
+        create_user()
 
 def initialize_tests():
     print("Initializing tests")
