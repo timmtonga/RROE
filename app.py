@@ -396,9 +396,13 @@ def prescribers():
     providers = []
     users = db.find({"selector": {"type": "user", "role": "Doctor"}, "fields": ["_id", "name"]})
     for user in users:
-        providers.append([user['name'], user['_id']])
+        if len(user['name'].split(" ")) > 1:
+            name = user['name'].split(" ")[0][0] + ". " + user['name'].split(" ")[1]
+        else:
+            name = user['name']
+        providers.append([name, user['_id']])
 
-    return providers
+    return providers.sort()
 
 ###### APPLICATION CALLBACKS ###########
 def initialize_connection():
