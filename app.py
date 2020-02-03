@@ -401,8 +401,8 @@ def prescribers():
         else:
             name = user['name']
         providers.append([name, user['_id']])
-
-    return providers.sort()
+    providers.sort()
+    return providers
 
 ###### APPLICATION CALLBACKS ###########
 def initialize_connection():

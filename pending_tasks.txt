@@ -1,5 +1,4 @@
 Test details and engine
-Nurse ability to add tests ordered
 Pull reason for rejection and not done
 pull panel test results
 Reprint Button
