@@ -1,4 +1,3 @@
-import os
 import json
 import mysql.connector
 from couchdb import Server
@@ -18,43 +17,21 @@ def sync_test_statuses():
     log("Check begun at %s" % datetime.utcnow().strftime("%d/%m/%Y %H:%S"))
     print("Check begun at %s" % datetime.utcnow().strftime("%d/%m/%Y %H:%S"))
     pending_tests = get_pending_tests()
-
     #Have items that need updating
     if len(pending_tests) > 0:
         connect_to_blis()
 
     for test in pending_tests:
-        print(test["_id"])
-        if test.get("lims_id") == None:
-            #get patient_id in lims
-            patient_id = get_patient_id(test["patient_id"])
-            if patient_id == None:
-                log("Couldn't find patient with id %s" % test["patient_id"])
-                next
-            else:
-                #get last test for patient with that id.
-                test_details = get_patient_test(patient_id,test.get("test_type"),test.get("ordered_by") ,test.get("date_ordered"))
-
-                if test_details == None:
-                    log("Couldn't find test for patient with id %s and test type %s ordered on %s" % (test["patient_id"], test.get("test_type"), test.get("date_ordered")))
-                    next
-                else:
-                    test["lims_id"] = test_details[0]
-        else:
-            #if test has lims id
-            test_details = get_test(test.get("lims_id"))
-
-        if test_details == None:
-                log("Couldn't find test for patient with id %s and test id %s" % (test["patient_id"], test.get("lims_id")))
-                next
-        else:
-            if test.get("status") != test_statuses[test_details[1]]:
-                update_test_status(test, test_details)
+        updated_test = process_test(test)
+        if updated_test !=None:
+            db.save(updated_test)
 
     pending_panels = get_pending_panels()
-
     for panel in pending_panels:
-        pass
+        processed_panel = process_panel(panel)
+        if processed_panel != panel:
+            db.save(processed_panel)
+
     log("Check concluded at %s" % datetime.utcnow().strftime("%d/%m/%Y %H:%S"))
     print("Check concluded at %s" % datetime.utcnow().strftime("%d/%m/%Y %H:%S"))
 
@@ -63,7 +40,7 @@ def get_pending_tests():
             "selector": {
                 "type": "test",
                 "status": {"$in": ["Ordered", "Specimen Collected", "Specimen Received", "Being Analyzed","Pending Verification"]}
-            }
+            },"limit":500
     })
     return tests
 
@@ -76,9 +53,10 @@ def get_pending_panels():
 
 def get_patient_id(npid):
     #Get patient id from blis
-    mycursor = mysqldb.cursor()
-    mycursor.execute("SELECT id FROM patients where external_patient_number = '%s' order by id desc" % npid)
-    patient_records = mycursor.fetchone()
+
+    cursor = mysqldb.cursor()
+    cursor.execute("SELECT id FROM patients where external_patient_number = '%s' order by id desc LIMIT 1" % npid)
+    patient_records = cursor.fetchone()
     if patient_records == None:
         return None
     else:
@@ -86,7 +64,7 @@ def get_patient_id(npid):
 
 def get_patient_test(patient_id, test_type_id, ordered_by, ordered_on):
     mycursor = mysqldb.cursor()
-    query = "SELECT id, test_status_id from tests where test_type_id = "+test_type_id+" and requested_by = '"+ordered_by +"' and visit_id in (select id from visits where patient_id = "+str(patient_id)+" and created_at between '"+datetime.utcfromtimestamp(float(ordered_on)).strftime("%Y-%m-%d %H:%M")+"' and now()) order by id desc"
+    query = "SELECT id, test_status_id,not_done_reasons,specimen_id from tests where test_type_id = "+test_type_id+" and requested_by = '"+ordered_by +"' and visit_id in (select id from visits where patient_id = "+str(patient_id)+" and created_at between '"+datetime.utcfromtimestamp(float(ordered_on)).strftime("%Y-%m-%d %H:%M")+"' and now()) order by id desc LIMIT 1"
     mycursor.execute(query)
     myTest = mycursor.fetchone()
     if myTest == None:
@@ -96,7 +74,8 @@ def get_patient_test(patient_id, test_type_id, ordered_by, ordered_on):
 
 def get_test(test_id):
     mycursor = mysqldb.cursor()
-    mycursor.execute("SELECT id, test_status_id from tests where id = %s" % test_id)
+    query = "SELECT id, test_status_id,not_done_reasons,specimen_id from tests where id = %s" % test_id
+    mycursor.execute(query)
     myTest = mycursor.fetchone()
     if myTest == None:
         return None
@@ -105,23 +84,31 @@ def get_test(test_id):
 
 def update_test_status(test, test_details):
     #Test has different state? update status
+    old_test = test
     test["status"] = test_statuses[test_details[1]]
 
     if test_details[1] == 7:
         #Test not done
-        test["rejection_reason"] = ""
+        mycursor = mysqldb.cursor()
+        mycursor.execute("SELECT reason from not_done_reasons where id = %s" % test_details[2])
+        reason= mycursor.fetchone()
+        test["rejection_reason"] = reason[0]
     elif test_details[1] == 8:
         #test rejected
-        test["rejection_reason"] = ""
+        mycursor = mysqldb.cursor()
+        mycursor.execute("SELECT reason from rejection_reasons WHERE id = (select rejection_reason_id from specimens where id = %s)" % test_details[3])
+        reason= mycursor.fetchone()
+        test["rejection_reason"] = reason[0]
     elif test_statuses[test_details[1]] == "Analysis Complete":
-        # test authorized? yes, get result
+        # test authorized? yes, get results
         test["measures"] = {}
         mycursor = mysqldb.cursor()
         mycursor.execute("SELECT (SELECT `name` FROM measures where id = measure_id) as measure, result FROM test_results where test_id = %s" % test_details[0])
         measures= mycursor.fetchall()
         for measure in measures:
             test["measures"][measure[0]] = measure[1]
-    db.save(test)
+
+    return test
 
 def connect_to_couch():
     couchConnection = Server("http://%s:%s@%s:%s/" %
@@ -143,6 +130,67 @@ def log(message):
     f.write("%s \n" % message)
     f.close()
 
+def process_test(test):
+    if test.get("lims_id") == None:
+        #get patient_id in lims
+        patient_id = get_patient_id(test["patient_id"])
+        if patient_id == None:
+            log("Couldn't find patient with id %s" % test["patient_id"])
+            return None
+        else:
+            #get last test for patient with that id.
+            test_details = get_patient_test(patient_id,test.get("test_type"),test.get("ordered_by") ,test.get("date_ordered"))
+
+            if test_details == None:
+                log("Couldn't find test for patient with id %s and test type %s ordered on %s" % (test["patient_id"], test.get("test_type"), datetime.fromtimestamp(float(test.get('date_ordered'))).strftime('%d %b %Y %H:%S')))
+                return None
+            else:
+                test["lims_id"] = test_details[0]
+    else:
+        #if test has lims id
+        test_details = get_test(test.get("lims_id"))
+
+    if test_details == None:
+            log("Couldn't find test for patient with id %s and test id %s" % (test["patient_id"], test.get("lims_id")))
+            return
+    else:
+        if test.get("status") != test_statuses[test_details[1]]:
+            updated_test = update_test_status(test, test_details)
+            return updated_test
+
+def process_panel(panel):
+    patient_id = None
+    for test_type_id in panel.get("tests").keys():
+        test = panel.get("tests")[test_type_id]
+        test_details = None
+        if test.get("lims_id") == None:
+            #get patient_id in lims
+            if patient_id == None:
+                result = get_patient_id(panel["patient_id"])
+                if result == None:
+                    log("Couldn't find patient with id %s" % panel["patient_id"])
+                    return panel
+                patient_id = result
+            else:
+                #get last test for patient with that id.
+                test_details = get_patient_test(patient_id,test_type_id,panel.get("ordered_by") ,panel.get("date_ordered"))
+        else:
+            #if test has lims id
+            test_details = get_test(test.get("lims_id"))
+
+        if test_details == None:
+            log("Couldn't find test for patient with id %s and test type %s ordered on %s" % (panel["patient_id"], test_type_id, panel.get("date_ordered")))
+        else:
+            if test.get("lims_id") == None:
+                test["lims_id"] = test_details[0]
+
+            if test.get("status") == None or test.get("status") != test_statuses[test_details[1]]:
+                updated_test = update_test_status(test, test_details)
+                panel["tests"][test_type_id] = updated_test
+
+    return panel
+
 if __name__ =='__main__':
     connect_to_couch()
     sync_test_statuses()
+

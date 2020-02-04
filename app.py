@@ -37,7 +37,7 @@ def index():
                 "type": {"$in": ["test","test panel"]},
                 "ward": session.get('location'),
                 "status": {"$in": ["Ordered","Specimen Collected","Analysis Complete", "Rejected"]}
-            }
+            },"limit":100
         }
 
     else:
@@ -46,7 +46,7 @@ def index():
                 "type": {"$in": ["test","test panel"]},
                 "ordered_by": session["user"]['username'],
                 "status": {"$in": ["Ordered","Specimen Collected","Analysis Complete","Rejected"]}
-            }
+            },"limit":100
         }
 
         #Get my team members and then all tests requested by members of my team
@@ -60,7 +60,7 @@ def index():
                 "type": {"$in": ["test","test panel"]},
                 "ordered_by": {"$in": my_team},
                 "status": {"$in": ["Ordered","Specimen Collected","Analysis Complete","Rejected"]}
-            },"limit": 50
+            },"limit": 100
         }
 
         for item in db.find(team_records):
