@@ -2,8 +2,6 @@
 {% block body %}
     <script type="text/javascript">
         navButtons = [["Finish", "window.location='/'", "Green", "Right"],["New Test", "showOrderDialog()", "Defaults", "Right"]]
-
-
         {% if  pending_orders != [] %}
             navButtons.push(["Draw Samples", "showDrawDialog()", "Defaults", "Right"])
         {% endif %}
@@ -49,73 +47,93 @@
                     <div style="display: table-cell;width: 100%;">Ordered On: {{ row['date_ordered'] }}</div>
                     <div style="display: table-cell;" id="{{row['id']}}-status">View</div>
                 </div>
+                {% if row.get("type") == "test"%}
+                    <div style="display: table-row;">
+                        <div style="display: table-cell;width: 100%;">Current Status: {{row['status']}}</div>
+                        <div style="display: table-cell;">&nbsp;</div>
+                    </div>
+                {% endif %}
                 <div style="display: table-row;">
-                    <div style="display: table-cell;width: 100%;">Current Status: {{row['status']}}</div>
+                    <div style="display: table-cell;width: 100%;">Ordered By: {{ row['ordered_by'] }}</div>
                     <div style="display: table-cell;">&nbsp;</div>
                 </div>
             </div>
              <div id='{{row["id"]}}' style="padding: 10px" hidden="False">
-                {% if row['status'] == "Analysis Complete" or row['status'] == "Reviewed" %}
-                    <table style="width: 100%;margin-left: auto; margin-right: auto;border-collapse: collapse; line-height: 5vh;" >
-                        <tr>
-                            <th style="height: 50px;border: 1px solid black;">Measure</th>
-                            <th style="height: 50px;border: 1px solid black;">Value</th>
-                            <th style="height: 50px;border: 1px solid black;">Range</th>
-                        </tr>
-                        {% for measure in row.get("measures") %}
+                 {% if row.get("type") == "test"%}
+                    {% if row['status'] == "Analysis Complete" or row['status'] == "Reviewed" %}
+                        <table style="width: 100%;margin-left: auto; margin-right: auto;border-collapse: collapse; line-height: 5vh;" >
                             <tr>
-                                <td style="border: 1px solid black;font-weight: bold;padding-left: 10px;">{{measure}} </td>
-                                {% if measure not in row['numeric_measures'] %}
-                                    <td style="border: 1px solid black;text-align: center;">
-                                        {{row["measures"][measure]}}
-                                    </td>
-                                    <td style="border: 1px solid black;text-align: center;">
-                                        &nbsp;
-                                    </td>
-                                {% else %}
-                                    {% if row["critical"].get(measure) == None  %}
-                                        <td style="border: 1px solid black;text-align: center;">
-                                            {{row["measures"][measure]}}
-                                        </td>
-                                    {% else %}
-                                        {% if row["critical"].get(measure) == "low" %}
-                                            <td style="color: red;border: 1px solid black;text-align: center;">
-                                                {{row["measures"][measure]}}<span style='color: red; font-size: 2em;font-weight: bold;'>&#8595;</span>
-                                            </td>
-                                        {% else%}
-                                            <td style="color: red;border: 1px solid black;text-align: center;">
-                                                {{row["measures"][measure]}}<span style='color: red; font-size: 2em;font-weight: bold;'>&#8593;</span>
-                                            </td>
-                                        {% endif %}
-                                    {% endif %}
-                                    <td style="border: 1px solid black;text-align: center;">
-                                        {{row['test_details'][0]["measures"][measure].get("minimum")}} - {{row['test_details'][0]["measures"][measure].get("maximum")}}
-                                    </td>
-                                {% endif %}
+                                <th style="height: 50px;border: 1px solid black;width:30%;">Measure</th>
+                                <th style="height: 50px;border: 1px solid black;">Value</th>
+                                <th style="height: 50px;border: 1px solid black;width:20%;">Range</th>
                             </tr>
-                        {% endfor %}
-                    </table>
-                {% elif row['status'] == "Ordered" %}
-                    <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
-                    <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
-                    <b>Order Status:</b>{{row.get("status")}}<br>
-                 {% elif row['status'] == "Specimen Collected" %}
-                    <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
-                    <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
-                    <b>Order Status:</b>{{row.get("status")}}<br>
-                 {% elif row['status'] == "Specimen Received" %}
-                    <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
-                    <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
-                    <b>Order Status:</b>{{row.get("status")}}<br>
-                 {% elif row['status'] == "Being Analyzed" or row['status'] == "Pending Verification" %}
-                    <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
-                    <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
-                    <b>Order Status:</b>{{row.get("status")}}<br>
-                 {% elif row['status'] == "Rejected" or row['status'] == "Specimen Rejected" or row['status'] == "Test Rejected" or row['status'] == "Not Done"%}
-                    <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
-                    <b>Clinical History: </b>{{row.get("clinical_history", "")}}<br><br>
-                    <b>Reason for rejection:</b>{{row.get("rejection_reason", "")}}<br>
-                {% endif %}
+                            {% for measure in row.get("measures").items() %}
+                                <tr>
+                                    <td style="border: 1px solid black;font-weight: bold;padding-left: 10px;">{{measure[0]}} </td>
+                                    <td style="border: 1px solid black;text-align: center;">
+                                        {% if measure[1]["interpretation"] == "High" %}
+                                                <span style='color: red; font-size: 2em;font-weight: bold;'>&#8593;</span><span style='color: red;'>{{measure[1]["value"]}}</span>
+                                        {% elif measure[1]["interpretation"] == "Low" %}
+                                                <span style='color: red; font-size: 2em;font-weight: bold;'>&#8595;</span><span style='color: red;'>{{measure[1]["value"]}}</span>
+                                        {% else %}
+                                            {{measure[1]["value"]}}
+
+                                        {% endif %}
+                                    </td>
+                                    <td style="border: 1px solid black;text-align: center;">{{measure[1]["range"]}} </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    {% elif row['status'] == "Ordered" %}
+                        <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
+                        <b>Clinical History: </b>{{row.get("history", "")}}<br><br>
+                        <b>Order Status:</b>{{row.get("status")}}<br>
+                     {% elif row['status'] == "Specimen Collected" %}
+                        <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
+                        <b>Clinical History: </b>{{row.get("history", "")}}<br><br>
+                        <b>Order Status:</b>{{row.get("status")}}<br>
+                     {% elif row['status'] == "Specimen Received" %}
+                        <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
+                        <b>Clinical History: </b>{{row.get("history", "")}}<br><br>
+                        <b>Order Status:</b>{{row.get("status")}}<br>
+                     {% elif row['status'] == "Being Analyzed" or row['status'] == "Pending Verification" %}
+                        <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
+                        <b>Clinical History: </b>{{row.get("history", "")}}<br><br>
+                        <b>Order Status:</b>{{row.get("status")}}<br>
+                     {% elif row['status'] == "Rejected" or row['status'] == "Specimen Rejected" or row['status'] == "Test Rejected" or row['status'] == "Not Done"%}
+                        <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
+                        <b>Clinical History: </b>{{row.get("history", "")}}<br><br>
+                        <b>Reason for rejection:</b>{{row.get("rejection_reason", "")}}<br>
+                    {% endif %}
+                 {% else %}
+                    {% for test in row.get("panel_test_details").keys()%}
+                        <b>{{row["panel_test_details"][test]["test_name"]}}s</b>
+                        <table style="width: 100%;margin-left: auto; margin-right: auto;border-collapse: collapse; line-height: 5vh;" >
+                            <tr>
+                                <th style="height: 50px;border: 1px solid black;width:30%;">Measure</th>
+                                <th style="height: 50px;border: 1px solid black;">Value</th>
+                                <th style="height: 50px;border: 1px solid black;width:20%;">Range</th>
+                            </tr>
+                            {% for measure in row.get("panel_test_details")[test]["measures"].items() %}
+                                <tr>
+                                    <td style="border: 1px solid black;font-weight: bold;padding-left: 10px;">{{measure[0]}} </td>
+                                    <td style="border: 1px solid black;text-align: center;">
+                                        {% if measure[1]["interpretation"] == "High" %}
+                                                <span style='color: red; font-size: 2em;font-weight: bold;'>&#8593;</span><span style='color: red;'>{{measure[1]["value"]}}</span>
+                                        {% elif measure[1]["interpretation"] == "Low" %}
+                                                <span style='color: red; font-size: 2em;font-weight: bold;'>&#8595;</span><span style='color: red;'>{{measure[1]["value"]}}</span>
+                                        {% else %}
+                                            {{measure[1]["value"]}}
+
+                                        {% endif %}
+                                    </td>
+                                    <td style="border: 1px solid black;text-align: center;">{{measure[1]["range"]}} </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                        <br/>
+                    {% endfor %}
+                 {% endif %}
              </div>
         </div>
         {% endfor %}
@@ -238,7 +256,7 @@
                         {% endfor %}
                     </ul>
                 </div>
-                {% if session.get('user').get('role') == 'Nurse'  %}
+                {% if session.get('user').get('role') in ['Nurse', 'Student']  %}
                     <div class="tab">
                     <h2>Select person who ordered test(s)</h2>
                     <ul>
@@ -303,7 +321,7 @@
                         <td style="text-align: center;">
                             <span class="step"></span>
                             <span class="step"></span>
-                           {% if session.get('user').get('role') == 'Nurse'  %}
+                           {% if session.get('user').get('role') in ['Nurse', 'Student']  %}
                                 <span class="step"></span>
                             {% endif %}
                             <span class="step"></span>

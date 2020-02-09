@@ -29,8 +29,7 @@ def sync_test_statuses():
     pending_panels = get_pending_panels()
     for panel in pending_panels:
         processed_panel = process_panel(panel)
-        if processed_panel != panel:
-            db.save(processed_panel)
+        db.save(processed_panel)
 
     log("Check concluded at %s" % datetime.utcnow().strftime("%d/%m/%Y %H:%S"))
     print("Check concluded at %s" % datetime.utcnow().strftime("%d/%m/%Y %H:%S"))
@@ -171,23 +170,25 @@ def process_panel(panel):
                     log("Couldn't find patient with id %s" % panel["patient_id"])
                     return panel
                 patient_id = result
-            else:
-                #get last test for patient with that id.
-                test_details = get_patient_test(patient_id,test_type_id,panel.get("ordered_by") ,panel.get("date_ordered"))
+
+             #get last test for patient with that id.
+            test_details = get_patient_test(patient_id,test_type_id,panel.get("ordered_by") ,panel.get("date_ordered"))
         else:
             #if test has lims id
             test_details = get_test(test.get("lims_id"))
 
         if test_details == None:
-            log("Couldn't find test for patient with id %s and test type %s ordered on %s" % (panel["patient_id"], test_type_id, panel.get("date_ordered")))
+            log("Couldn't find test for patient with id %s and panel test type %s ordered on %s" % (panel["patient_id"], test_type_id, panel.get("date_ordered")))
         else:
+            print("Found test for patient with id %s and panel test type %s ordered on %s" % (panel["patient_id"], test_type_id, panel.get("date_ordered")))
             if test.get("lims_id") == None:
                 test["lims_id"] = test_details[0]
 
             if test.get("status") == None or test.get("status") != test_statuses[test_details[1]]:
                 updated_test = update_test_status(test, test_details)
                 panel["tests"][test_type_id] = updated_test
-
+                if panel["status"] != "Analysis Complete":
+                    panel["status"] = test.get("status")
     return panel
 
 if __name__ =='__main__':

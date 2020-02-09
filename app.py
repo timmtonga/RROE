@@ -31,7 +31,7 @@ def index():
     for test in tests:
         test_names[test["test_type_id"]] =  test["_id"]
     #Based on role, pull the required information from the database
-    if session["user"]["role"] == "Nurse":
+    if session["user"]["role"] in ['Nurse', 'Student'] :
         main_index_records = {
             "selector": {
                 "type": {"$in": ["test","test panel"]},
@@ -138,6 +138,7 @@ def patient(patient_id):
     draw_sample = False
     pending_sample = []
     records = []
+    details_of_test = {}
     if (request.args.get("sample_draw") == "True"):
             draw_sample = True
 
@@ -149,31 +150,47 @@ def patient(patient_id):
 
     #get tests for pateint
     mango = {"selector": {"type": {"$in": ["test","test panel"]},"patient_id": patient_id},
-             "fields": ["_id","type","status","Priority","ordered_by","date_ordered","test_type","sample_type","measures","specimen_types","clinical_history","panel_type"], "limit": 50}
+             "fields": ["_id","type","status","Priority","ordered_by","date_ordered","rejection_reason","test_type","sample_type","measures","specimen_types","clinical_history","panel_type","tests"], "limit": 50}
 
     for test in  db.find(mango):
-        test["date"] = float(test["date_ordered"])
-        test["date_ordered"] =  datetime.fromtimestamp(float(test["date_ordered"])).strftime('%d %b %Y %H:%S')
+        test_record = {"date_ordered":  datetime.fromtimestamp(float(test["date_ordered"])).strftime('%d %b %Y %H:%S'), "id": test.get("_id")}
+        test_record["type"] = test.get("type")
+        test_record["status"] = test.get("status")
+        test_record["priority"] = test.get("Priority")
+        test_record["date"]= float(test["date_ordered"])
+        test_record["history"] = test.get("clinical_history")
+        test_record["ordered_by"] = test.get("ordered_by")
+        test_record["rejection_reason"] = test.get("rejection_reason")
+        test_record["test_type"] = "test" if test.get("type") == "test" else "test panel"
+
         if test.get("type") == "test":
-            test["test_details"] = db.find({"selector": {"type":"test_type","test_type_id": test.get('test_type')}, "fields": ["_id","measures", "specimen_requirements", "department"]})
-            test["test_name"] = test['test_details'][0]["_id"]
+            if details_of_test.get(test.get('test_type')) == None:
+                details_of_test[test.get('test_type')] = db.find({"selector": {"type":"test_type","test_type_id": test.get('test_type')}, "fields": ["_id","measures", "specimen_requirements", "department"]})[0]
+
+            test_record["test_name"] = details_of_test[test.get('test_type')]["_id"]
             if test["status"] == "Ordered":
                 pending_sample .append({"test_id":test["_id"],
-                                    "specimen_type": test["test_details"][0]["specimen_requirements"][test["sample_type"]]["type_of_specimen"],
-                                    "test_type": test["test_details"][0]["_id"],"department": test["test_details"][0]["department"],
-                                    "container": test["test_details"][0]["specimen_requirements"][test["sample_type"]]["container"],
-                                   "volume":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["volume"],
-                                   "units":test["test_details"][0]["specimen_requirements"][test["sample_type"]]["units"],
-                                    "test_name": test['test_details'][0]["_id"]
+                                    "specimen_type": details_of_test[test.get('test_type')]["specimen_requirements"][test["sample_type"]]["type_of_specimen"],
+                                    "test_type": details_of_test[test.get('test_type')]["_id"],"department": details_of_test[test.get('test_type')]["department"],
+                                    "container": details_of_test[test.get('test_type')]["specimen_requirements"][test["sample_type"]]["container"],
+                                   "volume":details_of_test[test.get('test_type')]["specimen_requirements"][test["sample_type"]]["volume"],
+                                   "units":details_of_test[test.get('test_type')]["specimen_requirements"][test["sample_type"]]["units"],
+                                    "test_name": details_of_test[test.get('test_type')]["_id"]
                                     })
+            test_record['measures'] = get_test_measures(test,details_of_test[test.get('test_type')])
         elif  test.get("type") == "test panel":
-
-            test["test_name"] = test["panel_type"]
-            panel_details = {"test_id":test["_id"],
+            test_record["test_name"] = test["panel_type"]
+            test_record["panel_test_details"] = {}
+            for panel_test in test.get("tests").keys():
+                if details_of_test.get(panel_test) == None:
+                    details_of_test[panel_test] = db.find({"selector": {"type":"test_type","test_type_id": panel_test}, "fields": ["_id","measures", "specimen_requirements", "department"]})[0]
+                test_record["panel_test_details"][panel_test] = {"test_name": details_of_test[panel_test]["_id"]}
+                test_record["panel_test_details"][panel_test]['measures'] = get_test_measures(test.get("tests")[panel_test],details_of_test[panel_test])
+            if test["status"] == "Ordered":
+                panel_details = {"test_id":test["_id"],
                                                 "specimen_type": specimen_type_map(test['sample_type']),
                                                 "test_name": test["panel_type"]
                                                 }
-            if test["status"] == "Ordered":
                 if panel_details["specimen_type"] == "Urine":
                     panel_details["container"] = 'Conical container'
                     panel_details["volume"] = "15 "
@@ -184,24 +201,9 @@ def patient(patient_id):
                     panel_details["units"] = "ml"
                 pending_sample .append(panel_details)
 
-        try:
-            test["numeric_measures"] = []
-            test["critical"] = {}
-            for measure in test.get("measures"):
-                if test['test_details'][0]["measures"][measure].get("minimum") != None :
-                    test["numeric_measures"].append(measure)
-                    test_measure =  re.sub(r'[^0-9\.]', '', test["measures"][measure])
-                    try:
-                        if float(test_measure) < float(test['test_details'][0]["measures"][measure].get("minimum")):
-                            test["critical"][measure] = "low"
-                        elif float(test_measure) > float(test['test_details'][0]["measures"][measure].get("maximum")):
-                            test["critical"][measure] = "high"
-                    except:
-                        pass
-        except:
-            pass
+        if test != None:
+            records.append(test_record)
 
-        records.append(test)
     records = sorted(records, key=lambda e: e["date"], reverse= True)
     return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=pending_sample, containers =  misc.container_options(),
                            collect_samples=draw_sample, doctors = prescribers(),requires_keyboard=True)
@@ -252,7 +254,7 @@ def create_user():
         provider = {'type': "user","name" : request.form["name"] ,  "_id": request.form['username'],
                     'password_hash': generate_password_hash(request.form["password"]),
         "role": request.form['role'],   'designation': request.form['designation']}
-        if request.form['role'] == "Doctor":
+        if request.form['designation'] in ['Consultant', 'Intern','Registrar','Medical Student', 'Student Clinical Officer', "Clinical Officer"] :
             provider["team"] = request.form["team"]
         else:
             provider["ward"] = request.form["wardAllocation"]
@@ -390,6 +392,27 @@ def review_test(test_id):
     else:
         return redirect(url_for('patient', patient_id=test['patient_id']))
 
+###### MISC Functions ############
+
+def get_test_measures(test, test_details):
+    results = {}
+    for measure in test.get("measures", []):
+        if test_details["measures"][measure].get("minimum") != None :
+            results[measure] = {"range": test_details["measures"][measure].get("minimum") + " - " + test_details["measures"][measure].get("maximum")}
+            results[measure]["value"] = re.sub(r'[^0-9\.]', '', test["measures"][measure])
+            if results[measure]["value"] == "":
+                results[measure]["value"] = "Not Done"
+                results[measure]["interpretation"] = "Normal"
+            elif float(results[measure]["value"]) < float(test_details["measures"][measure].get("minimum")):
+                results[measure]["interpretation"] = "Low"
+            elif float(results[measure]["value"]) > float(test_details["measures"][measure].get("maximum")):
+                results[measure]["interpretation"] = "High"
+            else:
+                results[measure]["interpretation"] = "Normal"
+        else:
+            results[measure] = {"range": "", "interpretation":"Normal", "value": test["measures"][measure]}
+
+    return results
 ###### DB CALLS ################
 
 def prescribers():
@@ -403,6 +426,16 @@ def prescribers():
         providers.append([name, user['_id']])
     providers.sort()
     return providers
+
+def specimen_type_map(type):
+    tests = db.find({"selector": {"type": "test_type"},"fields": ["specimen_types"]})
+    options = []
+    for i in tests:
+        for t in i["specimen_types"]:
+            if type == t:
+                return i["specimen_types"][t]
+
+    return "Unknown"
 
 ###### APPLICATION CALLBACKS ###########
 def initialize_connection():
@@ -437,17 +470,6 @@ def check_authentication():
         except:
             return redirect(url_for('login'))
 
-##### MISC Functions ###################
-
-def specimen_type_map(type):
-    tests = db.find({"selector": {"type": "test_type"},"fields": ["specimen_types"]})
-    options = []
-    for i in tests:
-        for t in i["specimen_types"]:
-            if type == t:
-                return i["specimen_types"][t]
-
-    return "Unknown"
 ###### APPLICATION CONTEXT PROCESSORS ###########
 # Used to get data in views
 @app.context_processor

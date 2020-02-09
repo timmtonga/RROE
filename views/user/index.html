@@ -64,6 +64,11 @@
                         <h2>User Role</h2>
                         <ul>
                             <li>
+                                <input type="radio" id="clinicalOfficer" value="Clinical Officer" name="role"  onchange="filterDesignations('doc')">
+                                <label for="clinicalOfficer">Clinical Officer</label>
+                                <div class="check"></div>
+                            </li>
+                            <li>
                                 <input type="radio" id="doctor" value="Doctor" name="role"  onchange="filterDesignations('doc')">
                                 <label for="doctor">Doctor</label>
                                 <div class="check"></div>
@@ -73,39 +78,69 @@
                                 <label for="nurse">Nurse</label>
                                 <div class="check"></div>
                             </li>
+                            <li>
+                                <input type="radio" id="student" value="Student" name="role" onchange="filterDesignations('student')">
+                                <label for="student">Student</label>
+                                <div class="check"></div>
+                            </li>
                         </ul>
                     </div>
                     <div class="tab">
                         <h2>User Desgination</h2>
                         <ul>
                             <li data-id="doc" name="designationOptions">
-                                <input type="radio" id="consultant" value="Consultant" name="designation" >
+                                <input type="radio" id="co" value="Clinical Officer" name="designation"  onchange="filterAllocation('medical')">
+                                <label for="co">Clinical Officer</label>
+                                <div class="check"></div>
+                            </li>
+                            <li data-id="doc" name="designationOptions">
+                                <input type="radio" id="consultant" value="Consultant" name="designation"  onchange="filterAllocation('medical')">
                                 <label for="consultant">Consultant</label>
                                 <div class="check"></div>
                             </li>
                             <li data-id="doc" name="designationOptions">
-                                <input type="radio" id="intern" value="Intern" name="designation" >
+                                <input type="radio" id="clinicalStudent" value="Student Clinical Officer" name="designation"  onchange="filterAllocation('medical')">
+                                <label for="clinicalStudent">Clinical Officer Student</label>
+                                <div class="check"></div>
+                            </li>
+                            <li data-id="doc" name="designationOptions">
+                                <input type="radio" id="intern" value="Intern" name="designation" onchange="filterAllocation('medical')">
                                 <label for="intern">Intern</label>
                                 <div class="check"></div>
                             </li>
                             <li data-id="nurse" name="designationOptions">
-                                <input type="radio" id="matron" value="Matron" name="designation" >
+                                <input type="radio" id="matron" value="Matron" name="designation" onchange="filterAllocation('nursing')">
                                 <label for="matron">Matron</label>
                                 <div class="check"></div>
                             </li>
                             <li data-id="nurse" name="designationOptions">
-                                <input type="radio" id="nurseRole" value="Nurse" name="designation" >
+                                <input type="radio" id="nurseRole" value="Nurse" name="designation" onchange="filterAllocation('nursing')">
                                 <label for="nurseRole">Nurse</label>
                                 <div class="check"></div>
                             </li>
                             <li data-id="doc" name="designationOptions">
-                                <input type="radio" id="registrar" value="Registrar" name="designation" >
+                                <input type="radio" id="registrar" value="Registrar" name="designation" onchange="filterAllocation('medical')">
                                 <label for="registrar">Registrar</label>
                                 <div class="check"></div>
                             </li>
                             <li data-id="nurse" name="designationOptions">
-                                <input type="radio" id="nurse-ic" value="Nurse In-Charge" name="designation" >
+                                <input type="radio" id="nurse-ic" value="Nurse In-Charge" name="designation" onchange="filterAllocation('nursing')">
                                 <label for="nurse-ic">Nurse in-charge</label>
+                                <div class="check"></div>
+                            </li>
+                            <li data-id="student" name="designationOptions">
+                                <input type="radio" id="nurse-student" value="Nursing Student" name="designation" onchange="filterAllocation('nursing')">
+                                <label for="nurse-student">Nursing Student</label>
+                                <div class="check"></div>
+                            </li>
+                            <li data-id="student" name="designationOptions">
+                                <input type="radio" id="mbbs-student" value="Medical Student" name="designation" onchange="filterAllocation('medical')">
+                                <label for="mbbs-student">Medical Student</label>
+                                <div class="check"></div>
+                            </li>
+                            <li data-id="doc" name="designationOptions">
+                                <input type="radio" id="visitingDoc" value="Visiting Doctor" name="designation" onchange="filterAllocation('medical')">
+                                <label for="visitingDoc">Visiting Doctor</label>
                                 <div class="check"></div>
                             </li>
                         </ul>
@@ -113,52 +148,52 @@
                     <div class="tab">
                         <h2>Allocation</h2>
                         <ul>
-                            <li data-id="doc" name="allocationOptions">
+                            <li data-id="medical" name="allocationOptions">
                                 <input type="radio" id="short_stay" value="MSS" name="team" >
                                 <label for="short_stay">Short Stay</label>
                                 <div class="check"></div>
                             </li>
-                            <li data-id="doc" name="allocationOptions">
+                            <li data-id="medical" name="allocationOptions">
                                 <input type="radio" id="opd" value="OPD" name="team" >
                                 <label for="opd">OPD</label>
                                 <div class="check"></div>
                             </li>
-                            <li data-id="doc" name="allocationOptions">
+                            <li data-id="medical" name="allocationOptions">
                                 <input type="radio" id="team_a" value="A" name="team" >
                                 <label for="team_a">Team A</label>
                                 <div class="check"></div>
                             </li>
-                            <li data-id="doc" name="allocationOptions">
+                            <li data-id="medical" name="allocationOptions">
                                 <input type="radio" id="team_b" value="B" name="team" >
                                 <label for="team_b">Team B</label>
                                 <div class="check"></div>
                             </li>
-                            <li data-id="doc" name="allocationOptions">
+                            <li data-id="medical" name="allocationOptions">
                                 <input type="radio" id="team_c" value="C" name="team" >
                                 <label for="team_c">Team C</label>
                                 <div class="check"></div>
                             </li>
-                            <li data-id="doc" name="allocationOptions">
+                            <li data-id="medical" name="allocationOptions">
                                 <input type="radio" id="team_d" value="D" name="team" >
                                 <label for="team_d">Team D</label>
                                 <div class="check"></div>
                             </li>
-                            <li data-id="nurse" name="allocationOptions">
+                            <li data-id="nursing" name="allocationOptions">
                                 <input type="radio" id="4a" value="4A" name="wardAllocation" >
                                 <label for="4a">Medical Female Ward</label>
                                 <div class="check"></div>
                             </li>
-                            <li data-id="nurse" name="allocationOptions">
+                            <li data-id="nursing" name="allocationOptions">
                                 <input type="radio" id="mhdu" value="MHDU" name="wardAllocation" >
                                 <label for="mhdu">Medical HDU</label>
                                 <div class="check"></div>
                             </li>
-                            <li data-id="nurse" name="allocationOptions">
+                            <li data-id="nursing" name="allocationOptions">
                                 <input type="radio" id="4b" value="4B" name="wardAllocation" >
                                 <label for="4b">Medical Male Ward</label>
                                 <div class="check"></div>
                             </li>
-                            <li data-id="nurse" name="allocationOptions">
+                            <li data-id="nursing" name="allocationOptions">
                                 <input type="radio" id="mss" value="MSS" name="wardAllocation" >
                                 <label for="mss">Medical Short Stay</label>
                                 <div class="check"></div>
@@ -199,17 +234,18 @@
         function filterDesignations(id) {
             var options = document.getElementsByName("designationOptions");
             for (var i = 0, length = options.length; i < length; i++) {
-                console.log(i)
                 if (options[i].dataset.id != id) {
                     options[i].style.display = "none";
                 } else {
                     options[i].style.display = "block";
                 }
             }
+        }
+
+        function filterAllocation(classification){
             var options = document.getElementsByName("allocationOptions");
             for (var i = 0, length = options.length; i < length; i++) {
-                console.log(i)
-                if (options[i].dataset.id != id) {
+                if (options[i].dataset.id != classification) {
                     options[i].style.display = "none";
                 } else {
                     options[i].style.display = "block";
