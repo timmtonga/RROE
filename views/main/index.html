@@ -45,7 +45,7 @@
     <br/>
     <div class="tabs">
         {% include
-        'main/_nurse_view.html' if session.get('user').get('role') == 'Nurse'  else  'main/_doctor_view.html' %}
+        'main/_nurse_view.html' if session.get('user').get('role') in ['Nurse', 'Student']   else  'main/_doctor_view.html' %}
 
     </div>
     <script type="text/javascript">
