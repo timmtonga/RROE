@@ -39,7 +39,7 @@ def get_pending_tests():
             "selector": {
                 "type": "test",
                 "status": {"$in": ["Ordered", "Specimen Collected", "Specimen Received", "Being Analyzed","Pending Verification"]}
-            },"limit":500
+            },"limit":1000
     })
     return tests
 
@@ -48,7 +48,7 @@ def get_pending_panels():
             "selector": {
                 "type": "test panel",
                 "status": {"$in": ["Ordered", "Specimen Collected", "Specimen Received", "Being Analyzed","Pending Verification"]}
-            }})
+            },"limit":1000})
 
 def get_patient_id(npid):
     #Get patient id from blis
