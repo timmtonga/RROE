@@ -1,5 +1,6 @@
 #Written by Timothy Mtonga
 #This is the main thread for the application
+#!/usr/bin/python
 
 import os
 import re
@@ -11,6 +12,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, render_template,redirect,session,flash,request,url_for
 
 app = Flask(__name__, template_folder="views", static_folder="assets")
+app.secret_key = os.urandom(25)
 
 #Main application configuration
 global db
@@ -546,5 +548,4 @@ def internal_error(error):
     return render_template('main/500.html'), 500
 
 if __name__ =='__main__':
-    app.secret_key = os.urandom(25)
     app.run(port="7500", debug=True, host='0.0.0.0')
