@@ -2,7 +2,6 @@ from __future__ import division
 import time
 import spidev
 
-
 class CheckVoltage:
     def bitstring(self,n):
         s = bin(n)[2:]
@@ -30,11 +29,11 @@ class CheckVoltage:
         average_voltage = avg * 16.5
         return average_voltage
 
-
-
     def getVoltage(self):
+        min_voltage = 10.5
         raw_voltage =self.current_voltage()
-        #voltage_percent = ((raw_voltage*25) - 10) *50
+        #Assume max_voltage is 13 volts. voltagePercent = (100*x)/2.5 ie x*40
+        voltage_percent = (raw_voltage - min_voltage) *40
         if voltage_percent > 100:
             voltage_percent = 100
         print("Current voltage %s" % raw_voltage)
