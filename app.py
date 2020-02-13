@@ -19,7 +19,7 @@ settings = misc.initialize_settings()
 #optional configuration when running on rpi
 if settings["using_rpi"] == "True":
     from utils.led_control import ledControl
-    #from utils.voltage_checker import CheckVoltage
+    from utils.voltage_checker import CheckVoltage
 
 #Root page of application
 @app.route("/")
@@ -499,7 +499,8 @@ def inject_specimen_types():
 @app.context_processor
 def inject_power():
     if settings["using_rpi"] == "True":
-        voltage = 100 #CheckVoltage().getVoltage()
+        voltage = CheckVoltage().getVoltage()
+        onCharge = False #CheckVoltage().isCharging()
         if voltage > 70:
             rating = "high"
         elif voltage > 30 and voltage < 70:
@@ -509,8 +510,8 @@ def inject_power():
     else:
         voltage=  100
         rating =  "high"
-
-    return {"current_power": voltage, "power_class": rating}
+        onCharge = True
+    return {"current_power": voltage, "power_class": rating, "charging": onCharge}
 
 @app.context_processor
 def inject_tests():

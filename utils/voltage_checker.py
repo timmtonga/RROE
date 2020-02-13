@@ -1,7 +1,7 @@
 from __future__ import division
 import spidev
 
-from random import randint
+
 class CheckVoltage:
     def bitstring(n):
         s = bin(n)[2:]
