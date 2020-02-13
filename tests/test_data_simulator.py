@@ -22,8 +22,7 @@ except:
     db = couchConnection.create(settings["couch"]["database"])
 
 orderers = []
-test_status = ["Ordered", "Specimen Collected", "Specimen Received", "Being Analyzed",
-               "Pending Verification", "Analysis Complete", "Reviewed"]
+test_status = ["Ordered", "Being Analyzed","Pending Verification", "Analysis Complete", "Reviewed"]
 
 designations = {'N' : 'Nurse', 'S': 'Sister-in-charge' , 'M': 'Matron',
                 'I': 'Intern Medical Offcer','R': 'Registrar', 'C': 'Consultant'}
@@ -63,8 +62,6 @@ def intializeFacts():
     initializeViews()
 
 def simulateProviders():
-    dr =  1
-    nu = 1
     for i in range(1,20):
         role = random.choice('NNND')
         provider = {
@@ -75,19 +72,15 @@ def simulateProviders():
         }
 
         if (role == 'N'):
-            print("nurse" + str(i))
-            provider["_id"] = "nurse" + str(i)
             provider['role']  = 'Nurse'
             provider['designation'] =  designations[random.choice('NNNNNSSM')]
-            nu +=1
         else:
-            print("doctor" + str(i))
-            provider["_id"] = "doctor" + str(i)
             provider['role']  = 'Doctor'
             provider['designation'] = designations[random.choice('IIIIRRRC')]
             provider['team'] = random.choice("ABCD")
-            dr += 1
 
+        provider["_id"] = provider["name"].split(" ")[1].lower()+provider["name"][0][0].lower()
+        print("Username %s Role: %s" % (provider["_id"],provider['role']))
         db.save(provider)
         if role == 'D':
             orderers.append(provider['_id'])
@@ -102,7 +95,6 @@ def simulatePatients():
 
         db.save(doc)
 '''
-
         nTests = random.randint(0,10)
 
         for n in range(0,nTests) :
@@ -159,10 +151,9 @@ def simulateMeasures(measures):
 
     for measure, params in measures.items():
         if params['type'] == 'Numeric':
-            test_measures[measure] = random.random() * float(params['maximum']) * random.choice([1,1.5])
+            test_measures[measure] = str(random.random() * float(params['maximum']) * random.choice([1,1.5]))
         else:
             test_measures[measure] = random.choice(params['options'])
-
     return test_measures
 
 def initializeViews():

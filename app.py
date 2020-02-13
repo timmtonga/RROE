@@ -254,7 +254,7 @@ def create_user():
         provider = {'type': "user","name" : request.form["name"] ,  "_id": request.form['username'],
                     'password_hash': generate_password_hash(request.form["password"]),
         "role": request.form['role'],   'designation': request.form['designation']}
-        if request.form['designation'] in ['Consultant', 'Intern','Registrar','Medical Student', 'Student Clinical Officer', "Clinical Officer"] :
+        if request.form['designation'] in ['Consultant', 'Intern','Registrar','Medical Student', 'Student Clinical Officer', "Clinical Officer","Visiting Doctor"] :
             provider["team"] = request.form["team"]
         else:
             provider["ward"] = request.form["wardAllocation"]
