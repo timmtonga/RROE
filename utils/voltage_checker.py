@@ -1,13 +1,14 @@
 from __future__ import division
+import time
 import spidev
 
 
 class CheckVoltage:
-    def bitstring(n):
+    def bitstring(self,n):
         s = bin(n)[2:]
         return '0'*(8-len(s)) + s
 
-    def read(self,adc_channel=0, spi_channel=0):
+    def read_it(self,adc_channel=0, spi_channel=0):
         conn =spidev.SpiDev(0, spi_channel)
         conn.max_speed_hz = 1200000 #1.2MHz
         cmd = 128
