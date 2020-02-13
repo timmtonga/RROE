@@ -19,11 +19,25 @@ class CheckVoltage:
         reply = reply_bitstring[5:15]
         return int(reply, 2) / 2**10
 
+    def current_voltage(self):
+        m = 0
+        for x in range(10):
+            x = self.read_it()
+            time.sleep(0.1)
+            m = m+ x
+
+        avg = m/10
+        average_voltage = avg * 16.5
+        return average_voltage
+
+
+
     def getVoltage(self):
-        raw_voltage =self.read()
-        voltage_percent = ((raw_voltage*25) - 10) *50
+        raw_voltage =self.current_voltage()
+        #voltage_percent = ((raw_voltage*25) - 10) *50
         if voltage_percent > 100:
             voltage_percent = 100
+        print("Current voltage %s" % raw_voltage)
         return voltage_percent
 
 
