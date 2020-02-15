@@ -38,10 +38,3 @@ class CheckVoltage:
             voltage_percent = 100
         print("Current voltage %s" % raw_voltage)
         return voltage_percent
-
-
-
-# Installing spidev:
-#  cd py-spidev-master/
-#  sudo python setup.py install
-

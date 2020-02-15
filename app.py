@@ -429,14 +429,15 @@ def prescribers():
     providers.sort()
     return providers
 
+def locations_options():
+    return [["MSS", "Medical Short Stay"], ["4A", "Medical Female Ward"], ["4B", "Medical Male Ward"], ["MHDU", "Medical HDU"]]
+
 def specimen_type_map(type):
     tests = db.find({"selector": {"type": "test_type"},"fields": ["specimen_types"]})
-    options = []
     for i in tests:
         for t in i["specimen_types"]:
             if type == t:
                 return i["specimen_types"][t]
-
     return "Unknown"
 
 ###### APPLICATION CALLBACKS ###########
@@ -477,9 +478,6 @@ def check_authentication():
 @app.context_processor
 def inject_now():
     return {'now': datetime.now().strftime("%H:%M%p")}
-
-def locations_options():
-    return [["MSS", "Medical Short Stay"], ["4A", "Medical Female Ward"], ["4B", "Medical Male Ward"], ["MHDU", "Medical HDU"]]
 
 @app.context_processor
 def inject_user():
