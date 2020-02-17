@@ -5,6 +5,7 @@
 import os
 import re
 import json
+import random
 from utils import misc
 from couchdb import Server
 from datetime import datetime
@@ -152,7 +153,8 @@ def patient(patient_id):
 
     #get tests for pateint
     mango = {"selector": {"type": {"$in": ["test","test panel"]},"patient_id": patient_id},
-             "fields": ["_id","type","status","Priority","ordered_by","date_ordered","rejection_reason","test_type","sample_type","measures","specimen_types","clinical_history","panel_type","tests"], "limit": 50}
+             "fields": ["_id","type","status","Priority","ordered_by","date_ordered","rejection_reason","collection_id",
+                        "test_type","sample_type","measures","specimen_types","clinical_history","panel_type","tests"], "limit": 500}
 
     for test in  db.find(mango):
         test_record = {"date_ordered":  datetime.fromtimestamp(float(test["date_ordered"])).strftime('%d %b %Y %H:%S'), "id": test.get("_id")}
@@ -160,6 +162,7 @@ def patient(patient_id):
         test_record["status"] = test.get("status")
         test_record["priority"] = test.get("Priority")
         test_record["date"]= float(test["date_ordered"])
+        test_record["collection_id"] = test.get("collection_id", "")
         test_record["history"] = test.get("clinical_history")
         test_record["ordered_by"] = test.get("ordered_by")
         test_record["rejection_reason"] = test.get("rejection_reason")
@@ -207,8 +210,9 @@ def patient(patient_id):
             records.append(test_record)
 
     records = sorted(records, key=lambda e: e["date"], reverse= True)
+    permitted_length = 86 - 46 - len(patient.get('name')) - len(patient.get('_id'))
     return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=pending_sample, containers =  misc.container_options(),
-                           collect_samples=draw_sample, doctors = prescribers(),requires_keyboard=True)
+                           collect_samples=draw_sample, doctors = prescribers(),ch_length= permitted_length,requires_keyboard=True)
 
 ###### USER ROUTES ###########
 
@@ -334,11 +338,14 @@ def collect_specimens(test_id):
     patient = db.get(tests[0]["patient_id"])
     dr = tests[0]["ordered_by"]
     wards = {"4A":"19","4B":"20","MSS":"44","MHDU":"56"}
+    collected_at = datetime.now().strftime('%s')
+    collection_id = ''.join(random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ') for i in range(2)) + collected_at
 
     for test in tests:
         test["status"] = "Specimen Collected"
         test["collected_by"] = session["user"]['username']
-        test["collected_at"] = datetime.now().strftime('%s')
+        test["collected_at"] = collected_at
+        test["collection_id"] = collection_id
         if test["type"] == "test":
             test_ids.append(test["test_type"])
             test_names.append(db.find({"selector": {"type":"test_type","test_type_id": test["test_type"]}, "fields": ["short_name"]})[0]["short_name"])
@@ -365,7 +372,58 @@ def collect_specimens(test_id):
                          datetime.now().strftime("%s"), ("^").join(test_ids), tests[0]["Priority"][0]]
         db.save(test)
 
+    labelFile = open("/tmp/test_order.lbl", "w+")
+    labelFile.write("N\nq406\nQ203,027\nZT\n")
+    labelFile.write('A5,10,0,1,1,2,N,"%s"\n' % patient["name"])
+    labelFile.write('A5,40,0,1,1,2,N,"%s (%s)"\n' % (datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), patient["gender"][0]) )
+    labelFile.write('b5,70,P,386,80,"%s$"\n' % ("~").join(test_string))
+    labelFile.write('A20,170,0,1,1,2,N,"%s"\n' % (",").join(test_names))
+    labelFile.write('A260,170,0,1,1,2,N,"%s" \n' % datetime.now().strftime("%d-%b %H:%M"))
+    labelFile.write("P1\n")
+    labelFile.close()
+    os.system('sudo sh ~/print.sh /tmp/test_order.lbl')
 
+    return redirect(url_for('patient', patient_id=patient.get("_id")))
+
+#update lab test orders to specimen collected
+@app.route("/test/<test_id>/reprint")
+def reprint_barcode(test_id):
+    tests = db.find({"selector" : {"type":{"$in": ["test","test panel"]}, "collection_id":  test_id}})
+    if tests == None or tests == []:
+        tests = db.find({"selector" : {"type":{"$in": ["test","test panel"]}, "_id":  test_id }})
+    test_ids = []
+    test_names = []
+    if tests == None or tests == []:
+        return redirect( url_for("index", error = "Tests not found"))
+    patient = db.get(tests[0]["patient_id"])
+    dr = tests[0]["ordered_by"]
+    wards = {"4A":"19","4B":"20","MSS":"44","MHDU":"56"}
+
+    for test in tests:
+        if test["type"] == "test":
+            test_ids.append(test["test_type"])
+            test_names.append(db.find({"selector": {"type":"test_type","test_type_id": test["test_type"]}, "fields": ["short_name"]})[0]["short_name"])
+            test_string = [patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0],
+                     datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%s"),
+                     wards[tests[0]["ward"]] ,dr,tests[0]["clinical_history"],tests[0]["sample_type"],
+                     datetime.now().strftime("%s"), ("^").join(test_ids), tests[0]["Priority"][0] ]
+        else:
+            panel = db.get(test["panel_type"])
+            test_names.append(panel.get("short_name"))
+            if panel.get("orderable"):
+                test_ids.append(panel["panel_id"])
+                test_string = [patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0],
+                     datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%s"),
+                     wards[tests[0]["ward"]] ,dr,tests[0]["clinical_history"],tests[0]["sample_type"],
+                     datetime.now().strftime("%s"), ("^").join(test_ids), tests[0]["Priority"][0],"P" ]
+            else:
+                for test_type_id in db.find({"selector": {"type":"test_type","_id": {"$in": panel["tests"]}}, "fields": ["test_type_id"]}):
+                    test_ids.append(test_type_id.get("test_type_id"))
+
+                test_string = [patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0],
+                         datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%s"),
+                         wards[tests[0]["ward"]] ,dr,tests[0]["clinical_history"],tests[0]["sample_type"],
+                         datetime.now().strftime("%s"), ("^").join(test_ids), tests[0]["Priority"][0]]
 
     labelFile = open("/tmp/test_order.lbl", "w+")
     labelFile.write("N\nq406\nQ203,027\nZT\n")
@@ -379,6 +437,7 @@ def collect_specimens(test_id):
     os.system('sudo sh ~/print.sh /tmp/test_order.lbl')
 
     return redirect(url_for('patient', patient_id=patient.get("_id")))
+
 
 @app.route("/test/<test_id>/review_ajax")
 @app.route("/test/<test_id>/review")

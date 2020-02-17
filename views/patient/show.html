@@ -91,7 +91,12 @@
                      {% elif row['status'] == "Specimen Collected" %}
                         <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
                         <b>Clinical History: </b>{{row.get("history", "")}}<br><br>
-                        <b>Order Status:</b>{{row.get("status")}}<br>
+                        <b>Order Status:</b>{{row.get("status")}}<br><br>
+                        {% if row.get("collection_id") == "" %}
+                            <button onmousedown="window.location='/test/{{row.get('id')}}/reprint'">Re-print Barcode</button>
+                        {% else %}
+                            <button onmousedown="window.location='/test/{{row.get('collection_id')}}/reprint'">Re-print Barcode</button>
+                        {% endif %}
                      {% elif row['status'] == "Specimen Received" %}
                         <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
                         <b>Clinical History: </b>{{row.get("history", "")}}<br><br>
@@ -275,7 +280,7 @@
                 <div class="tab">
                     <h2>Enter Clinical Information/History</h2>
                     <input type="text" placeholder="Clinical history" name="clinical_history" id="default" class="input" value="{{
-                      request.form.clinical_history }}" required style="width: 90%; font-size : 18pt;border-radius:5px;height: 7vh;">
+                      request.form.clinical_history }}" maxlength="{{ch_length}}" required style="width: 90%; font-size : 18pt;border-radius:5px;height: 7vh;">
                     <div class="simple-keyboard" style="width: 99%; border: 1px solid silver;margin-top: 2vh;"></div>
                 </div>
                 <div class="tab">
