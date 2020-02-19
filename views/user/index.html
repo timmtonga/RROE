@@ -37,7 +37,9 @@
                         <div class="Cell">{{user.get("role")}}</div>
                         <div class="Cell">{{user.get("designation")}}</div>
                         <div class="Cell">{{user.get("ward", user.get("team"))}}</div>
-                        <div class="Cell">&nbsp;</div>
+                        <div class="Cell">
+                            <button onmousedown="window.location='/user/{{user.get('_id')}}/reset_password'">Reset Password</button>
+                        </div>
                     </div>
                  {% endfor %}
         </div>

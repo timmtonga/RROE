@@ -65,7 +65,7 @@ function initializeListener()
     document.getElementById("barcode").focus();
     timerHand = setTimeout(function () {
         checkBarcode();
-    }, 3000);
+    }, 1500);
 }
 
 //Wizard form javascript

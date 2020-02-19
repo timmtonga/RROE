@@ -129,7 +129,6 @@
                                                 <span style='color: red; font-size: 2em;font-weight: bold;'>&#8595;</span><span style='color: red;'>{{measure[1]["value"]}}</span>
                                         {% else %}
                                             {{measure[1]["value"]}}
-
                                         {% endif %}
                                     </td>
                                     <td style="border: 1px solid black;text-align: center;">{{measure[1]["range"]}} </td>
@@ -138,6 +137,9 @@
                         </table>
                         <br/>
                     {% endfor %}
+                    {% if row.get("status") == "Specimen Collected"%}
+                        <button onmousedown="window.location='/test/{{row.get('id')}}/reprint'">Re-print Barcode</button>
+                    {% endif %}
                  {% endif %}
              </div>
         </div>

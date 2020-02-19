@@ -126,7 +126,7 @@ def barcode():
             elif "??" != barcode_segments[2].split("/")[0] and "???" == barcode_segments[2].split("/")[1]:
                 dob_format = "%d/???/%Y"
 
-            doc = {'_id': id, 'name': barcode_segments[0], 'type': 'patient',
+            doc = {'_id': id, 'name': barcode_segments[0].replace(id,""), 'type': 'patient',
                    'dob':  datetime.strptime(barcode_segments[2], dob_format).strftime("%d-%m-%Y"),
                    'gender': barcode_segments[3]}
             db.save(doc)
@@ -192,13 +192,16 @@ def patient(patient_id):
                 test_record["panel_test_details"][panel_test] = {"test_name": details_of_test[panel_test]["_id"]}
                 test_record["panel_test_details"][panel_test]['measures'] = get_test_measures(test.get("tests")[panel_test],details_of_test[panel_test])
             if test["status"] == "Ordered":
-                panel_details = {"test_id":test["_id"],
-                                                "specimen_type": specimen_type_map(test['sample_type']),
+                panel_details = {"test_id":test["_id"],"specimen_type": specimen_type_map(test['sample_type']),
                                                 "test_name": test["panel_type"]
                                                 }
                 if panel_details["specimen_type"] == "Urine":
                     panel_details["container"] = 'Conical container'
                     panel_details["volume"] = "15 "
+                    panel_details["units"] = "ml"
+                elif panel_details["specimen_type"] == "Blood" and panel_details["test_name"] == "MC&S":
+                    panel_details["container"] = 'Baktech'
+                    panel_details["volume"] = "5 "
                     panel_details["units"] = "ml"
                 else:
                     panel_details["container"] = 'Red top'
@@ -211,7 +214,7 @@ def patient(patient_id):
 
     records = sorted(records, key=lambda e: e["date"], reverse= True)
     permitted_length = 86 - 46 - len(patient.get('name')) - len(patient.get('_id'))
-    return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders=pending_sample, containers =  misc.container_options(),
+    return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders= pending_sample, containers =  misc.container_options(),
                            collect_samples=draw_sample, doctors = prescribers(),ch_length= permitted_length,requires_keyboard=True)
 
 ###### USER ROUTES ###########
@@ -283,6 +286,16 @@ def change_password(user_id=None):
             return redirect(url_for("index"))
     else:
         return render_template("user/update_password.html", requires_keyboard=True,username = user_id)
+
+@app.route("/user/<user_id>/reset_password")
+def reset_password(user_id=None):
+    user = db.get(user_id)
+    if user == None:
+        return redirect(url_for("index", error = "User not found"))
+    else:
+        user["password_hash"] =  generate_password_hash(user.get("name").split(" ")[1].lower())
+        db.save(user)
+        return redirect(url_for("index"))
 
 @app.route("/select_location", methods=["GET", "POST"])
 def select_location():
@@ -478,7 +491,7 @@ def get_test_measures(test, test_details):
 
 def prescribers():
     providers = []
-    users = db.find({"selector": {"type": "user", "role": "Doctor"}, "fields": ["_id", "name"]})
+    users = db.find({"selector": {"type": "user", "role": "Doctor"}, "fields": ["_id", "name"], "limit": 100})
     for user in users:
         if len(user['name'].split(" ")) > 1:
             name = user['name'].split(" ")[0][0] + ". " + user['name'].split(" ")[1]
