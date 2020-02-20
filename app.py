@@ -250,6 +250,7 @@ def login():
 def logout():
     session["user"] = None
     session["logged_in"] = None
+    session["location"] = None
     return render_template('user/login.html', requires_keyboard=True)
 
 #route to main user management page
@@ -567,15 +568,13 @@ def check_authentication():
             ledControl().turn_led_off()
 
     if request.path != "/login" or request.path == "/logout":
-        try:
-            session["logged_in"]
-            if request.path != "/select_location":
-                try:
-                    session["location"]
-                except:
-                    return  redirect(url_for('select_location'))
-        except:
+        if session.get("logged_in") == None or  not session["logged_in"] :
             return redirect(url_for('login'))
+        else:
+            if session.get("location") == None and request.path != "/select_location":
+                return  redirect(url_for('select_location'))
+
+
 
 ###### APPLICATION CONTEXT PROCESSORS ###########
 # Used to get data in views
