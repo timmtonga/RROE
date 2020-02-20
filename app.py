@@ -239,7 +239,8 @@ def login():
                                    'team': user.get('team', 'Unassigned'),
                                    'rank': user.get('designation', 'Unassigned')}
                 return redirect(url_for('select_location'))
-
+    else:
+        pass
     session["user"] = None
     return render_template('user/login.html', error=error, requires_keyboard=True)
 
@@ -565,14 +566,11 @@ def check_authentication():
             ledControl().turn_led_off()
 
     if request.path != "/login" or request.path == "/logout":
-        try:
-            if session.get("user") == None:
-                return redirect(url_for('login'))
-            else:
-                if session.get("location") == None and request.path != "/select_location":
-                    return  redirect(url_for('select_location'))
-        except:
-            return redirect(url_for('login'))
+        if session.get("user") == None:
+            redirect(url_for('login'))
+        else:
+            if session.get("location") == None and request.path != "/select_location":
+                return  redirect(url_for('select_location'))
 
 
 ###### APPLICATION CONTEXT PROCESSORS ###########

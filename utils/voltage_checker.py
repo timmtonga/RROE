@@ -36,5 +36,4 @@ class CheckVoltage:
         voltage_percent = (raw_voltage - min_voltage) *40
         if voltage_percent > 100:
             voltage_percent = 100
-        print("Current voltage %s" % raw_voltage)
         return voltage_percent
