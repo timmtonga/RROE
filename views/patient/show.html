@@ -1,12 +1,18 @@
 {% extends 'layout/application.html' %}
-{% block body %}
+{% block content %}
     <script type="text/javascript">
-        navButtons = [["Finish", "window.location='/'", "Green", "Right"],["New Test", "showOrderDialog()", "Defaults", "Right"]]
+        navButtons = [
+            "<button class=\"nvButton green\" onmousedown=\"window.location='/'\" style=\"float: right;\">Finish</button>",
+            "<button class=\"nvButton\" onmousedown='showOrderDialog()' style=\"float: right;\">New Test</button>"
+        ]
+
         {% if  pending_orders != [] %}
-            navButtons.push(["Draw Samples", "showDrawDialog()", "Defaults", "Right"])
+            navButtons.push("<button class=\"nvButton\" onmousedown='showDrawDialog()' style=\"float: right;\">Draw Samples</button>")
         {% endif %}
      </script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/keyboard.css') }}">
+    <script src="{{url_for('static', filename='javascript/keyboard.js')}}" defer></script>
+    <script src="{{url_for('static', filename='javascript/keyboard_init.js')}}" defer></script>
     <div class="header">
         <table style="width:100%;">
             <tr>
@@ -197,9 +203,9 @@
     </div>
     <div id="orderModal" class="modalDialog">
         <div>
-            <div style="height: 17%;text-align: center; border: 1px solid silver; padding:5px; border-radius: 5px 5px 0px 0px">
+            <div style="height: 17%; border: 1px solid silver; padding:5px; border-radius: 5px 5px 0px 0px">
                 <span  style="font-weight:bold;font-size: 20pt;">Laboratory Test Order</span><hr/>
-                <table style="width:80%;">
+                <table style="width:80%;text-align: ">
                     <tr>
                         <td >Patient</td><td>:</td>
                         <td>{{ pt_details.get('name') }}</td>
@@ -406,5 +412,4 @@
             xhr.send();
         }
     </script>
-
 {% endblock %}

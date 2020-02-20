@@ -44,9 +44,16 @@
             <div class="nvBar footer" id= "navFooter" style="text-align: left;">&nbsp;</div>
             {% endblock%}
         </div>
+        <div id="openModal" class="modalDialog">
+            <div id="modalContent">
+            </div>
+        </div>
     </body>
     <script TYPE="application/javascript">
         addNavButtons()
+        {% if collect_samples  %}
+            showDrawDialog()
+        {% endif %}
         idleTimer()
     </script>
 </html>
