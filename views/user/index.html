@@ -1,10 +1,14 @@
 {% extends 'layout/application.html' %}
-{% block body %}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/keyboard.css') }}">
+{% block content %}
     <script type="text/javascript">
-        navButtons = [["Finish", "window.location='/'", "Green", "Right"],
-        ["New User", "showNewUserDialog()", "Defaults", "Right"]]
-     </script>
+        navButtons = [
+            "<button class=\"nvButton Green\" onmousedown=\"window.location='/'\" style=\"float: right;\">Finish</button>",
+            "<button class=\"nvButton\" onmousedown='showNewUserDialog()' style=\"float: right;\">New User</button>"]
+    </script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/keyboard.css') }}">
+    <script src="{{url_for('static', filename='javascript/keyboard.js')}}" defer></script>
+    <script src="{{url_for('static', filename='javascript/keyboard_init.js')}}" defer></script>
+
     <div style="width: 95%; margin-left:auto;margin-right:auto;height:90%; overflow: auto;">
         <div class="Table">
             <div class="Title">
@@ -47,7 +51,7 @@
 
     <div id="userModal" class="modalDialog">
         <div>
-            <div style="height: 87%; overflow-y: auto;overflow-x: hidden;">
+            <div style="height: 89%; overflow-y: auto;overflow-x: hidden;">
                 <form id="regForm" method="post" action="/user/create">
                     <div class="tab">
                         <h2>User Details</h2>
@@ -255,6 +259,4 @@
             }
         }
      </script>
-
-
 {% endblock %}
