@@ -4,3 +4,4 @@
 *.pyc
 *~
 uwsgi.ini
+rroe.ini

@@ -164,7 +164,7 @@ function idleTimer(){
                 if(idleTimeout) clearTimeout(idleTimeout);
 
                 // Set a new idle timeout to load the redirectUrl after idleDurationSecs
-                idleTimeout = setTimeout(() => location.href = redirectUrl, idleDurationSecs * 1000);
+                idleTimeout = setTimeout(() => window.location = redirectUrl, idleDurationSecs * 1000);
             };
 
             // Init on page load

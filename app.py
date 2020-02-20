@@ -215,7 +215,8 @@ def patient(patient_id):
     records = sorted(records, key=lambda e: e["date"], reverse= True)
     permitted_length = 86 - 46 - len(patient.get('name')) - len(patient.get('_id'))
     return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders= pending_sample, containers =  misc.container_options(),
-                           collect_samples=draw_sample, doctors = prescribers(),ch_length= permitted_length,requires_keyboard=True)
+                           collect_samples=draw_sample, doctors = prescribers(),ch_length= permitted_length,requires_keyboard=True,
+                           test_options= inject_tests(), specimen_types=inject_specimen_types(),panel_options = inject_panels())
 
 ###### USER ROUTES ###########
 
@@ -231,6 +232,7 @@ def login():
             if not check_password_hash(user['password_hash'], request.form['password']):
                 error = "Wrong password. Please try again."
             else:
+                session.permanent = True
                 session["logged_in"] = True
                 session["user"] = {'username': request.form['username'],
                                    'role': user['role'],
@@ -512,6 +514,36 @@ def specimen_type_map(type):
                 return i["specimen_types"][t]
     return "Unknown"
 
+def inject_tests():
+    options = {}
+    tests = db.find({ "selector": {"type": "test_type"},"fields": ["_id","test_type_id","specimen_types"],"limit":500})
+    for test in tests:
+        options[test["test_type_id"]] =  {"name": test["_id"], "specimen_types" :test["specimen_types"].keys()}
+
+    options = sorted(options.items(), key=lambda e: e[1]["name"])
+    return options
+
+def inject_specimen_types():
+    tests = db.find({"selector": {"type": "test_type"},"fields": ["specimen_types"]})
+    options = []
+
+    for i in tests:
+        for t in i["specimen_types"]:
+            if [i["specimen_types"][t],t ] not in options:
+                options.append([i["specimen_types"][t],t ])
+
+    options.sort()
+    return  [options[i * 2:(i + 1) * 2] for i in range((len(options) + 2 - 1) // 2 )]
+
+def inject_panels():
+    options = {}
+    panels = db.find({ "selector": {"type": "panels"},"fields": ["_id","specimen_types"],"limit":500})
+    for panel in panels:
+        options[panel["_id"]] =  {"name": panel["_id"], "specimen_types" : panel["specimen_types"].keys()}
+    options = sorted(options.items(), key=lambda e: e[1]["name"])
+    return options
+
+
 ###### APPLICATION CALLBACKS ###########
 def initialize_connection():
     #Connect to a couchdb instance
@@ -556,19 +588,6 @@ def inject_user():
     return {'current_user': session.get("user")}
 
 @app.context_processor
-def inject_specimen_types():
-    tests = db.find({"selector": {"type": "test_type"},"fields": ["specimen_types"]})
-    options = []
-
-    for i in tests:
-        for t in i["specimen_types"]:
-            if [i["specimen_types"][t],t ] not in options:
-                options.append([i["specimen_types"][t],t ])
-
-    options.sort()
-    return {'specimen_types': [options[i * 2:(i + 1) * 2] for i in range((len(options) + 2 - 1) // 2 )] }
-
-@app.context_processor
 def inject_power():
     if settings["using_rpi"] == "True":
         voltage = CheckVoltage().getVoltage()
@@ -584,25 +603,6 @@ def inject_power():
         rating =  "high"
         onCharge = True
     return {"current_power": voltage, "power_class": rating, "charging": onCharge}
-
-@app.context_processor
-def inject_tests():
-    options = {}
-    tests = db.find({ "selector": {"type": "test_type"},"fields": ["_id","test_type_id","specimen_types"],"limit":500})
-    for test in tests:
-        options[test["test_type_id"]] =  {"name": test["_id"], "specimen_types" :test["specimen_types"].keys()}
-
-    options = sorted(options.items(), key=lambda e: e[1]["name"])
-    return {"test_options":  options}
-
-@app.context_processor
-def inject_panels():
-    options = {}
-    panels = db.find({ "selector": {"type": "panels"},"fields": ["_id","specimen_types"],"limit":500})
-    for panel in panels:
-        options[panel["_id"]] =  {"name": panel["_id"], "specimen_types" : panel["specimen_types"].keys()}
-    options = sorted(options.items(), key=lambda e: e[1]["name"])
-    return {"panel_options":  options}
 
 #Error handling pages
 @app.errorhandler(404)
