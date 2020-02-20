@@ -565,12 +565,14 @@ def check_authentication():
             ledControl().turn_led_off()
 
     if request.path != "/login" or request.path == "/logout":
-        if session.get("user") == None or session["user"]["role"] == None:
+        try:
+            if session.get("user") == None:
+                return redirect(url_for('login'))
+            else:
+                if session.get("location") == None and request.path != "/select_location":
+                    return  redirect(url_for('select_location'))
+        except:
             return redirect(url_for('login'))
-        else:
-            if session.get("location") == None and request.path != "/select_location":
-                return  redirect(url_for('select_location'))
-
 
 
 ###### APPLICATION CONTEXT PROCESSORS ###########
