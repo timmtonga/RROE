@@ -567,7 +567,7 @@ def check_authentication():
 
     if request.path != "/login" or request.path == "/logout":
         if session.get("user") == None:
-            redirect(url_for('login'))
+            redirect('/login')
         else:
             if session.get("location") == None and request.path != "/select_location":
                 return  redirect(url_for('select_location'))
