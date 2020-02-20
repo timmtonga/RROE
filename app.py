@@ -233,7 +233,6 @@ def login():
                 error = "Wrong password. Please try again."
             else:
                 session.permanent = True
-                session["logged_in"] = True
                 session["user"] = {'username': request.form['username'],
                                    'role': user['role'],
                                    'current_user': user.get('name','Unknown'),
@@ -242,14 +241,12 @@ def login():
                 return redirect(url_for('select_location'))
 
     session["user"] = None
-    session["logged_in"] = None
     return render_template('user/login.html', error=error, requires_keyboard=True)
 
 #Route to handle logging out
 @app.route("/logout")
 def logout():
     session["user"] = None
-    session["logged_in"] = None
     session["location"] = None
     return render_template('user/login.html', requires_keyboard=True)
 
@@ -568,7 +565,7 @@ def check_authentication():
             ledControl().turn_led_off()
 
     if request.path != "/login" or request.path == "/logout":
-        if session.get("logged_in") == None or  not session["logged_in"] :
+        if session.get("user") == None or session["user"]["role"] == None:
             return redirect(url_for('login'))
         else:
             if session.get("location") == None and request.path != "/select_location":
