@@ -1,11 +1,14 @@
+<!doctype html>
 <html>
     <head>
-        <title>RROE</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/application.css') }}">
-        <script src="{{url_for('static', filename='javascript/application.js')}}"></script>
+        {% block head %}
+            <title>RROE - {% block title %}{% endblock %}</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/application.css') }}">
+            <script src="{{url_for('static', filename='javascript/application.js')}}"></script>
+        {% endblock %}
     </head>
-    <body >
+    <body>
         <div style="height: 5vh; background-color: #011A27;color:#fef;font-weight:bold;font-size:13pt;top:0px;">
             <div style="display:table; width: 100%;">
                 <div style="display: table-row; ">
@@ -16,7 +19,7 @@
                         <a href="/login" style="text-decoration: none;font-weight:bold; color: #fff">Results Review and Order Entry System</a>
                     </div>
                     <div style="display: table-cell; vertical-align:middle;padding-right: 3px;">
-                            {{now}}
+                        {{now}}
                     </div>
                     <div style="display: table-cell; vertical-align:middle;padding-right: 3px;">
                         <div style="border: 2px solid grey; height: 3vh;width:6vw;">
@@ -24,38 +27,26 @@
                                 {% if charging %}
                                 <span style="padding-left:45%;font-weight:bold;">&#9889;</span>
                                 {% else %}
-                                    &nbsp;
+                                &nbsp;
                                 {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
-             </div>
+            </div>
         </div>
-        <div class="mainDiv">
-            {% block body %}
+        <div id="content" class="mainDiv">
+            {% block content %}
             {% endblock %}
         </div>
-        <div class="nvBar footer" id= "navFooter" style="text-align: left;">&nbsp;</div>
-        <div id="openModal" class="modalDialog">
-                    <div id="modalContent">
-                    </div>
+        <div id="footer">
+            {% block footer %}
+            <div class="nvBar footer" id= "navFooter" style="text-align: left;">&nbsp;</div>
+            {% endblock%}
         </div>
     </body>
-
-    {% if requires_keyboard  %}
-        <script src="{{url_for('static', filename='javascript/keyboard.js')}}" ></script>
-        <script src="{{url_for('static', filename='javascript/keyboard_init.js')}}" ></script>
-    {% endif %}
-    <script type="text/javascript">
-       document.onreadystatechange = function () {
-          if (document.readyState == "interactive") {
-                       addNavButtons()
-          }
-        }
-       {% if collect_samples  %}
-            showDrawDialog()
-        {% endif %}
+    <script TYPE="application/javascript">
+        addNavButtons()
         idleTimer()
-     </script>
+    </script>
 </html>

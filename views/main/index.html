@@ -1,6 +1,6 @@
 {% extends 'layout/application.html' %}
 
-{% block body %}
+{% block content %}
 
 <div class="header">
     <table style="width: 100%;">
@@ -26,9 +26,8 @@
 {% if session.get('user').get('role') == 'Administrator' %}
     {% include 'main/_admin_view.html' %}
     <script type="text/javascript">
-        navButtons = [["Logout", "window.location='/login'", "Red", "Left"]]
-                document.getElementById("defaultOpen").click();
-
+        navButtons = ["<button class=\"nvButton red\" onmousedown=\"window.location='/logout'\" style=\"float: left;\">Logout</button>"]
+        document.getElementById("defaultOpen").click();
     </script>
 {% else %}
     <div style="display: table-row;margin-top: 4vh !important;">
@@ -49,9 +48,9 @@
 
     </div>
     <script type="text/javascript">
-        navButtons = [["Logout", "window.location='/logout'", "Red", "Left"],
-            ["Change Location", "window.location='/select_location'", "lightGreen", "Right"]]
-            barcode_length = 0;
+        navButtons = ["<button class=\"nvButton red\" onmousedown=\"window.location='/logout'\" style=\"float: left;\">Logout</button>",
+            "<button class=\"nvButton lightGreen\" onmousedown=\"window.location='/select_location'\" style=\"float: right;\">Change Location</button>"]
+        barcode_length = 0;
         document.getElementById("defaultOpen").click();
         setTimeout(initializeListener(), 3000);
 
@@ -64,8 +63,6 @@
             }
         }
     </script>
-
-
 {% endif %}
 
 

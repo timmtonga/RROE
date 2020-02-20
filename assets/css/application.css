@@ -38,43 +38,43 @@ body {
     width: 6vw;
 }
 
-    .nvButton {
-        height:8vh;
-        margin:1vh 0.5vw;
-        min-width:7vw;
-        font-size:1.5em;
-        font-weight:bold;
-        font-family: Arial;
-        text-align: Center;
-    }
-    .modalNVButton {
-        height:6vh;
-        margin:0.5vh 0.5vw;
-        min-width:7vw;
-        font-size:15pt;
-        font-weight:bold;
-        font-family: Arial;
-        text-align: Center;
-    }
+.nvButton {
+    height:8vh;
+    margin:1vh 0.5vw;
+    min-width:7vw;
+    font-size:1.5em;
+    font-weight:bold;
+    font-family: Arial;
+    text-align: Center;
+}
+.modalNVButton {
+    height:6vh;
+    margin:0.5vh 0.5vw;
+    min-width:7vw;
+    font-size:15pt;
+    font-weight:bold;
+    font-family: Arial;
+    text-align: Center;
+}
 
-    .blue {
-        background-color:  #0F4C81;
-        color: #FFFFFF;
-    }
+.blue {
+    background-color:  #0F4C81;
+    color: #FFFFFF;
+}
 
-    .green {
-        background-color: #278040;
-        color: #FFFFFF;
-    }
-    .lightGreen {
-        background-color: #DE7A22;
-        color: #FFFFFF !important;
-    }
+.green {
+    background-color: #278040;
+    color: #FFFFFF;
+}
+.lightGreen {
+    background-color: #DE7A22;
+    color: #FFFFFF !important;
+}
 
-    .red {
-        background-color: #990011;
-        color: #FFFFFF;
-    }
+.red {
+    background-color: #990011;
+    color: #FFFFFF;
+}
 
     .nvBar {
           width: 100%;

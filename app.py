@@ -558,20 +558,25 @@ def initialize_connection():
 
 @app.before_request
 def check_authentication():
-    initialize_connection()
-    if settings["using_rpi"] == "True":
-        if request.path == "/":
-            ledControl().turn_led_on()
-        else:
-            ledControl().turn_led_off()
+    print("checking authentication")
+    if not re.search("asset", request.path):
+        initialize_connection()
+        print("Not an asset")
+        if settings["using_rpi"] == "True":
+            if request.path == "/":
+                ledControl().turn_led_on()
+            else:
+                ledControl().turn_led_off()
 
-    if request.path != "/login" or request.path == "/logout":
-        if session.get("user") == None:
-            redirect('/login')
-        else:
-            if session.get("location") == None and request.path != "/select_location":
-                return  redirect(url_for('select_location'))
-
+        if request.path != "/login" and request.path != "/logout":
+            print("Not login or logout page")
+            if session.get("user") == None:
+                print("EMpty user")
+                return redirect(url_for('login'))
+            else:
+                if session.get("location") == None and request.path != "/select_location":
+                    return  redirect(url_for('select_location'))
+    print("Logged in")
 
 ###### APPLICATION CONTEXT PROCESSORS ###########
 # Used to get data in views

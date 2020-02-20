@@ -1,34 +1,26 @@
-function showMainTab(evt, tabName) {
-  var i, tabcontent, tablinks;
-  tabcontent = document.getElementsByClassName("maintabcontent");
-  for (i = 0; i < tabcontent.length; i++) {
-    tabcontent[i].style.display = "none";
-  }
-  tablinks = document.getElementsByClassName("maintablinks");
-  for (i = 0; i < tablinks.length; i++) {
-    tablinks[i].className = tablinks[i].className.replace(" active", "");
-  }
-  document.getElementById(tabName).style.display = "block";
-  evt.currentTarget.className += " active";
-}
-
 
 //function to add navigation buttons to footer
 function addNavButtons(){
     if (navButtons == undefined ) return
+    var footer = document.getElementById('navFooter')
     for(let i=0; i < navButtons.length; i++)
     {
-        button = document.createElement("button")
-        button.classList.add("nvButton")
-        button.classList.add(navButtons[i][2])
-        button.style.float = navButtons[i][3]
-        button.innerText = navButtons[i][0]
-        button.onmousedown = function(){
-            eval(navButtons[i][1])
-        }
-
-        document.getElementById('navFooter').appendChild(button)
+        footer.innerHTML +=navButtons[i]
     }
+}
+
+function showMainTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("maintabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("maintablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
 }
 
 //Function to hide modal dialog
@@ -155,23 +147,23 @@ function fixStepIndicator(n) {
 }
 
 function idleTimer(){
-            const idleDurationSecs = 900;    // X number of seconds
-            const redirectUrl = '/logout';  // Redirect idle users to this URL
-            let idleTimeout; // variable to hold the timeout, do not modify
+    const idleDurationSecs = 900;    // X number of seconds
+    const redirectUrl = '/logout';  // Redirect idle users to this URL
+    let idleTimeout; // variable to hold the timeout, do not modify
 
-            const resetIdleTimeout = function() {
-                // Clears the existing timeout
-                if(idleTimeout) clearTimeout(idleTimeout);
+    const resetIdleTimeout = function() {
+        // Clears the existing timeout
+        if(idleTimeout) clearTimeout(idleTimeout);
 
-                // Set a new idle timeout to load the redirectUrl after idleDurationSecs
-                idleTimeout = setTimeout(() => window.location = redirectUrl, idleDurationSecs * 1000);
-            };
+        // Set a new idle timeout to load the redirectUrl after idleDurationSecs
+        idleTimeout = setTimeout(() => window.location = redirectUrl, idleDurationSecs * 1000);
+    };
 
-            // Init on page load
-            resetIdleTimeout();
+    // Init on page load
+    resetIdleTimeout();
 
-            // Reset the idle timeout on any of the events listed below
-            ['click', 'touchstart', 'mousemove','mousedown'].forEach(evt =>
-                document.addEventListener(evt, resetIdleTimeout, false)
-            );
+    // Reset the idle timeout on any of the events listed below
+    ['click', 'touchstart', 'mousemove','mousedown'].forEach(evt =>
+        document.addEventListener(evt, resetIdleTimeout, false)
+    );
 };

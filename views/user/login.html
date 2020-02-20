@@ -1,13 +1,7 @@
 {% extends 'layout/application.html' %}
-
-{% block body %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/keyboard.css') }}">
-    <script type="text/javascript">
-        navButtons = [["Cancel", "window.location='/login'", "Red", "Left"],
-            ["Login", "validateLogin()", "Green", "Right"]]
-    </script>
-
-    <div style="margin-left: auto;margin-right: auto;width: 95%; border: 1px solid silver;padding: 1%;margin-top:5vh;">
+{% block title %}Login{% endblock %}
+{% block content %}
+<div style="margin-left: auto;margin-right: auto;width: 95%; border: 1px solid silver;padding: 1%;margin-top:5vh;">
       <h1>Please login</h1>
       <form action="/login" name="loginForm" method="post">
           <h3>Username</h3>
@@ -25,30 +19,34 @@
     <div class="simple-keyboard" style="margin-left: auto;margin-right: auto;width: 95%; border: 1px solid silver;margin-top: 2vh;">
 
     </div>
-    <script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/keyboard.css') }}">
+    <script src="{{url_for('static', filename='javascript/keyboard.js')}}" defer></script>
+    <script src="{{url_for('static', filename='javascript/keyboard_init.js')}}" defer></script>
+<script>
+    function validateLogin() {
+        var username = document.getElementById("default");
+        var password = document.getElementById("input2");
 
-        function validateLogin() {
-            var username = document.getElementById("default");
-            var password = document.getElementById("input2");
-
-            if(username.value.length <1)
-            {
-                username.className += " invalid";
-                document.getElementById('errorField').innerHTML = "Please enter a username."
-                return
-            }
-
-            if(password.value.trim().length <1)
-            {
-                username.className += " invalid";
-                document.getElementById('errorField').innerHTML = "Please enter a password."
-                password.className += " invalid";
-
-                return
-            }
-
-            document.loginForm.submit()
+        if(username.value.length <1)
+        {
+            username.className += " invalid";
+            document.getElementById('errorField').innerHTML = "Please enter a username."
+            return
         }
 
-    </script>
+        if(password.value.trim().length <1)
+        {
+            username.className += " invalid";
+            document.getElementById('errorField').innerHTML = "Please enter a password."
+            password.className += " invalid";
+
+            return
+        }
+
+        document.loginForm.submit()
+    }
+    navButtons = ["<button class=\"nvButton red\" onmousedown=\"window.location='/login'\" style=\"float: left;\">Cancel</button>",
+        "<button class=\"nvButton green\" onmousedown='validateLogin()' style=\"float: right;\">Login</button>"]
+</script>
+
 {% endblock %}

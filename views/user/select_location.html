@@ -1,9 +1,9 @@
 {% extends 'layout/application.html' %}
-
-{% block body %}
+{% block title %}Location{% endblock %}
+{% block content %}
 <script type="text/javascript">
-    navButtons = [["Logout", "window.location='/login'", "Red", "Left"],
-        ["Finish", "submitSelections()", "Green", "Right"]]
+    navButtons = ["<button class=\"nvButton red\" onmousedown=\"window.location='/logout'\" style=\"float: left;\">Logout</button>",
+        "<button class=\"nvButton green\" onmousedown='submitSelections()' style=\"float: right;\">Finish</button>"]
 
     function submitSelections(){
         if (document.querySelectorAll('input[type="radio"]:checked').length > 0)
