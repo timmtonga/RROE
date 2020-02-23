@@ -6,52 +6,42 @@
             "<button class=\"nvButton\" onmousedown='showNewUserDialog()' style=\"float: right;\">New User</button>"]
     </script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/keyboard.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
+    <script src="{{url_for('static', filename='javascript/paginate.min.js')}}"></script>
     <script src="{{url_for('static', filename='javascript/keyboard.js')}}" defer></script>
     <script src="{{url_for('static', filename='javascript/keyboard_init.js')}}" defer></script>
 
-    <div style="width: 95%; margin-left:auto;margin-right:auto;height:90%; overflow: auto;">
-        <div class="Table">
-            <div class="Title">
-                User Management
-            </div>
-            <div class="Heading" style="width:100%;">
-                <div class="TitleCell">
-                    <p>User</p>
-                </div>
-                <div class="TitleCell">
-                    <p>Name</p>
-                </div>
-                <div class="TitleCell">
-                    <p>Role</p>
-                </div>
-                <div class="TitleCell">
-                    <p>Designation</p>
-                </div>
-                <div class="TitleCell">
-                    <p>Team/Ward</p>
-                </div>
-                <div class="TitleCell">
-                    <p>Action</p>
-                </div>
-            </div>
+    <h1 >User Management</h1>
+    <div style="width: 95%; margin-left:auto;margin-right:auto;height:85%; overflow: auto;text-align:left;">
+        <table class="myTable table hover">
+            <tbody>
+                <tr>
+                    <th>User</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Designation</th>
+                    <th>Team/Ward</th>
+                    <th>Action</th>
+                </tr>
                 {% for user in users %}
-                    <div class="Row">
-                        <div class="Cell">{{user.get("_id")}}</div>
-                        <div class="Cell">{{user.get("name")}}</div>
-                        <div class="Cell">{{user.get("role")}}</div>
-                        <div class="Cell">{{user.get("designation")}}</div>
-                        <div class="Cell">{{user.get("ward", user.get("team"))}}</div>
-                        <div class="Cell">
+                <tr>
+                        <td>{{user.get("_id")}}</td>
+                        <td>{{user.get("name")}}</td>
+                        <td>{{user.get("role")}}</td>
+                        <td>{{user.get("designation")}}</td>
+                        <td>{{user.get("ward", user.get("team"))}}</td>
+                        <td>
                             <button class='displayButton lightGreen' onmousedown="window.location='/user/{{user.get('_id')}}/reset_password'">Reset Password</button>
                             {% if user.get("status") == None %}
                                 <button class="displayButton red" onmousedown="window.location='/user/{{user.get('_id')}}/deactivate'">Deactivate</button>
                             {% else %}
                                 <button class="displayButton green" onmousedown="window.location='/user/{{user.get('_id')}}/activate'">Reactivate</button>
                             {% endif %}
-                        </div>
-                    </div>
-                 {% endfor %}
-        </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
     <div id="userModal" class="modalDialog">
@@ -236,6 +226,13 @@
     </div>
 
     <script type="text/javascript">
+        let options = {
+            numberPerPage:8, //Cantidad de datos por pagina
+            goBar:false, //Barra donde puedes digitar el numero de la pagina al que quiere ir
+            pageCounter:true, //Contador de paginas, en cual estas, de cuantas paginas
+        };
+        paginate.init('.myTable',options);
+
         var currentTab = 0; // Current tab is set to be the first tab (0)
         function showNewUserDialog(){
             window.location='{{request.url.split("?")[0]}}#userModal'
