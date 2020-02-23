@@ -8,6 +8,7 @@
     function submitSelections(){
         if (document.querySelectorAll('input[type="radio"]:checked').length > 0)
         {
+            Spinner.show()
             document.locationSelection.submit();
             return;
         }

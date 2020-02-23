@@ -6,7 +6,7 @@
 
 <div id="myOrders" class="maintabcontent">
   {%  for i in orders %}
-          <div class = "mainButtons" onmousedown="choosePath('{{i.get('patient_id')}}','{{i.get('id')}}', '{{i.get('status')}}')">
+          <div class = "mainButtons" onmousedown="Spinner.show();choosePath('{{i.get('patient_id')}}','{{i.get('id')}}', '{{i.get('status')}}')">
               <span style="font-weight:bold; font-size: 1.25em ;">{{i.get('name')}}</span>
               <div style="display: table-row; ">
                   <div style="display: table-cell; ">Test Ordered</div>
@@ -29,7 +29,7 @@
 
 <div id="teamOrders" class="maintabcontent">
    {%  for i in team_records %}
-          <div class = "mainButtons" onmousedown="choosePath('{{i.get('patient_id')}}','{{i.get('id')}}', '{{i.get('status')}}')">
+          <div class = "mainButtons" onmousedown="Spinner.show();choosePath('{{i.get('patient_id')}}','{{i.get('id')}}', '{{i.get('status')}}')">
               <span style="font-weight:bold; font-size: 1.25em ;">{{i.get('name')}}</span>
               <div style="display: table-row; ">
                   <div style="display: table-cell; ">Test Ordered</div>
@@ -58,18 +58,18 @@
 <div id="preferences" class="maintabcontent">
     <div style="display: table; padding-top: 10px;padding-left: 10px;margin-left: auto;margin-right: auto;">
         <div style="display: table-row">
-            <div style="display: table-cell;width: 15vw;text-align: center;padding:5%;" onmousedown="window.location='/user/{{ session['user']['username']}}/update_password'">
+            <div style="display: table-cell;width: 15vw;text-align: center;padding:5%;" onmousedown="Spinner.show();window.location='/user/{{ session['user']['username']}}/update_password'">
                 <img src="/assets/images/change_password.png">
             </div>
-            <div style="display: table-cell;width: 15vw;text-align: center;padding:5%;" onmousedown="window.location='/'">
+            <div style="display: table-cell;width: 15vw;text-align: center;padding:5%;" onmousedown="Spinner.show();window.location='/'">
                 <img src="/assets/images/score_card.png">
             </div>
         </div>
         <div style="display: table-row">
-            <div style="display: table-cell;text-align: center;font-size: 1.4em;padding:5%;" onmousedown="window.location='/user/{{ session['user']['username']}}/update_password'">
+            <div style="display: table-cell;text-align: center;font-size: 1.4em;padding:5%;" onmousedown="Spinner.show();window.location='/user/{{ session['user']['username']}}/update_password'">
                 Change Password
             </div>
-            <div style="display: table-cell;text-align: center;font-size: 1.4em;padding:5%;" onmousedown="window.location='/'">
+            <div style="display: table-cell;text-align: center;font-size: 1.4em;padding:5%;" onmousedown="Spinner.show();window.location='/'">
                 My Score Card
             </div>
         </div>

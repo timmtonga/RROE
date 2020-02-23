@@ -104,11 +104,11 @@ def barcode():
     if (len(barcode_segments) == 1 ):
         patient = db.get(barcode_segments[0].strip())
         if patient == None:
-            error = "No patient with this record"
-            return redirect(url_for("index", error = error))
+            flash("No patient with this record", 'error')
+            return redirect(url_for("index"))
         elif patient.get("type") != 'patient':
-            error = "No patient with this record"
-            return redirect( url_for("index", error = error))
+            flash("No patient with this record", "error")
+            return redirect( url_for("index"))
         else:
             return redirect(url_for('patient', patient_id=barcode_segments[0].strip()))
     elif (len(barcode_segments) == 5 ):
@@ -118,7 +118,6 @@ def barcode():
 
         if patient == None or patient.get("type") != 'patient':
             dob_format = "%d/%b/%Y"
-
             if "??" == barcode_segments[2].split("/")[0] and "???" == barcode_segments[2].split("/")[1]:
                 dob_format = "??/???/%Y"
             elif "??" == barcode_segments[2].split("/")[0] and "???" != barcode_segments[2].split("/")[1]:
@@ -132,8 +131,8 @@ def barcode():
             db.save(doc)
         return redirect(url_for('patient', patient_id=id))
     else:
-        error = "Wrong format for patient identifier. Please use the National patient Identifier"
-        return redirect( url_for("index", error = error))
+        flash("Wrong format for patient identifier. Please use the National patient Identifier", "error")
+        return redirect( url_for("index"))
 
 ###### PATIENT ROUTES ###########
 @app.route("/patient/<patient_id>", methods=['GET'])
@@ -271,19 +270,21 @@ def create_user():
             provider["team"] = request.form["team"]
         else:
             provider["ward"] = request.form["wardAllocation"]
-
         db.save(provider)
     else:
       current_users = db.find({"selector": { "type": "user"}, "limit": 200})
-      return render_template("user/index.html", requires_keyboard=True, users =current_users, error="Username already exists")
-    return redirect(url_for("users",success =  "New user created"))
+      flash("Username already exists", 'error')
+      return render_template("user/index.html", requires_keyboard=True, users =current_users)
+    flash("New user created","success")
+    return redirect(url_for("users"))
 
 @app.route("/user/<user_id>/update_password", methods=["GET", "POST"])
 def change_password(user_id=None):
     if request.method == "POST":
         user = db.get(user_id)
         if user == None:
-            return redirect(url_for("index", error = "User not found"))
+            flash("User not found", 'error')
+            return redirect(url_for("index"))
         else:
             user["password_hash"] =  generate_password_hash(request.form["password"])
             db.save(user)
@@ -295,7 +296,8 @@ def change_password(user_id=None):
 def reset_password(user_id=None):
     user = db.get(user_id)
     if user == None:
-        return redirect(url_for("index", error = "User not found"))
+        flash("User not found", 'error')
+        return redirect(url_for("index"))
     else:
         user["password_hash"] =  generate_password_hash(user.get("name").split(" ")[1].lower())
         db.save(user)
@@ -305,7 +307,8 @@ def reset_password(user_id=None):
 def deactivate_user(user_id=None):
     user = db.get(user_id)
     if user == None:
-        return redirect(url_for("index", error = "User not found"))
+        flash("User not found", 'error')
+        return redirect(url_for("index"))
     else:
         user["status"] =  "Deactivated"
         db.save(user)
@@ -315,7 +318,8 @@ def deactivate_user(user_id=None):
 def activate_user(user_id=None):
     user = db.get(user_id)
     if user == None:
-        return redirect(url_for("index", error = "User not found"))
+        flash("User not found", 'error')
+        return redirect(url_for("index"))
     else:
         user.pop("status")
         db.save(user)
@@ -326,6 +330,7 @@ def select_location():
     error= None
     if request.method == "POST":
         if request.form['location'] == '' :
+            flash("Invalid location. Please try again.", 'error')
             error = "Invalid location. Please try again."
         else:
             session["location"] = request.form['location']
@@ -361,7 +366,7 @@ def create_lab_order():
              new_test['type'] =  'test'
              new_test['test_type'] = test
         db.save(new_test)
-
+        flash("New test ordered.", 'success')
     return redirect(url_for('patient', patient_id=request.form['patient_id'], sample_draw=(request.form["sampleCollection"] == "Collect Now")))
 
 #update lab test orders to specimen collected
@@ -419,7 +424,7 @@ def collect_specimens(test_id):
     labelFile.write("P1\n")
     labelFile.close()
     os.system('sudo sh ~/print.sh /tmp/test_order.lbl')
-
+    flash("Specimen collected.", 'success')
     return redirect(url_for('patient', patient_id=patient.get("_id")))
 
 #update lab test orders to specimen collected
@@ -606,6 +611,10 @@ def inject_now():
 @app.context_processor
 def inject_user():
     return {'current_user': session.get("user")}
+
+@app.context_processor
+def inject_message_category():
+    return {'message_category': {"info":"#004085", "success":"#28a745", "error":"#dc3545","warning": "#ffc107"}}
 
 @app.context_processor
 def inject_power():

@@ -5,7 +5,7 @@
 
 <div id="pendingOrders" class="maintabcontent">
         {%  for i in orders %}
-          <div class = "mainButtons" onmousedown="window.location='/patient/{{i.get('patient_id')}}'">
+          <div class = "mainButtons" onmousedown="Spinner.show();window.location='/patient/{{i.get('patient_id')}}'">
               <span style="font-weight:bold; font-size: 1.25em ;">{{i.get('name')}}</span>
               <div style="display: table-row; ">
                   <div style="display: table-cell; ">Test Ordered</div>
@@ -29,10 +29,10 @@
 <div id="preferences" class="maintabcontent">
     <div style="display: table; padding-top: 10px;padding-left: 10px;margin-left: auto;margin-right: auto;">
         <div style="display: table-row">
-            <div style="display: table-cell;width: 15vw;text-align: center;padding:5%;" onmousedown="window.location='/user/{{ session['user']['username']}}/update_password'">
+            <div style="display: table-cell;width: 15vw;text-align: center;padding:5%;" onmousedown="Spinner.show();window.location='/user/{{ session['user']['username']}}/update_password'">
                 <img src="/assets/images/change_password.png">
             </div>
-            <div style="display: table-cell;width: 15vw;text-align: center;padding:5%;" onmousedown="window.location='/'">
+            <div style="display: table-cell;width: 15vw;text-align: center;padding:5%;" onmousedown="Spinner.show();window.location='/'">
                 <img src="/assets/images/score_card.png">
             </div>
         </div>

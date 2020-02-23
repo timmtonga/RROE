@@ -6,12 +6,12 @@
 <div id="management" class="maintabcontent">
     <div style="display: table; padding-top: 10px;padding-left: 10px;margin-left: auto;margin-right: auto;">
         <div style="display: table-row">
-            <div style="display: table-cell;width: 15vw;text-align: center;padding:5%;" onmousedown="window.location='/users'">
+            <div style="display: table-cell;width: 15vw;text-align: center;padding:5%;" onmousedown="Spinner.show();window.location='/users'">
                 <img src="/assets/images/user_management.png">
             </div>
         </div>
         <div style="display: table-row">
-            <div style="display: table-cell;text-align: center;font-size: 1.4em;padding:5%;" onmousedown="window.location='/users'">
+            <div style="display: table-cell;text-align: center;font-size: 1.4em;padding:5%;" onmousedown="Spinner.show();window.location='/users'">
                 User Management
             </div>
         </div>
@@ -21,12 +21,12 @@
 <div id="preferences" class="maintabcontent">
     <div style="display: table; padding-top: 10px;padding-left: 10px;margin-left: auto;margin-right: auto;">
         <div style="display: table-row">
-            <div style="display: table-cell;width: 15vw;text-align: center;padding:5%;" onmousedown="window.location='/user/{{ session['user']['username']}}/update_password'">
+            <div style="display: table-cell;width: 15vw;text-align: center;padding:5%;" onmousedown="Spinner.show();window.location='/user/{{ session['user']['username']}}/update_password'">
                 <img src="/assets/images/change_password.png">
             </div>
         </div>
         <div style="display: table-row">
-            <div style="display: table-cell;text-align: center;font-size: 1.4em;padding:5%;" onmousedown="window.location='/user/{{ session['user']['username']}}/update_password'">
+            <div style="display: table-cell;text-align: center;font-size: 1.4em;padding:5%;" onmousedown="Spinner.show();window.location='/user/{{ session['user']['username']}}/update_password'">
                 Change Password
             </div>
         </div>

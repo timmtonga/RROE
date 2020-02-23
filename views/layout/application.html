@@ -5,7 +5,10 @@
             <title>RROE - {% block title %}{% endblock %}</title>
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/application.css') }}">
+            <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/toastify.css') }}">
             <script src="{{url_for('static', filename='javascript/application.js')}}"></script>
+            <script src="{{url_for('static', filename='javascript/loading-spinner.js')}}" ></script>
+            <script src="{{url_for('static', filename='javascript/toast.min.js')}}"></script>
         {% endblock %}
     </head>
     <body>
@@ -50,6 +53,16 @@
         </div>
     </body>
     <script TYPE="application/javascript">
+        Spinner();
+        Spinner.hide()
+        {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                    {% for category, message in messages %}
+                          Toastify({text: "{{ message }}",position: 'center',backgroundColor: "{{message_category[category] }}", duration: 3000}).showToast()
+                    {% endfor %}
+              {% endif %}
+        {% endwith %}
+
         addNavButtons()
         {% if collect_samples  %}
             showDrawDialog()

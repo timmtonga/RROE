@@ -45,7 +45,6 @@
     <div class="tabs">
         {% include
         'main/_nurse_view.html' if session.get('user').get('role') in ['Nurse', 'Student']   else  'main/_doctor_view.html' %}
-
     </div>
     <script type="text/javascript">
         navButtons = ["<button class=\"nvButton red\" onmousedown=\"window.location='/logout'\" style=\"float: left;\">Logout</button>",
