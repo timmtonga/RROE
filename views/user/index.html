@@ -42,7 +42,12 @@
                         <div class="Cell">{{user.get("designation")}}</div>
                         <div class="Cell">{{user.get("ward", user.get("team"))}}</div>
                         <div class="Cell">
-                            <button onmousedown="window.location='/user/{{user.get('_id')}}/reset_password'">Reset Password</button>
+                            <button class='displayButton lightGreen' onmousedown="window.location='/user/{{user.get('_id')}}/reset_password'">Reset Password</button>
+                            {% if user.get("status") == None %}
+                                <button class="displayButton red" onmousedown="window.location='/user/{{user.get('_id')}}/deactivate'">Deactivate</button>
+                            {% else %}
+                                <button class="displayButton green" onmousedown="window.location='/user/{{user.get('_id')}}/activate'">Reactivate</button>
+                            {% endif %}
                         </div>
                     </div>
                  {% endfor %}

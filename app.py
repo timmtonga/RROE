@@ -238,6 +238,9 @@ def login():
                                    'current_user': user.get('name','Unknown'),
                                    'team': user.get('team', 'Unassigned'),
                                    'rank': user.get('designation', 'Unassigned')}
+                if user.get("status") != None:
+                    user.pop("status")
+                    db.save(user)
                 return redirect(url_for('select_location'))
     else:
         pass
@@ -297,6 +300,26 @@ def reset_password(user_id=None):
         user["password_hash"] =  generate_password_hash(user.get("name").split(" ")[1].lower())
         db.save(user)
         return redirect(url_for("index"))
+
+@app.route("/user/<user_id>/deactivate")
+def deactivate_user(user_id=None):
+    user = db.get(user_id)
+    if user == None:
+        return redirect(url_for("index", error = "User not found"))
+    else:
+        user["status"] =  "Deactivated"
+        db.save(user)
+        return redirect(url_for("users"))
+
+@app.route("/user/<user_id>/activate")
+def activate_user(user_id=None):
+    user = db.get(user_id)
+    if user == None:
+        return redirect(url_for("index", error = "User not found"))
+    else:
+        user.pop("status")
+        db.save(user)
+        return redirect(url_for("users"))
 
 @app.route("/select_location", methods=["GET", "POST"])
 def select_location():
@@ -492,7 +515,8 @@ def get_test_measures(test, test_details):
 
 def prescribers():
     providers = []
-    users = db.find({"selector": {"type": "user", "role": "Doctor"}, "fields": ["_id", "name"], "limit": 100})
+    users = db.find({"selector": {"type": "user", "role": "Doctor",
+      "status": {"$exists": False}},"fields": ["_id", "name"], "limit": 100})
     for user in users:
         if len(user['name'].split(" ")) > 1:
             name = user['name'].split(" ")[0][0] + ". " + user['name'].split(" ")[1]
@@ -558,10 +582,8 @@ def initialize_connection():
 
 @app.before_request
 def check_authentication():
-    print("checking authentication")
     if not re.search("asset", request.path):
         initialize_connection()
-        print("Not an asset")
         if settings["using_rpi"] == "True":
             if request.path == "/":
                 ledControl().turn_led_on()
@@ -569,14 +591,11 @@ def check_authentication():
                 ledControl().turn_led_off()
 
         if request.path != "/login" and request.path != "/logout":
-            print("Not login or logout page")
             if session.get("user") == None:
-                print("EMpty user")
                 return redirect(url_for('login'))
             else:
                 if session.get("location") == None and request.path != "/select_location":
                     return  redirect(url_for('select_location'))
-    print("Logged in")
 
 ###### APPLICATION CONTEXT PROCESSORS ###########
 # Used to get data in views
