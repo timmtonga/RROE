@@ -287,8 +287,12 @@
                 {% endif %}
                 <div class="tab">
                     <h2>Enter Clinical Information/History</h2>
+                    <div>
                     <input type="text" placeholder="Clinical history" name="clinical_history" id="input20" class="input" value="{{
                       request.form.clinical_history }}" maxlength="{{ch_length}}" required style="width: 90%; font-size : 18pt;border-radius:5px;height: 7vh;">
+                        <span style="font-weight:500;font-size:14pt;">Max Char : {{ch_length}}</span>
+                    </div>
+
                     <div class="simple-keyboard" style="width: 99%; border: 1px solid silver;margin-top: 2vh;"></div>
                 </div>
                 <div class="tab">
