@@ -2,7 +2,6 @@ let Keyboard = window.SimpleKeyboard.default;
 
 let selectedInput;
 
-
 let keyboard = new Keyboard({
   onChange: input => onChange(input),
   onKeyPress: button => onKeyPress(button),
@@ -24,8 +23,9 @@ let keyboard = new Keyboard({
       '{space}': 'space',
       '{lock}': 'CAPS'
     }
+  },
+maxLength: {
   }
-
 });
 
 document.querySelectorAll(".input").forEach(input => {
@@ -48,14 +48,11 @@ function onInputChange(event) {
 }
 
 function onChange(input) {
-  console.log("Input changed", input);
   document.querySelector(selectedInput || ".input").value = input;
 }
 
 function onKeyPress(button) {
-  console.log("Button pressed", button);
-
-  /**
+   /**
    * Shift functionality
    */
   if (button === "{lock}" || button === "{shift}") handleShiftButton();
