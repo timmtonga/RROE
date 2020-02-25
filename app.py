@@ -500,20 +500,23 @@ def review_test(test_id):
 def get_test_measures(test, test_details):
     results = {}
     for measure in test.get("measures", []):
-        if test_details["measures"][measure].get("minimum") != None :
-            results[measure] = {"range": test_details["measures"][measure].get("minimum") + " - " + test_details["measures"][measure].get("maximum")}
-            results[measure]["value"] = re.sub(r'[^0-9\.]', '', test["measures"][measure])
-            if results[measure]["value"] == "":
-                results[measure]["value"] = "Not Done"
-                results[measure]["interpretation"] = "Normal"
-            elif float(results[measure]["value"]) < float(test_details["measures"][measure].get("minimum")):
-                results[measure]["interpretation"] = "Low"
-            elif float(results[measure]["value"]) > float(test_details["measures"][measure].get("maximum")):
-                results[measure]["interpretation"] = "High"
-            else:
-                results[measure]["interpretation"] = "Normal"
-        else:
+        if test_details["measures"].get(measure) == None:
             results[measure] = {"range": "", "interpretation":"Normal", "value": test["measures"][measure]}
+        else:
+            if test_details["measures"][measure].get("minimum") != None :
+                results[measure] = {"range": test_details["measures"][measure].get("minimum") + " - " + test_details["measures"][measure].get("maximum")}
+                results[measure]["value"] = re.sub(r'[^0-9\.]', '', test["measures"][measure])
+                if results[measure]["value"] == "":
+                    results[measure]["value"] = "Not Done"
+                    results[measure]["interpretation"] = "Normal"
+                elif float(results[measure]["value"]) < float(test_details["measures"][measure].get("minimum")):
+                    results[measure]["interpretation"] = "Low"
+                elif float(results[measure]["value"]) > float(test_details["measures"][measure].get("maximum")):
+                    results[measure]["interpretation"] = "High"
+                else:
+                    results[measure]["interpretation"] = "Normal"
+            else:
+                results[measure] = {"range": "", "interpretation":"Normal", "value": test["measures"][measure]}
 
     return results
 ###### DB CALLS ################
