@@ -485,7 +485,10 @@ def reprint_barcode(test_id):
 @app.route("/test/<test_id>/review")
 def review_test(test_id):
     test = db.get(test_id)
-    test["status"] = "Reviewed" if test.get("status") == "Analysis Complete" else "Specimen Rejected"
+    if test.get("status") == "Analysis Complete":
+        test["status"] = "Reviewed"
+    else:
+        test["status"] = "Specimen Rejected"
     test["reviewed_by"] = session["user"]['username']
     test["reviewed_at"] = datetime.now().strftime('%s')
     db.save(test)

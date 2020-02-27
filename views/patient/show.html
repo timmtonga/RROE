@@ -357,13 +357,14 @@
 
     <script>
         selected =null
+        isNurse = "{{ session.get('user').get('role') in ['Nurse', 'Student'] }}"
         function toggleDisplay(id, test_status){
             var state= {true: "View", false: "Hide"}
             div = document.getElementById(id)
             var status = div.hidden;
             div.hidden = !status;
             document.getElementById(id+"-status").innerHTML = state[!status]
-            if (test_status == "Analysis Complete" || test_status == "Rejected"){
+            if ((test_status == "Analysis Complete" || test_status == "Rejected") && (isNurse == "False")){
                 testReviewed(id)
             }
         }
