@@ -212,7 +212,7 @@ def patient(patient_id):
             records.append(test_record)
 
     records = sorted(records, key=lambda e: e["date"], reverse= True)
-    permitted_length = 86 - 46 - len(patient.get('name')) - len(patient.get('_id'))
+    permitted_length = 86 - 50 - len(patient.get('name')) - len(patient.get('_id'))
     return render_template('patient/show.html',pt_details = pt,tests=records, pending_orders= pending_sample, containers =  misc.container_options(),
                            collect_samples=draw_sample, doctors = prescribers(),ch_length= permitted_length,requires_keyboard=True,
                            test_options= inject_tests(), specimen_types=inject_specimen_types(),panel_options = inject_panels())

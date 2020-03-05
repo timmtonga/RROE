@@ -157,7 +157,7 @@
             <div class="Title">
                 Sample Collection
                 <div style="float: right;" onmousedown=hideDialog('/patient/{{pt_details.get('id')}}')>
-                    <img style="vertical-align: middle;" src="/assets/images/cancel.png">
+                    <img style="vertical-align: middle;" src="/assets/images/cancel.png" onmousedown=hideDialog('/patient/{{pt_details.get('id')}}')>
                 </div>
             </div>
             <div class="Heading">
@@ -190,7 +190,7 @@
                 </div>
                 <div class="Cell" style="text-align: center">
 
-                    <img style="vertical-align: middle;height:12vh;width:inherit;" src="/assets/images/{{containers[test['container']]}}">
+                    <img style="vertical-align: middle;height:12vh;max-width:15vw;" src="/assets/images/{{containers[test['container']]}}">
                 </div>
                 <div class="Cell">
                     <button class="modalNVButton" onmousedown="Spinner.show();window.location='/test/{{test['test_id']}}/collect_specimen'">
