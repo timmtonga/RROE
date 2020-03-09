@@ -14,6 +14,7 @@ class CheckVoltage:
         if adc_channel:
             cmd +=32
         reply_bytes = conn.xfer2([cmd, 0])
+        conn.close()
         reply_bitstring = ''.join(self.bitstring(n) for n in reply_bytes)
         reply = reply_bitstring[5:15]
         return int(reply, 2) / 2**10
