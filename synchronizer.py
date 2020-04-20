@@ -14,8 +14,8 @@ global db
 global mysqldb
 
 def sync_test_statuses():
-    log("Check begun at %s" % datetime.utcnow().strftime("%d/%m/%Y %H:%S"))
-    print("Check begun at %s" % datetime.utcnow().strftime("%d/%m/%Y %H:%S"))
+    log("Check begun at %s" % datetime.now().strftime("%d/%m/%Y %H:%S"))
+    print("Check begun at %s" % datetime.now().strftime("%d/%m/%Y %H:%S"))
     pending_tests = get_pending_tests()
     #Have items that need updating
     if len(pending_tests) > 0:
@@ -31,8 +31,8 @@ def sync_test_statuses():
         processed_panel = process_panel(panel)
         db.save(processed_panel)
 
-    log("Check concluded at %s" % datetime.utcnow().strftime("%d/%m/%Y %H:%S"))
-    print("Check concluded at %s" % datetime.utcnow().strftime("%d/%m/%Y %H:%S"))
+    log("Check concluded at %s" % datetime.now().strftime("%d/%m/%Y %H:%S"))
+    print("Check concluded at %s" % datetime.now().strftime("%d/%m/%Y %H:%S"))
 
 def get_pending_tests():
     tests =  db.find({
@@ -63,7 +63,7 @@ def get_patient_id(npid):
 
 def get_patient_test(patient_id, test_type_id, ordered_by, ordered_on):
     mycursor = mysqldb.cursor()
-    query = "SELECT id, test_status_id,not_done_reasons,specimen_id from tests where test_type_id = "+test_type_id+" and requested_by = '"+ordered_by +"' and visit_id in (select id from visits where patient_id = "+str(patient_id)+" and created_at between '"+datetime.utcfromtimestamp(float(ordered_on)).strftime("%Y-%m-%d %H:%M")+"' and now()) order by id desc LIMIT 1"
+    query = "SELECT id, test_status_id,not_done_reasons,specimen_id from tests where test_type_id = "+test_type_id+" and requested_by = '"+ordered_by +"' and visit_id in (select id from visits where patient_id = "+str(patient_id)+" and created_at between '"+datetime.fromtimestamp(float(ordered_on)).strftime("%Y-%m-%d %H:%M")+"' and now()) order by id desc LIMIT 1"
     mycursor.execute(query)
     myTest = mycursor.fetchone()
     if myTest == None:
