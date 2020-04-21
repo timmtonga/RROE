@@ -4,7 +4,6 @@
 
 import os
 import re
-import json
 import random
 from utils import misc
 from couchdb import Server
@@ -54,8 +53,8 @@ def index():
 
         #Get my team members and then all tests requested by members of my team
         my_team = []
-        for provider in db.view("_design/users/_view/teams",key=session.get('user').get('team'), limit=100):
-            my_team.append(provider.value)
+        for provider in db.find({ "selector": {"type": "user", "team": session.get('user').get('team')},"fields": ["_id"],"limit":5000}):
+            my_team.append(provider["_id"])
 
         #Get all records for my team that require attention
         team_records = {

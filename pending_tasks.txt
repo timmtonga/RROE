@@ -1,6 +1,4 @@
 Test details and engine
-Pull reason for rejection and not done
-Show next activity
 new test statuses test_statuses = {1:"Specimen Received",2:"Specimen Received",
                  3:"Being Analyzed",4:"Pending Verification",5:"Analysis Complete",6:"Not Done",7:"Not Done",8:"Rejected"}
 Verify hepatitis c peads
