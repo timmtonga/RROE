@@ -21,6 +21,7 @@ settings = misc.initialize_settings()
 #optional configuration when running on rpi
 if settings["using_rpi"] == "True":
     from utils.led_control import ledControl
+    from utils.charging_checker import CheckChargeState
     from utils.voltage_checker import CheckVoltage
 
 #Root page of application
@@ -497,8 +498,11 @@ def review_test(test_id):
     else:
         return redirect(url_for('patient', patient_id=test['patient_id']))
 
-###### MISC Functions ############
+@app.route("/get_charge_state")
+def get_charge_state():
+    return CheckChargeState().getState()
 
+###### MISC Functions ############
 def get_test_measures(test, test_details):
     results = {}
     for measure in test.get("measures", []):
@@ -600,7 +604,7 @@ def check_authentication():
             else:
                 ledControl().turn_led_off()
 
-        if request.path != "/login" and request.path != "/logout":
+        if request.path != "/login" and request.path != "/logout" and request.path != "/get_charge_state":
             if session.get("user") == None:
                 return redirect(url_for('login'))
             else:
@@ -624,8 +628,8 @@ def inject_message_category():
 @app.context_processor
 def inject_power():
     if settings["using_rpi"] == "True":
+        checkCharging = True
         voltage = CheckVoltage().getVoltage()
-        onCharge = False #CheckVoltage().isCharging()
         if voltage > 70:
             rating = "high"
         elif voltage > 30 and voltage < 70:
@@ -633,10 +637,10 @@ def inject_power():
         else:
             rating = "low"
     else:
+        checkCharging = False
         voltage=  100
         rating =  "high"
-        onCharge = True
-    return {"current_power": voltage, "power_class": rating, "charging": onCharge}
+    return {"current_power": voltage, "power_class": rating, "checkCharging": checkCharging}
 
 #Error handling pages
 @app.errorhandler(404)

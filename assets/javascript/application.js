@@ -167,3 +167,37 @@ function idleTimer(){
         document.addEventListener(evt, resetIdleTimeout, false)
     );
 };
+
+function powerMonitor(){
+    console.log("Check charge state")
+    let powerTimeout; // variable to hold the timeout, do not modify
+
+    const resetPowerTimeout = function() {
+        // Clears the existing timeout
+        if(powerTimeout) clearTimeout(powerTimeout);
+        // Set a new idle timeout to load the redirectUrl after idleDurationSecs
+        powerTimeout = setTimeout(() => eval('checkChargeStatus'), 1000);
+    };
+
+}
+
+function checkChargeStatus(){
+    var xhr = new XMLHttpRequest();
+    var url = "/get_charge_state";
+    xhr.open("GET", url, true);
+    xhr.setRequestHeader("Content-Type", "application/text");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            console.log("Charging status " + xhr.responseText);
+            if(xhr.responseText == "False"){
+                document.getElementById("batteryState").innerHTML ="&nbsp;";
+             }
+             else{
+                document.getElementById("batteryState").innerHTML ="<span style='padding-left:45%;font-weight:bold;'>&#9889;</span>";
+             }
+        }
+    };
+    xhr.send();
+
+
+}
