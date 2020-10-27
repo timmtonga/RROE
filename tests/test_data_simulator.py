@@ -59,7 +59,7 @@ surnames = ['Ball','Bell','Berry','Black','Blake','Bond','Bower','Brown','Buckla
 def intializeFacts():
     simulateProviders()
     simulatePatients()
-    initializeViews()
+    #initializeViews()
 
 def simulateProviders():
     for i in range(1,20):
