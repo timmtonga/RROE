@@ -37,8 +37,12 @@ class LaboratoryTestType:
         return test_type
 
     @staticmethod
+    def find_by_test_types(test_types):
+        return DataAccess("lab_test_type").db.find({"selector": {"_id": {"$in": test_types}}})
+
+    @staticmethod
     def match_specimen_types(spec_type):
-        test_types = DataAccess("lab_test_type").db.find({"selector": {"_id": {"$gt": "null"}}})
+        test_types = DataAccess("lab_test_type").db.find({"selector": {"_id": {"$gt": None}}})
         for i in test_types:
             for t in i["specimen_types"]:
                 if spec_type == t:
@@ -46,7 +50,7 @@ class LaboratoryTestType:
 
     @staticmethod
     def get_specimen_types():
-        test_types = DataAccess("lab_test_type").db.find({"selector": {"_id": {"$gt": "null"}}})
+        test_types = DataAccess("lab_test_type").db.find({"selector": {"_id": {"$gt": None}}})
         options = []
         for i in test_types:
             for t in i["specimen_types"]:
@@ -74,8 +78,8 @@ class LaboratoryTestType:
     def __str__(self):
         return 'LaboratoryTestType(test_name: '+self.test_name + ', short_name: '+self.short_name + ', department: ' + \
                self.department + ', test_type_id: '+self.test_type_id + ', specimen_types: '+self.specimen_types + \
-               + ', measures: '+self.measures + ', requirements: '+self.specimen_requirements + ', ' + \
-               'availability: '+self.available+')'
+               + ', measures: '+self.measures + ', requirements: '+self.specimen_requirements +  \
+               ', availability: '+str(self.available)+')'
 
     def __repr__(self):
         return {'_id': self.test_name, 'short_name': self.short_name, 'department': self.department,

@@ -1,6 +1,6 @@
 <div class="maintab">
   <button class="maintablinks" onclick="showMainTab(event, 'myOrders')" id="defaultOpen">My Orders</button>
-  <button class="maintablinks" onclick="showMainTab(event, 'teamOrders')">My Team's Orders</button>
+  <!-- <button class="maintablinks" onclick="showMainTab(event, 'teamOrders')">My Team's Orders</button> !-->
   <button class="maintablinks" onclick="showMainTab(event, 'preferences')">My Preferences</button>
 </div>
 
@@ -26,7 +26,7 @@
           </div>
       {% endfor %}
 </div>
-
+<!--
 <div id="teamOrders" class="maintabcontent">
    {%  for i in team_records %}
           <div class = "mainButtons" onmousedown="Spinner.show();choosePath('{{i.get('patient_id')}}','{{i.get('id')}}', '{{i.get('status')}}')">
@@ -54,7 +54,7 @@
           </div>
       {% endfor %}
 </div>
-
+!-->
 <div id="preferences" class="maintabcontent">
     <div style="display: table; padding-top: 10px;padding-left: 10px;margin-left: auto;margin-right: auto;">
         <div style="display: table-row">

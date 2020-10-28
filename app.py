@@ -50,7 +50,7 @@ def index():
                 "status": {"$in": ["Ordered", "Specimen Collected", "Analysis Complete", "Rejected"]}
             }, "limit": 100
         }
-
+        '''
         # Get my team members and then all tests requested by members of my team
         my_team = User.get_team_members(session.get('user').get('team'))
 
@@ -75,7 +75,7 @@ def index():
             else:
                 team_test_detail['test'] = item.get('panel_type')
             my_team_recs.append(team_test_detail)
-
+    '''
     # query for records to display on the main page
     main_results = db.find(main_index_query)
     for item in main_results:
@@ -94,8 +94,7 @@ def index():
     records = sorted(records, key=lambda e: e["date"], reverse=True)
     my_team_recs = sorted(my_team_recs, key=lambda e: e["date"], reverse=True)
 
-    return render_template('main/index.html', orders=records, team_records=my_team_recs,
-                           current_facility=misc.current_facility())
+    return render_template('main/index.html', orders=records, current_facility=misc.current_facility())
 
 
 # process barcode from the main index page
@@ -151,71 +150,30 @@ def patient(patient_id):
     var_patient = Patient.get(patient_id)
 
     # get tests for patient
-    mango = {"selector": {"patient_id": patient_id},
-             "fields": ["_id", "type", "status", "Priority", "ordered_by", "date_ordered", "rejection_reason",
-                        "collection_id", "test_type", "sample_type", "measures", "specimen_types", "clinical_history",
-                        "panel_type", "tests"], "limit": 50}
+    test_query_result = db.find({"selector": {"patient_id": patient_id}, "limit": 100})
+    for test in test_query_result:
+        record = {"date_ordered": datetime.fromtimestamp(float(test["date_ordered"])).strftime('%d %b %Y %H:%S'),
+                  "id": test.get("_id"), "type": test.get("type"), "status": test.get("status"),
+                  "priority": test.get("Priority"), "date": float(test["date_ordered"]),
+                  "collection_id": test.get("collection_id", ""), "history": test.get("clinical_history"),
+                  "ordered_by": test.get("ordered_by"), "rejection_reason": test.get("rejection_reason"),
+                  "test_type": "test" if test.get("type") == "test" else "test panel"}
 
-    '''for test in db.find(mango):
-        test_record = {"date_ordered": datetime.fromtimestamp(float(test["date_ordered"])).strftime('%d %b %Y %H:%S'),
-                       "id": test.get("_id"), "type": test.get("type"), "status": test.get("status"),
-                       "priority": test.get("Priority"), "date": float(test["date_ordered"]),
-                       "collection_id": test.get("collection_id", ""), "history": test.get("clinical_history"),
-                       "ordered_by": test.get("ordered_by"), "rejection_reason": test.get("rejection_reason"),
-                       "test_type": "test" if test.get("type") == "test" else "test panel"}
-
-        if test.get("type") == "test":
-            if details_of_test.get(test.get('test_type')) is None:
-                details_of_test[test.get('test_type')] = LaboratoryTestType.find_by_test_type(test.get('test_type'))
-
-            test_record["test_name"] = details_of_test[test.get('test_type')].test_name
+        if test.get('panel_type') is not None:
+            record["test_name"] = test.get('panel_type')
+            record["panel_test_details"] = get_panel_details(test)
             if test["status"] == "Ordered":
-                pending_sample.append({"test_id": test["_id"],
-                                       "specimen_type": details_of_test[test.get('test_type')]["specimen_requirements"][
-                                           test["sample_type"]]["type_of_specimen"],
-                                       "test_type": details_of_test[test.get('test_type')]["_id"],
-                                       "department": details_of_test[test.get('test_type')]["department"],
-                                       "container": details_of_test[test.get('test_type')]["specimen_requirements"][
-                                           test["sample_type"]]["container"],
-                                       "volume": details_of_test[test.get('test_type')]["specimen_requirements"][
-                                           test["sample_type"]]["volume"],
-                                       "units": details_of_test[test.get('test_type')]["specimen_requirements"][
-                                           test["sample_type"]]["units"],
-                                       "test_name": details_of_test[test.get('test_type')]["_id"]
-                                       })
-            test_record['measures'] = get_test_measures(test, details_of_test[test.get('test_type')])
-        elif test.get("type") == "test panel":
-            test_record["test_name"] = test["panel_type"]
-            test_record["panel_test_details"] = {}
-            for panel_test in test.get("tests").keys():
-                if details_of_test.get(panel_test) == None:
-                    details_of_test[panel_test] = db.find(
-                        {"selector": {"type": "test_type", "test_type_id": panel_test},
-                         "fields": ["_id", "measures", "specimen_requirements", "department"]})[0]
-                test_record["panel_test_details"][panel_test] = {"test_name": details_of_test[panel_test]["_id"]}
-                test_record["panel_test_details"][panel_test]['measures'] = get_test_measures(
-                    test.get("tests")[panel_test], details_of_test[panel_test])
+                pending_sample.append(get_pending_panel_details(test))
+        else:
+            detail = LaboratoryTestType.find_by_test_type(test.get('test_type'))
+            record["test_name"] = detail.test_name
+            record["measures"] = get_test_measures(test, detail)
             if test["status"] == "Ordered":
-                panel_details = {"test_id": test["_id"], "specimen_type": specimen_type_map(test['sample_type']),
-                                 "test_name": test["panel_type"]
-                                 }
-                if panel_details["specimen_type"] == "Urine":
-                    panel_details["container"] = 'Conical container'
-                    panel_details["volume"] = "15 "
-                    panel_details["units"] = "ml"
-                elif panel_details["specimen_type"] == "Blood" and panel_details["test_name"] == "MC&S":
-                    panel_details["container"] = 'Baktech'
-                    panel_details["volume"] = "5 "
-                    panel_details["units"] = "ml"
-                else:
-                    panel_details["container"] = 'Red top'
-                    panel_details["volume"] = "4"
-                    panel_details["units"] = "ml"
-                pending_sample.append(panel_details)
+                pending_sample.append(get_pending_test_details(test, detail))
+            elif test["status"] == "Analysis Complete" or test["status"] == "Reviewed":
+                get_test_measures(test, detail)
+        records.append(record)
 
-        if test is not None:
-            records.append(test_record)
-'''
     records = sorted(records, key=lambda e: e["date"], reverse=True)
     permitted_length = 86 - 50 - len(var_patient['name']) - len(var_patient['id'])
     return render_template('patient/show.html', pt_details=var_patient, tests=records, pending_orders=pending_sample,
@@ -396,13 +354,13 @@ def collect_specimens(test_id):
     tests = db.find({"selector": {"type": {"$in": ["test", "test panel"]}, "_id": {"$in": test_id.split("^")}}})
     test_ids = []
     test_names = []
-    if tests == None or tests == []:
+    if tests is None or tests == []:
         return redirect(url_for("index", error="Tests not found"))
-    patient = db.get(tests[0]["patient_id"])
+    var_patient = Patient.get(tests[0]["patient_id"])
     dr = tests[0]["ordered_by"]
     wards = {"4A": "19", "4B": "20", "MSS": "44", "MHDU": "56"}
     collected_at = int(datetime.now().strftime('%s'))
-    collection_id = ''.join(random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ') for i in range(2)) + collected_at
+    collection_id = ''.join(random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ') for i in range(2)) + str(collected_at)
 
     for test in tests:
         test["status"] = "Specimen Collected"
@@ -411,104 +369,100 @@ def collect_specimens(test_id):
         test["collection_id"] = collection_id
         if test["type"] == "test":
             test_ids.append(test["test_type"])
-            test_names.append(db.find(
-                {"selector": {"type": "test_type", "test_type_id": test["test_type"]}, "fields": ["short_name"]})[0][
-                                  "short_name"])
-            test_string = [patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0],
-                           datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%s"),
+            test_names.append(LaboratoryTestType.find_by_test_type(test["test_type"]).short_name)
+            test_string = [var_patient["name"].replace(" ", "^"), var_patient["_id"], var_patient["gender"][0],
+                           datetime.strptime(var_patient.get('dob'), "%d-%m-%Y").strftime("%s"),
                            wards[tests[0]["ward"]], dr, tests[0]["clinical_history"], tests[0]["sample_type"],
-                           datetime.now().strftime("%s"), ("^").join(test_ids), tests[0]["Priority"][0]]
+                           datetime.now().strftime("%s"), '^'.join(test_ids), tests[0]["Priority"][0]]
         else:
-            panel = db.get(test["panel_type"])
-            test_names.append(panel.get("short_name"))
-            if panel.get("orderable"):
-                test_ids.append(panel["panel_id"])
-                test_string = [patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0],
-                               datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%s"),
+            panel = LaboratoryTestPanel.get(test["panel_type"])
+            test_names.append(panel.short_name)
+            if panel.orderable:
+                test_ids.append(panel.panel_id)
+                test_string = [var_patient["name"].replace(" ", "^"), var_patient["_id"], var_patient["gender"][0],
+                               datetime.strptime(var_patient.get('dob'), "%d-%m-%Y").strftime("%s"),
                                wards[tests[0]["ward"]], dr, tests[0]["clinical_history"], tests[0]["sample_type"],
-                               datetime.now().strftime("%s"), ("^").join(test_ids), tests[0]["Priority"][0], "P"]
+                               datetime.now().strftime("%s"), '^'.join(test_ids), tests[0]["Priority"][0], "P"]
             else:
-                for test_type_id in db.find({"selector": {"type": "test_type", "_id": {"$in": panel["tests"]}},
-                                             "fields": ["test_type_id"]}):
+                tests_types = LaboratoryTestType.find_by_test_types(panel["tests"])
+                for test_type_id in tests_types:
                     test_ids.append(test_type_id.get("test_type_id"))
 
-                test_string = [patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0],
-                               datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%s"),
+                test_string = [var_patient["name"].replace(" ", "^"), var_patient["_id"], var_patient["gender"][0],
+                               datetime.strptime(var_patient.get('dob'), "%d-%m-%Y").strftime("%s"),
                                wards[tests[0]["ward"]], dr, tests[0]["clinical_history"], tests[0]["sample_type"],
-                               datetime.now().strftime("%s"), ("^").join(test_ids), tests[0]["Priority"][0]]
+                               datetime.now().strftime("%s"), '^'.join(test_ids), tests[0]["Priority"][0]]
         db.save(test)
 
-    labelFile = open("/tmp/test_order.lbl", "w+")
-    labelFile.write("N\nq406\nQ203,027\nZT\n")
-    labelFile.write('A5,10,0,1,1,2,N,"%s"\n' % patient["name"])
-    labelFile.write('A5,40,0,1,1,2,N,"%s (%s)"\n' % (
-        datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), patient["gender"][0]))
-    labelFile.write('b5,70,P,386,80,"%s$"\n' % ("~").join(test_string))
-    labelFile.write('A20,170,0,1,1,2,N,"%s"\n' % (",").join(test_names))
-    labelFile.write('A260,170,0,1,1,2,N,"%s" \n' % datetime.now().strftime("%d-%b %H:%M"))
-    labelFile.write("P1\n")
-    labelFile.close()
+    label_file = open("/tmp/test_order.lbl", "w+")
+    label_file.write("N\nq406\nQ203,027\nZT\n")
+    label_file.write('A5,10,0,1,1,2,N,"%s"\n' % var_patient["name"])
+    label_file.write('A5,40,0,1,1,2,N,"%s (%s)"\n' % (
+        datetime.strptime(var_patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), var_patient["gender"][0]))
+    label_file.write('b5,70,P,386,80,"%s$"\n' % '~'.join(test_string))
+    label_file.write('A20,170,0,1,1,2,N,"%s"\n' % ','.join(test_names))
+    label_file.write('A260,170,0,1,1,2,N,"%s" \n' % datetime.now().strftime("%d-%b %H:%M"))
+    label_file.write("P1\n")
+    label_file.close()
     os.system('sudo sh ~/print.sh /tmp/test_order.lbl')
     flash("Specimen collected.", 'success')
-    return redirect(url_for('patient', patient_id=patient.get("_id")))
+    return redirect(url_for('patient', patient_id=var_patient.get("_id")))
 
 
 # update lab test orders to specimen collected
 @app.route("/test/<test_id>/reprint")
 def reprint_barcode(test_id):
-    tests = db.find({"selector": {"type": {"$in": ["test", "test panel"]}, "collection_id": test_id}})
+    tests = db.find({"selector": {"collection_id": test_id}})
     if tests is None or tests == []:
-        tests = db.find({"selector": {"type": {"$in": ["test", "test panel"]}, "_id": test_id}})
+        tests = db.find({"selector": {"_id": test_id}})
     test_ids = []
     test_names = []
     if tests is None or tests == []:
         return redirect(url_for("index", error="Tests not found"))
-    patient = db.get(tests[0]["patient_id"])
+    var_patient = Patient.get(tests[0]["patient_id"])
     dr = tests[0]["ordered_by"]
     wards = {"4A": "19", "4B": "20", "MSS": "44", "MHDU": "56"}
 
     for test in tests:
         if test["type"] == "test":
             test_ids.append(test["test_type"])
-            test_names.append(db.find(
-                {"selector": {"type": "test_type", "test_type_id": test["test_type"]}, "fields": ["short_name"]})[0][
-                                  "short_name"])
-            test_string = [patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0],
-                           datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%s"),
+            test_names.append(LaboratoryTestType.find_by_test_type(test["test_type"]).short_name)
+            test_string = [var_patient["name"].replace(" ", "^"), var_patient["_id"], var_patient["gender"][0],
+                           datetime.strptime(var_patient.get('dob'), "%d-%m-%Y").strftime("%s"),
                            wards[tests[0]["ward"]], dr, tests[0]["clinical_history"], tests[0]["sample_type"],
-                           datetime.now().strftime("%s"), ("^").join(test_ids), tests[0]["Priority"][0]]
+                           datetime.now().strftime("%s"), "^".join(test_ids), tests[0]["Priority"][0]]
         else:
-            panel = db.get(test["panel_type"])
-            test_names.append(panel.get("short_name"))
-            if panel.get("orderable"):
-                test_ids.append(panel["panel_id"])
-                test_string = [patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0],
-                               datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%s"),
+            panel = LaboratoryTestPanel.get(test["panel_type"])
+            test_names.append(panel.short_name)
+            if panel.orderable:
+                test_ids.append(panel.panel_id)
+                test_string = [var_patient["name"].replace(" ", "^"), var_patient["_id"], var_patient["gender"][0],
+                               datetime.strptime(var_patient.get('dob'), "%d-%m-%Y").strftime("%s"),
                                wards[tests[0]["ward"]], dr, tests[0]["clinical_history"], tests[0]["sample_type"],
-                               datetime.now().strftime("%s"), ("^").join(test_ids), tests[0]["Priority"][0], "P"]
+                               datetime.now().strftime("%s"), "^".join(test_ids), tests[0]["Priority"][0], "P"]
             else:
-                for test_type_id in db.find({"selector": {"type": "test_type", "_id": {"$in": panel["tests"]}},
-                                             "fields": ["test_type_id"]}):
+                tests_types = LaboratoryTestType.find_by_test_types(panel["tests"])
+                for test_type_id in tests_types:
                     test_ids.append(test_type_id.get("test_type_id"))
 
-                test_string = [patient["name"].replace(" ", "^"), patient["_id"], patient["gender"][0],
-                               datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%s"),
+                test_string = [var_patient["name"].replace(" ", "^"), var_patient["_id"], var_patient["gender"][0],
+                               datetime.strptime(var_patient.get('dob'), "%d-%m-%Y").strftime("%s"),
                                wards[tests[0]["ward"]], dr, tests[0]["clinical_history"], tests[0]["sample_type"],
-                               datetime.now().strftime("%s"), ("^").join(test_ids), tests[0]["Priority"][0]]
+                               datetime.now().strftime("%s"), "^".join(test_ids), tests[0]["Priority"][0]]
 
-    labelFile = open("/tmp/test_order.lbl", "w+")
-    labelFile.write("N\nq406\nQ203,027\nZT\n")
-    labelFile.write('A5,10,0,1,1,2,N,"%s"\n' % patient["name"])
-    labelFile.write('A5,40,0,1,1,2,N,"%s (%s)"\n' % (
-        datetime.strptime(patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), patient["gender"][0]))
-    labelFile.write('b5,70,P,386,80,"%s$"\n' % ("~").join(test_string))
-    labelFile.write('A20,170,0,1,1,2,N,"%s"\n' % (",").join(test_names))
-    labelFile.write('A260,170,0,1,1,2,N,"%s" \n' % datetime.now().strftime("%d-%b %H:%M"))
-    labelFile.write("P1\n")
-    labelFile.close()
+    label_file = open("/tmp/test_order.lbl", "w+")
+    label_file.write("N\nq406\nQ203,027\nZT\n")
+    label_file.write('A5,10,0,1,1,2,N,"%s"\n' % var_patient["name"])
+    label_file.write('A5,40,0,1,1,2,N,"%s (%s)"\n' % (
+        datetime.strptime(var_patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), var_patient["gender"][0]))
+    label_file.write('b5,70,P,386,80,"%s$"\n' % ("~").join(test_string))
+    label_file.write('A20,170,0,1,1,2,N,"%s"\n' % (",").join(test_names))
+    label_file.write('A260,170,0,1,1,2,N,"%s" \n' % datetime.now().strftime("%d-%b %H:%M"))
+    label_file.write("P1\n")
+    label_file.close()
     os.system('sudo sh ~/print.sh /tmp/test_order.lbl')
 
-    return redirect(url_for('patient', patient_id=patient.get("_id")))
+    return redirect(url_for('patient', patient_id=var_patient.get("_id")))
 
 
 @app.route("/test/<test_id>/review_ajax")
@@ -534,24 +488,25 @@ def get_charge_state():
     return CheckChargeState().getState()
 
 
-###### MISC Functions ############
+# MISC Functions
 def get_test_measures(test, test_details):
+
     results = {}
     for measure in test.get("measures", []):
-        if test_details["measures"].get(measure) == None:
+        if test_details.measures.get(measure) is None:
             results[measure] = {"range": "", "interpretation": "Normal", "value": test["measures"][measure]}
         else:
-            if test_details["measures"][measure].get("minimum") != None:
+            if test_details.measures[measure].get("minimum") is not None:
                 results[measure] = {
-                    "range": test_details["measures"][measure].get("minimum") + " - " + test_details["measures"][
+                    "range": test_details.measures[measure].get("minimum") + " - " + test_details.measures[
                         measure].get("maximum")}
                 results[measure]["value"] = re.sub(r'[^0-9\.]', '', test["measures"][measure])
                 if results[measure]["value"] == "":
                     results[measure]["value"] = "Not Done"
                     results[measure]["interpretation"] = "Normal"
-                elif float(results[measure]["value"]) < float(test_details["measures"][measure].get("minimum")):
+                elif float(results[measure]["value"]) < float(test_details.measures[measure].get("minimum")):
                     results[measure]["interpretation"] = "Low"
-                elif float(results[measure]["value"]) > float(test_details["measures"][measure].get("maximum")):
+                elif float(results[measure]["value"]) > float(test_details.measures[measure].get("maximum")):
                     results[measure]["interpretation"] = "High"
                 else:
                     results[measure]["interpretation"] = "Normal"
@@ -561,7 +516,43 @@ def get_test_measures(test, test_details):
     return results
 
 
-###### DB CALLS ################
+def get_panel_details(panel):
+    details = {}
+    for panel_test in panel.get("tests").keys():
+        if details.get(panel_test) is None:
+            test = LaboratoryTestType.find_by_test_type(panel_test)
+        details[panel_test] = {"test_name": test.test_name}
+        details[panel_test]['measures'] = get_test_measures(panel.get("tests")[panel_test], test)
+    return details
+
+
+def get_pending_panel_details(test):
+    panel_details = {"test_id": test["_id"], "specimen_type": specimen_type_map(test['sample_type']),
+                     "test_name": test["panel_type"]
+                     }
+    if panel_details["specimen_type"] == "Urine":
+        panel_details["container"] = 'Conical container'
+        panel_details["volume"] = "15 "
+        panel_details["units"] = "ml"
+    elif panel_details["specimen_type"] == "Blood" and panel_details["test_name"] == "MC&S":
+        panel_details["container"] = 'Baktech'
+        panel_details["volume"] = "5 "
+        panel_details["units"] = "ml"
+    else:
+        panel_details["container"] = 'Red top'
+        panel_details["volume"] = "4"
+        panel_details["units"] = "ml"
+
+
+def get_pending_test_details(test, detail):
+    return {"test_id": test["_id"], "test_type": detail.test_name, "department": detail.department,
+            "specimen_type": detail.specimen_requirements[test["sample_type"]]["type_of_specimen"],
+            "test_name": detail.test_name, "container": detail.specimen_requirements[test["sample_type"]]["container"],
+            "volume": detail.specimen_requirements[test["sample_type"]]["volume"],
+            "units": detail.specimen_requirements[test["sample_type"]]["units"]}
+
+# DB CALLS
+
 
 def prescribers():
     providers = []
@@ -601,6 +592,7 @@ def inject_tests():
 def inject_specimen_types():
     options = LaboratoryTestType.get_specimen_types()
     options.sort()
+
     return [options[i * 2:(i + 1) * 2] for i in range((len(options) + 2 - 1) // 2)]
 
 

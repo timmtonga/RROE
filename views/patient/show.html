@@ -91,11 +91,11 @@
                             {% endfor %}
                         </table>
                     {% elif row['status'] == "Ordered" %}
-                        <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
+                        <b>Test Priority: </b>{{row.get("priority")}}<br><br>
                         <b>Clinical History: </b>{{row.get("history", "")}}<br><br>
                         <b>Order Status:</b>{{row.get("status")}}<br>
                      {% elif row['status'] == "Specimen Collected" %}
-                        <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
+                        <b>Test Priority: </b>{{row.get("priority")}}<br><br>
                         <b>Clinical History: </b>{{row.get("history", "")}}<br><br>
                         <b>Order Status:</b>{{row.get("status")}}<br><br>
                         {% if row.get("collection_id") == "" %}
@@ -104,15 +104,15 @@
                             <button onmousedown="window.location='/test/{{row.get('collection_id')}}/reprint'">Re-print Barcode</button>
                         {% endif %}
                      {% elif row['status'] == "Specimen Received" %}
-                        <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
+                        <b>Test Priority: </b>{{row.get("priority")}}<br><br>
                         <b>Clinical History: </b>{{row.get("history", "")}}<br><br>
                         <b>Order Status:</b>{{row.get("status")}}<br>
                      {% elif row['status'] == "Being Analyzed" or row['status'] == "Pending Verification" %}
-                        <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
+                        <b>Test Priority: </b>{{row.get("priority")}}<br><br>
                         <b>Clinical History: </b>{{row.get("history", "")}}<br><br>
                         <b>Order Status:</b>{{row.get("status")}}<br>
                      {% elif row['status'] == "Rejected" or row['status'] == "Specimen Rejected" or row['status'] == "Test Rejected" or row['status'] == "Not Done"%}
-                        <b>Test Priority: </b>{{row.get("Priority")}}<br><br>
+                        <b>Test Priority: </b>{{row.get("priority")}}<br><br>
                         <b>Clinical History: </b>{{row.get("history", "")}}<br><br>
                         <b>Reason for rejection:</b>{{row.get("rejection_reason", "")}}<br>
                     {% endif %}
