@@ -2,7 +2,7 @@ from models.database import DataAccess
 
 
 class LaboratoryTestType:
-    def __init__(self, name, spec_req, short_name, test_type, measures, spec_types, department, available=True):
+    def __init__(self, name, spec_req, short_name, test_type, measures, spec_types, department, available=True, ver=''):
         self.database = DataAccess("lab_test_type").db
         self.test_name = name
         self.measures = measures
@@ -12,6 +12,7 @@ class LaboratoryTestType:
         self.test_type_id = test_type
         self.specimen_types = spec_types
         self.specimen_requirements = spec_req
+        self.revision = ver
 
     @staticmethod
     def get(test_id):
@@ -20,7 +21,8 @@ class LaboratoryTestType:
             availability = test_type.get("availability") if test_type.get("availability") is not None else True
             test_type = LaboratoryTestType(test_type["_id"], test_type["requirements"],
                                            test_type["short_name"], test_type["test_type_id"], test_type["measures"],
-                                           test_type["specimen_types"], test_type["department"], availability)
+                                           test_type["specimen_types"], test_type["department"], availability,
+                                           test_type["_rev"])
 
         return test_type
 
@@ -72,6 +74,9 @@ class LaboratoryTestType:
 
         if test_type is None:
             test_type = self.__repr__()
+            test_type.pop("_rev")
+        else:
+            test_type = self.__repr__()
 
         self.database.save(test_type)
 
@@ -84,4 +89,5 @@ class LaboratoryTestType:
     def __repr__(self):
         return {'_id': self.test_name, 'short_name': self.short_name, 'department': self.department,
                 'test_type_id': self.test_type_id, 'specimen_types': self.specimen_types, 'measures': self.measures,
-                'requirements': self.specimen_requirements, 'availability': self.available, 'type': 'Laboratory Test'}
+                'requirements': self.specimen_requirements, 'availability': self.available,
+                '_rev': self.revision, 'type': 'Laboratory Test'}

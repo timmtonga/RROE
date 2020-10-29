@@ -46,7 +46,8 @@ class User:
 
     def save(self):
         user = self.__repr__()
-
+        if self.rev == "":
+            user.pop("_rev")
         if not self.password == "":
             user["password_hash"] = generate_password_hash(self.password)
         elif not self.password_hash == "":
@@ -62,4 +63,4 @@ class User:
     def __repr__(self):
         return {"_id": self.username, "name": self.name, "role": self.role, 'designation': self.designation,
                 'status': self.status, 'department': self.department, 'team': self.team, 'ward': self.ward,
-                'type': "user", "_rev":self.rev}
+                'type': "user", "_rev": self.rev}

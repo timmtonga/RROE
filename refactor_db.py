@@ -26,11 +26,13 @@ except:
 
 def start():
     print("Starting")
+
     transfer_patient_demographics()
     transfer_users()
     transfer_test_types()
     transfer_test_panels()
     reformat_tests()
+
     print("Finished")
 
 
@@ -97,6 +99,7 @@ def transfer_test_panels():
 def reformat_tests():
     print("Refactoring tests and test panels")
     records = db.find({"selector": {"type": {"$in": ["test", "test panel"]}}, "limit": 100000})
+    temp_db = couchConnection.create("refactor_temp")
 
     for record in records:
         record["date_ordered"] = int(record["date_ordered"])
@@ -105,7 +108,8 @@ def reformat_tests():
 
         if record.get("reviewed_at") is not None:
             record["reviewed_at"] = int(record["reviewed_at"])
-        db.save(record)
+        record.pop("_rev")
+        temp_db.save(record)
 
 
 if __name__ == '__main__':

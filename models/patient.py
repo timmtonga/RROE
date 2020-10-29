@@ -17,13 +17,14 @@ def calculate_age(birth_date):
 
 
 class Patient:
-    def __init__(self, npid, name, dob, gender, archived=False):
+    def __init__(self, npid, name, dob, gender, archived=False,rev=''):
         self.database = DataAccess("patients").db
         self.patient_id = npid
         self.name = name
         self.dob = dob
         self.gender = gender
         self.archived = archived
+        self.version = rev
 
     @staticmethod
     def get(npid):
@@ -50,8 +51,9 @@ class Patient:
     def save(self):
         patient = self.database.get(self.patient_id)
 
-        if patient is None or patient.get("type") != 'patient':
+        if patient is None:
             patient = self.__repr__()
+            patient.pop("_rev")
         else:
             patient['dob'] = self.dob
             patient['name'] = self.name
@@ -65,4 +67,4 @@ class Patient:
 
     def __repr__(self):
         return {'_id': self.patient_id, 'name': self.name, 'type': 'patient', 'dob': self.dob, 'gender': self.gender,
-                'archived': self.archived, 'type': 'patient'}
+                'archived': self.archived, '_rev': self.version, 'type': 'patient'}
