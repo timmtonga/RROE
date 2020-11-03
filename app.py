@@ -115,7 +115,7 @@ def barcode():
         # This section is for the npid qr code
         npid = barcode_segments[1].strip()
         var_patient = Patient.get(npid)
-
+        print(var_patient)
         if var_patient is None:
             dob_format = "%d/%b/%Y"
             if "??" == barcode_segments[2].split("/")[0] and "???" == barcode_segments[2].split("/")[1]:
@@ -125,12 +125,12 @@ def barcode():
             elif "??" != barcode_segments[2].split("/")[0] and "???" == barcode_segments[2].split("/")[1]:
                 dob_format = "%d/???/%Y"
 
-            var_patient = Patient(npid, barcode_segments[0].replace(id, ""),
+            var_patient = Patient(npid, barcode_segments[0].replace(npid, ""),
                                   datetime.strptime(barcode_segments[2], dob_format).strftime("%d-%m-%Y"),
                                   barcode_segments[3])
             var_patient.save()
 
-        return redirect(url_for('patient', patient_id=id))
+        return redirect(url_for('patient', patient_id=npid))
     else:
         flash("Wrong format for patient identifier. Please use the National patient Identifier", "error")
         return redirect(url_for("index"))
