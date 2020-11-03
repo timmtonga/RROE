@@ -22,6 +22,11 @@ class LaboratoryTestPanel:
 
         return panel
 
+    @staticmethod
+    def get_available():
+        tests = DataAccess("lab_test_panels").db.find({"selector": {"availability": True}, "limit": 5000})
+        return tests
+
     def show(self):
         return self.__str__()
 

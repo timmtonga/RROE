@@ -455,8 +455,8 @@ def reprint_barcode(test_id):
     label_file.write('A5,10,0,1,1,2,N,"%s"\n' % var_patient["name"])
     label_file.write('A5,40,0,1,1,2,N,"%s (%s)"\n' % (
         datetime.strptime(var_patient.get('dob'), "%d-%m-%Y").strftime("%d-%b-%Y"), var_patient["gender"][0]))
-    label_file.write('b5,70,P,386,80,"%s$"\n' % ("~").join(test_string))
-    label_file.write('A20,170,0,1,1,2,N,"%s"\n' % (",").join(test_names))
+    label_file.write('b5,70,P,386,80,"%s$"\n' % "~".join(test_string))
+    label_file.write('A20,170,0,1,1,2,N,"%s"\n' % ",".join(test_names))
     label_file.write('A260,170,0,1,1,2,N,"%s" \n' % datetime.now().strftime("%d-%b %H:%M"))
     label_file.write("P1\n")
     label_file.close()
@@ -543,6 +543,8 @@ def get_pending_panel_details(test):
         panel_details["volume"] = "4"
         panel_details["units"] = "ml"
 
+    return panel_details
+
 
 def get_pending_test_details(test, detail):
     return {"test_id": test["_id"], "test_type": detail.test_name, "department": detail.department,
@@ -598,7 +600,7 @@ def inject_specimen_types():
 
 def inject_panels():
     options = {}
-    panels = db.find({"selector": {"type": "panels"}, "fields": ["_id", "specimen_types"], "limit": 500})
+    panels = LaboratoryTestPanel.get_available()
     for panel in panels:
         options[panel["_id"]] = {"name": panel["_id"], "specimen_types": panel["specimen_types"].keys()}
     options = sorted(options.items(), key=lambda e: e[1]["name"])
