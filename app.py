@@ -384,9 +384,9 @@ def collect_specimens(test_id):
                                wards[tests[0]["ward"]], dr, tests[0]["clinical_history"], tests[0]["sample_type"],
                                datetime.now().strftime("%s"), '^'.join(test_ids), tests[0]["Priority"][0], "P"]
             else:
-                tests_types = LaboratoryTestType.find_by_test_types(panel["tests"])
-                for test_type_id in tests_types:
-                    test_ids.append(test_type_id.get("test_type_id"))
+                for test_type in panel.tests:
+                    test_id = LaboratoryTestType.get(test_type).test_type_id
+                    test_ids.append(test_id)
 
                 test_string = [var_patient["name"].replace(" ", "^"), var_patient["_id"], var_patient["gender"][0],
                                datetime.strptime(var_patient.get('dob'), "%d-%m-%Y").strftime("%s"),
