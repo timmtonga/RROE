@@ -26,12 +26,18 @@ def sync_test_statuses():
     for test in pending_tests:
         updated_test = process_test(test)
         if updated_test is not None:
-            db.save(updated_test)
+            try:
+                db.save(updated_test)
+            except:
+                pass
 
     pending_panels = get_pending_panels()
     for panel in pending_panels:
         processed_panel = process_panel(panel)
-        db.save(processed_panel)
+        try:
+            db.save(processed_panel)
+        except:
+            pass
 
     log("Check concluded at %s" % datetime.now().strftime("%d/%m/%Y %H:%S"))
     print("Check concluded at %s" % datetime.now().strftime("%d/%m/%Y %H:%S"))
