@@ -25,8 +25,8 @@ with open(replications_file, "r") as replications:
     for destination in replications:
         for sub_dir in sub_directories:
 
-            first = 'curl -d \'{"source":"%s", "target":"%s", "create_target":true, "continuous":true}\' -H "Content-Type: application/json" -X POST %s' % ((destination + sub_dir), (new_ip_address + sub_dir), server)
-            second = 'curl -d \'{"source":"%s", "target":"%s", "create_target":true, "continuous":true}\' -H "Content-Type: application/json" -X POST %s' % ((new_ip_address + sub_dir), (destination + sub_dir), server)
+            first = 'curl -d \'{"source":"%s", "target":"%s", "create_target":true, "continuous":true}\' -H "Content-Type: application/json" -X POST %s' % ((destination.strip() + sub_dir), (new_ip_address.strip() + sub_dir), server)
+            second = 'curl -d \'{"source":"%s", "target":"%s", "create_target":true, "continuous":true}\' -H "Content-Type: application/json" -X POST %s' % ((new_ip_address.strip() + sub_dir), (destination.strip() + sub_dir), server)
 
             os.system(first)
             os.system(second)
