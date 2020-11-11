@@ -1,7 +1,8 @@
 import json
 import mysql.connector
 from couchdb import Server
-from datetime import datetime
+from datetime import datetime, timedelta
+
 test_statuses = {1: "Specimen Received", 2: "Specimen Received", 3: "Being Analyzed", 4: "Pending Verification",
                  5: "Analysis Complete", 6: "Not Done", 7: "Not Done", 8: "Rejected"}
 
@@ -79,7 +80,7 @@ def get_patient_test(patient_id, test_type_id, ordered_by, ordered_on):
     query = "SELECT id, test_status_id,not_done_reasons,specimen_id from tests where test_type_id = "+test_type_id+\
             " and requested_by = '"+ordered_by + "' and visit_id in (select id from visits where patient_id = "+\
             str(patient_id)+" and created_at between '"+\
-            datetime.fromtimestamp(float(ordered_on)).strftime("%Y-%m-%d %H:%M")+"' and now()) order by id desc LIMIT 1"
+            (datetime.fromtimestamp(float(ordered_on)) - timedelta(hours=2)).strftime("%Y-%m-%d %H:%M")+"' and now()) order by id desc LIMIT 1"
     my_cursor.execute(query)
     my_test = my_cursor.fetchone()
     if my_test is None:
