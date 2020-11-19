@@ -335,10 +335,10 @@ def create_lab_order():
             new_test['tests'] = {}
             new_test['type'] = "test panel"
             new_test["panel_type"] = test.replace("|", "")
-            panel_details = db.get(new_test["panel_type"])
-            if panel_details != None:
-                for test in panel_details.get("tests"):
-                    new_test['tests'][db.get(test)["test_type_id"]] = {}
+            panel_details = LaboratoryTestPanel.get(new_test["panel_type"])
+            if panel_details is not None:
+                for test_in_panel in panel_details.tests:
+                    new_test['tests'][LaboratoryTestType.get(test_in_panel).test_type_id] = {}
         else:
             new_test['type'] = 'test'
             new_test['test_type'] = test

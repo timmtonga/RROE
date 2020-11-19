@@ -2,6 +2,8 @@ import json
 import mysql.connector
 from couchdb import Server
 from datetime import datetime, timedelta
+from models.laboratory_test_type import LaboratoryTestType
+from models.laboratory_test_panel import LaboratoryTestPanel
 
 test_statuses = {1: "Specimen Received", 2: "Specimen Received", 3: "Being Analyzed", 4: "Pending Verification",
                  5: "Analysis Complete", 6: "Not Done", 7: "Not Done", 8: "Rejected"}
@@ -33,6 +35,7 @@ def sync_test_statuses():
                 pass
 
     pending_panels = get_pending_panels()
+
     for panel in pending_panels:
         processed_panel = process_panel(panel)
         try:
@@ -188,6 +191,13 @@ def process_test(test):
 
 def process_panel(panel):
     patient_id = None
+
+    if not panel.get("tests").keys():
+        panel_details = LaboratoryTestPanel.get(panel["panel_type"])
+        if panel_details is not None:
+            for test_in_panel in panel_details.tests:
+                panel['tests'][LaboratoryTestType.get(test_in_panel).test_type_id] = {}
+
     for test_type_id in panel.get("tests").keys():
         test = panel.get("tests")[test_type_id]
         test_details = None
