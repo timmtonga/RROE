@@ -554,8 +554,6 @@ def get_pending_test_details(test, detail):
             "units": detail.specimen_requirements[test["sample_type"]]["units"]}
 
 # DB CALLS
-
-
 def prescribers():
     providers = []
     var_users = User.get_active_prescribers()

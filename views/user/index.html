@@ -33,7 +33,7 @@
                         <td>{{user.get("ward", user.get("team"))}}</td>
                         <td>
                             <button class='displayButton lightGreen' onmousedown="window.location='/user/{{user.get('_id')}}/reset_password'">Reset Password</button>
-                            {% if user.get("status") == None %}
+                            {% if user.get("status") == "Active" %}
                                 <button class="displayButton red" onmousedown="window.location='/user/{{user.get('_id')}}/deactivate'">Deactivate</button>
                             {% else %}
                                 <button class="displayButton green" onmousedown="window.location='/user/{{user.get('_id')}}/activate'">Reactivate</button>
