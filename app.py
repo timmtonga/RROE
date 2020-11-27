@@ -79,20 +79,24 @@ def index():
     # query for records to display on the main page
     main_results = db.find(main_index_query)
     for item in main_results:
-        test_detail = {'status': item.get('status'), "date": float(item.get('date_ordered')),
-                       'name': Patient.get(item.get('patient_id')).get('name').title(),
-                       'ordered_on': datetime.fromtimestamp(float(item.get('date_ordered'))).strftime('%d %b %Y %H:%S'),
-                       "id": item["_id"], 'patient_id': item.get('patient_id')}
+        try:
+            test_detail = {'status': item.get('status'), "date": float(item.get('date_ordered')),
+                           'name': Patient.get(item.get('patient_id')).get('name').title(),
+                           'ordered_on': datetime.fromtimestamp(float(item.get('date_ordered'))).strftime(
+                               '%d %b %Y %H:%S'),
+                           "id": item["_id"], 'patient_id': item.get('patient_id')}
 
-        if item.get("type") == "test":
-            test_detail['test'] = LaboratoryTestType.find_by_test_type(item.get('test_type')).test_name
-        else:
-            test_detail['test'] = item.get('panel_type')
-        records.append(test_detail)
+            if item.get("type") == "test":
+                test_detail['test'] = LaboratoryTestType.find_by_test_type(item.get('test_type')).test_name
+            else:
+                test_detail['test'] = item.get('panel_type')
+            records.append(test_detail)
+        except:
+            pass
 
     # sort by date descending
     records = sorted(records, key=lambda e: e["date"], reverse=True)
-    my_team_recs = sorted(my_team_recs, key=lambda e: e["date"], reverse=True)
+    # my_team_recs = sorted(my_team_recs, key=lambda e: e["date"], reverse=True)
 
     return render_template('main/index.html', orders=records, current_facility=misc.current_facility())
 
