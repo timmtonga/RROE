@@ -244,6 +244,10 @@ function fixStepIndicator(n) {
   //... and adds the "active" class on the current step:
   x[n].className += " active";
 }
+idleTimer()
+{% if checkCharging  %}
+    setInterval("checkChargeStatus()",10000)
+{% endif %}
 </script>
 
 </html>

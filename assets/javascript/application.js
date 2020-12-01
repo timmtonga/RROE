@@ -188,13 +188,32 @@ function checkChargeStatus(){
     xhr.setRequestHeader("Content-Type", "application/text");
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
-            console.log("Charging status " + xhr.responseText);
-            if(xhr.responseText == "False"){
-                document.getElementById("batteryState").innerHTML ="&nbsp;";
-             }
-             else{
-                document.getElementById("batteryState").innerHTML ="<span style='padding-left:45%;font-weight:bold;'>&#9889;</span>";
-             }
+            var results = JSON.parse(xhr.responseText)
+            if(results)
+            {
+                console.log(results)
+                var battery = document.getElementById("batteryState");
+
+                if (results["current_power"] < 10.5 && results["checkCharging"] == false)
+                {
+                    window.location = "/low_voltage"
+                }
+                else if (results["checkCharging"] == true && deviceOff)
+                {
+                    window.location = "/"
+                }
+                else{
+                    if(results["checkCharging"] == false){
+                        battery.innerHTML ="&nbsp;";
+                    }
+                    else
+                    {
+                        document.getElementById("batteryState").innerHTML ="<span style='padding-left:45%;font-weight:bold;'>&#9889;</span>";
+                    }
+                    battery.class = results["power_class"]
+                    battery.style.width = results["current_power"]
+                }
+            }
         }
     };
     xhr.send();

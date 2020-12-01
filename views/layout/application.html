@@ -49,6 +49,7 @@
         </div>
     </body>
     <script TYPE="application/javascript">
+        var deviceOff = false
         Spinner();
         Spinner.hide()
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -64,8 +65,7 @@
             showDrawDialog()
         {% endif %}
         idleTimer()
-        {% if checkCharging  %}
-            setInterval("checkChargeStatus()",10000)
-        {% endif %}
+        setInterval("checkChargeStatus()",10000)
+
     </script>s
 </html>

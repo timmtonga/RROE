@@ -30,10 +30,10 @@ class CheckVoltage:
         average_voltage = avg * 16.5
         return average_voltage
 
-    def getVoltage(self):
+    def get_voltage(self):
         min_voltage = 10.5
-        raw_voltage =self.current_voltage()
-        #Assume max_voltage is 13 volts. voltagePercent = (100*x)/2.5 ie x*40
+        raw_voltage = self.current_voltage()
+        # Assume max_voltage is 13 volts. voltagePercent = (100*x)/2.5 ie x*40
         voltage_percent = (raw_voltage - min_voltage) *40
         if voltage_percent > 100:
             voltage_percent = 100

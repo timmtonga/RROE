@@ -489,8 +489,12 @@ def review_test(test_id):
 
 @app.route("/get_charge_state")
 def get_charge_state():
-    return CheckChargeState().getState()
+    return inject_power()
 
+
+@app.route("/low_voltage")
+def low_voltage():
+    return render_template('main/low_voltage.html')
 
 # MISC Functions
 def get_test_measures(test, test_details):
@@ -633,7 +637,7 @@ def check_authentication():
             else:
                 ledControl().turn_led_off()
 
-        if request.path != "/login" and request.path != "/logout" and request.path != "/get_charge_state":
+        if request.path not in ["/login", "/logout", "/get_charge_state", "/low_voltage"]:
             if session.get("user") is None:
                 return redirect(url_for('login'))
             else:
@@ -661,19 +665,19 @@ def inject_message_category():
 @app.context_processor
 def inject_power():
     if settings["using_rpi"] == "True":
-        checkCharging = True
-        voltage = CheckVoltage().getVoltage()
+        check_charging = CheckChargeState().getState()
+        voltage = CheckVoltage().get_voltage()
         if voltage > 70:
             rating = "high"
-        elif voltage > 30 and voltage < 70:
+        elif 30 < voltage < 70:
             rating = "medium"
         else:
             rating = "low"
     else:
-        checkCharging = False
+        check_charging = True
         voltage = 100
         rating = "high"
-    return {"current_power": voltage, "power_class": rating, "checkCharging": checkCharging}
+    return {"current_power": voltage, "power_class": rating, "checkCharging": check_charging}
 
 
 # Error handling pages
