@@ -2,17 +2,18 @@ from __future__ import division
 import time
 import spidev
 
+
 class CheckVoltage:
-    def bitstring(self,n):
+    def bitstring(self, n):
         s = bin(n)[2:]
         return '0'*(8-len(s)) + s
 
-    def read_it(self,adc_channel=0, spi_channel=0):
-        conn =spidev.SpiDev(0, spi_channel)
-        conn.max_speed_hz = 1200000 #1.2MHz
+    def read_it(self, adc_channel=0, spi_channel=0):
+        conn = spidev.SpiDev(0, spi_channel)
+        conn.max_speed_hz = 1200000  # 1.2MHz
         cmd = 128
         if adc_channel:
-            cmd +=32
+            cmd += 32
         reply_bytes = conn.xfer2([cmd, 0])
         conn.close()
         reply_bitstring = ''.join(self.bitstring(n) for n in reply_bytes)
@@ -34,7 +35,7 @@ class CheckVoltage:
         min_voltage = 14
         raw_voltage = self.current_voltage()
         # Assume max_voltage is 13 volts. voltagePercent = (100*x)/2.5 ie x*40
-        voltage_percent = (raw_voltage - min_voltage) *40
+        voltage_percent = (raw_voltage - min_voltage) * 40
         if voltage_percent > 100:
             voltage_percent = 100
         return voltage_percent
