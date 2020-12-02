@@ -24,9 +24,9 @@ class CheckVoltage:
         for x in range(10):
             x = self.read_it()
             time.sleep(0.1)
-            m = m+ x
+            m += x
 
-        avg = m/10
+        avg = m/10.0
         average_voltage = avg * 16.5
         return average_voltage
 
@@ -37,6 +37,6 @@ class CheckVoltage:
         voltage_percent = (raw_voltage - min_voltage) *40
         if voltage_percent > 100:
             voltage_percent = 100
-        elif voltage_percent < 0:
-            voltage_percent = 0
         return voltage_percent
+
+

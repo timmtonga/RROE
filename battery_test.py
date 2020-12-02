@@ -10,9 +10,9 @@ def initialize_test():
         # Get voltage
 
         voltage = CheckVoltage().get_voltage()
-        raw_voltage = (voltage / 40.0) + 10.5
+        raw_voltage = (voltage / 40.0) + 14
 
-        if 12 < voltage < 14:
+        if 12 <= voltage < 14:
             msg = "At %s , system voltage was at %s \n" % (datetime.now().strftime("%d-%b %H:%M"), str(raw_voltage))
             log(msg)
         elif voltage < 12:
@@ -24,6 +24,7 @@ def initialize_test():
             msg = "At %s , system voltage was %s \n" % (datetime.now().strftime("%d-%b %H:%M"), str(raw_voltage))
             log(msg)
             print_label(voltage)
+        print(raw_voltage)
         time.sleep(600)
 
 
@@ -34,7 +35,7 @@ def log(message):
 
 
 def print_label(voltage):
-    raw_voltage = (voltage/40.0) + 10.5
+    raw_voltage = (voltage/40.0) + 14
     label_file = open("/tmp/test_order.lbl", "w+")
     label_file.write("N\nq609\nQ90,0\nZT\n")
     label_file.write('A20,10,0,1,1,2,N,"Voltage Percentage: %s"\n' % str(voltage))
