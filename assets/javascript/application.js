@@ -194,9 +194,11 @@ function checkChargeStatus(){
                 console.log(results)
                 var battery = document.getElementById("batteryState");
 
-                if (results["current_power"] < 14 && results["checkCharging"] == false)
+                if (results["current_power"] =< 0 && results["checkCharging"] == false)
                 {
-                    window.location = "/low_voltage"
+                    if (deviceOff == false){
+                        window.location = "/low_voltage"
+                    }
                 }
                 else if (results["checkCharging"] == true && deviceOff)
                 {
