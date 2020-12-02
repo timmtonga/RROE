@@ -194,7 +194,7 @@ function checkChargeStatus(){
                 console.log(results)
                 var battery = document.getElementById("batteryState");
 
-                if (results["current_power"] < 10.5 && results["checkCharging"] == false)
+                if (results["current_power"] < 14 && results["checkCharging"] == false)
                 {
                     window.location = "/low_voltage"
                 }

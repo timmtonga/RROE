@@ -4,6 +4,7 @@
 
 import os
 import re
+import json
 import random
 from utils import misc
 from couchdb import Server
@@ -13,7 +14,7 @@ from models.patient import Patient
 from models.laboratory_test_type import LaboratoryTestType
 from models.laboratory_test_panel import LaboratoryTestPanel
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask import Flask, render_template, redirect, session, flash, request, url_for
+from flask import Flask, render_template, redirect, session, flash, request, url_for,Response
 
 app = Flask(__name__, template_folder="views", static_folder="assets")
 app.secret_key = os.urandom(25)
@@ -489,7 +490,7 @@ def review_test(test_id):
 
 @app.route("/get_charge_state")
 def get_charge_state():
-    return inject_power()
+    return Response(json.dumps(inject_power()),  mimetype='application/json')
 
 
 @app.route("/low_voltage")

@@ -8,6 +8,6 @@ class CheckChargeState:
     def getState(self):
         state = GPIO.input(24)
         if state:
-            return "True"
+            return True
         else:
-            return "False"
+            return False
