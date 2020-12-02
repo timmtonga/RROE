@@ -33,10 +33,11 @@ def log(message):
 
 
 def print_label(voltage):
+    raw_voltage = (voltage/40.0) + 10.5
     label_file = open("/tmp/test_order.lbl", "w+")
     label_file.write("N\nq609\nQ90,0\nZT\n")
     label_file.write('A20,10,0,1,1,2,N,"Voltage Percentage: %s"\n' % str(voltage))
-    label_file.write('A20,40,0,1,1,2,N,"Voltage Actual: %s"\n' % str((voltage/40)))
+    label_file.write('A20,40,0,1,1,2,N,"Voltage Actual: %s"\n' % str(raw_voltage))
     label_file.write('b5,70,P,386,80,"%s$"\n' % '~'.join([str(voltage), datetime.now().strftime("%d-%b %H:%M")]))
     label_file.write('A20,170,0,1,1,2,N,"%s" \n' % datetime.now().strftime("%d-%b %H:%M"))
     label_file.write("P1\n")
