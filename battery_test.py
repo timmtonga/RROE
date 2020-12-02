@@ -12,14 +12,15 @@ def initialize_test():
         voltage = CheckVoltage().get_voltage()
 
         if 10 < voltage < 12:
-            msg = "At %s , system voltage was %s \n" % (datetime.now().strftime("%d-%b %H:%M"), str(voltage))
+            msg = "At %s , system voltage was at %s \n" % (datetime.now().strftime("%d-%b %H:%M"), str(voltage))
             log(msg)
         elif voltage < 10:
             # shutdown
-            msg = "At %s , system voltage was %s \n Shutdown ... \n" % (datetime.now().strftime("%d-%b %H:%M"), str(voltage))
+            msg = "At %s , system voltage was at %s \n Shutdown ... \n" % (datetime.now().strftime("%d-%b %H:%M"), str(voltage))
             log(msg)
             os.system('sudo shutdown now')
         else:
+            msg = "At %s , system voltage was %s \n" % (datetime.now().strftime("%d-%b %H:%M"), str(voltage))
             log(msg)
             print_label(voltage)
         time.sleep(600)
@@ -33,8 +34,9 @@ def log(message):
 
 def print_label(voltage):
     label_file = open("/tmp/test_order.lbl", "w+")
-    label_file.write("N\nq406\nQ203,027\nZT\n")
-    label_file.write('A5,10,0,1,1,2,N,"Voltage: %s"\n' % str(voltage))
+    label_file.write("N\nq609\nQ90,0\nZT\n")
+    label_file.write('A20,10,0,1,1,2,N,"Voltage Percentage: %s"\n' % str(voltage))
+    label_file.write('A20,40,0,1,1,2,N,"Voltage Actual: %s"\n' % str((voltage/40)))
     label_file.write('b5,70,P,386,80,"%s$"\n' % '~'.join([str(voltage), datetime.now().strftime("%d-%b %H:%M")]))
     label_file.write('A20,170,0,1,1,2,N,"%s" \n' % datetime.now().strftime("%d-%b %H:%M"))
     label_file.write("P1\n")
