@@ -668,6 +668,12 @@ def inject_power():
     if settings["using_rpi"] == "True":
         check_charging = CheckChargeState().getState()
         voltage = CheckVoltage().get_voltage()
+        raw_voltage = (voltage / 40.0) + 14
+
+        if raw_voltage < 12:
+            # shutdown
+            os.system('sudo shutdown now')
+
         if voltage > 70:
             rating = "high"
         elif 30 < voltage < 70:
