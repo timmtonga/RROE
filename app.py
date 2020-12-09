@@ -632,7 +632,7 @@ def initialize_connection():
 def check_authentication():
     if not re.search("asset", request.path):
         initialize_connection()
-        if settings["using_rpi"] == "True":
+        if settings["using_rpi"] == "True" and request.path != "/get_charge_state":
             if request.path == "/":
                 ledControl().turn_led_on()
             else:
