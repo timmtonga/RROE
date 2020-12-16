@@ -670,9 +670,9 @@ def inject_power():
         voltage = CheckVoltage().get_voltage()
         raw_voltage = (voltage / 40.0) + 14
 
-        if raw_voltage < 12:
+        # if raw_voltage < 12:
             # shutdown
-            os.system('sudo shutdown now')
+            # os.system('sudo shutdown now')
 
         if voltage > 70:
             rating = "high"
