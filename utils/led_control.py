@@ -1,12 +1,13 @@
 import RPi.GPIO as GPIO
 
-class ledControl:
+
+class led_control:
     GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
-    GPIO.setup(23,GPIO.OUT)
+    GPIO.setup(23, GPIO.OUT)
 
     def turn_led_off(self):
-        GPIO.output(23,GPIO.LOW)
+        GPIO.output(23, GPIO.LOW)
 
     def turn_led_on(self):
-        GPIO.output(23,GPIO.HIGH)
+        GPIO.output(23, GPIO.HIGH)

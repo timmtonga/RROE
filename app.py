@@ -25,7 +25,7 @@ settings = misc.initialize_settings()
 
 # optional configuration when running on rpi
 if settings["using_rpi"] == "True":
-    from utils.led_control import ledControl
+    from utils.led_control import led_control
     from utils.charging_checker import CheckChargeState
     from utils.voltage_checker import CheckVoltage
 
@@ -497,6 +497,7 @@ def get_charge_state():
 def low_voltage():
     return render_template('main/low_voltage.html')
 
+
 # MISC Functions
 def get_test_measures(test, test_details):
 
@@ -546,6 +547,10 @@ def get_pending_panel_details(test):
     elif panel_details["specimen_type"] == "Blood" and panel_details["test_name"] == "MC&S":
         panel_details["container"] = 'Baktech'
         panel_details["volume"] = "5 "
+        panel_details["units"] = "ml"
+    elif panel_details["specimen_type"] == "Blood" and panel_details["test_name"] == "PBF":
+        panel_details["container"] = 'EDTA'
+        panel_details["volume"] = "3 "
         panel_details["units"] = "ml"
     else:
         panel_details["container"] = 'Red top'
@@ -634,9 +639,9 @@ def check_authentication():
         initialize_connection()
         if settings["using_rpi"] == "True" and request.path != "/get_charge_state":
             if request.path == "/":
-                ledControl().turn_led_on()
+                led_control().turn_led_on()
             else:
-                ledControl().turn_led_off()
+                led_control().turn_led_off()
 
         if request.path not in ["/login", "/logout", "/get_charge_state", "/low_voltage"]:
             if session.get("user") is None:
