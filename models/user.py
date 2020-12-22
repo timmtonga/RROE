@@ -38,8 +38,8 @@ class User:
 
     @staticmethod
     def all():
-        return DataAccess("users").db.find({"selector": {"_id": {"$gt": "null"}}, "limit": 2000 })
-
+        return DataAccess("users").db.find({"selector": {"_id": {"$gt": None}}, "limit": 2000})
+        
     @staticmethod
     def get_active_prescribers():
         return DataAccess("users").db.find({"selector": {"role": "Doctor", "status": "Active"}, "limit": 5000})
