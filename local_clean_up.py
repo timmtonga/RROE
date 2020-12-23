@@ -12,22 +12,12 @@ def initiate_archiving():
     for row in patient_ids:
         test_records = DataAccess().db.find({"selector": {"patient_id": row["_id"]}, "limit": 9000})
 
-        if len(test_records) == 0:
-            # patient was archived
-            archive_patient(row["_id"])
-        else:
+        if len(test_records) > 0:
             # Check patient record for last test
             archive_record = check_recent_test(test_records)
 
             if archive_record:
-                archive_patient(row["_id"])
                 archive_records(test_records)
-
-
-def archive_patient(patient_id):
-    patient = DataAccess("patients").db.get(patient_id)
-    pt_record = Patient(patient["_id"], patient["name"], patient["dob"], patient["gender"], True, patient["_rev"])
-    pt_record.save()
 
 
 def archive_records(records):
