@@ -374,7 +374,7 @@ def collect_specimens(test_id):
         test["collection_id"] = collection_id
         if test["type"] == "test":
             test_ids.append(test["test_type"])
-            test_names.append(LaboratoryTestType.find_by_test_type(test["test_type"]).short_name)
+            test_names.append(LaboratoryTestType.find_by_test_type(test["test_type"]).printable_name())
             test_string = [var_patient["name"].replace(" ", "^"), var_patient["_id"], var_patient["gender"][0],
                            datetime.strptime(var_patient.get('dob'), "%d-%m-%Y").strftime("%s"),
                            wards[tests[0]["ward"]], dr, tests[0]["clinical_history"], tests[0]["sample_type"],
@@ -431,7 +431,7 @@ def reprint_barcode(test_id):
     for test in tests:
         if test["type"] == "test":
             test_ids.append(test["test_type"])
-            test_names.append(LaboratoryTestType.find_by_test_type(test["test_type"]).short_name)
+            test_names.append(LaboratoryTestType.find_by_test_type(test["test_type"]).printable_name())
             test_string = [var_patient["name"].replace(" ", "^"), var_patient["_id"], var_patient["gender"][0],
                            datetime.strptime(var_patient.get('dob'), "%d-%m-%Y").strftime("%s"),
                            wards[tests[0]["ward"]], dr, tests[0]["clinical_history"], tests[0]["sample_type"],

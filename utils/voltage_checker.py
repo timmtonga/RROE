@@ -1,6 +1,7 @@
 from __future__ import division
 import time
 import spidev
+import misc
 
 
 class CheckVoltage:
@@ -32,10 +33,12 @@ class CheckVoltage:
         return average_voltage
 
     def get_voltage(self):
-        min_voltage = 14
+        settings = misc.initialize_settings()
+        max_voltage = float(settings["battery_maximum"])
+        min_voltage = float(settings["battery_minimum"])
         raw_voltage = self.current_voltage()
-        # Assume max_voltage is 13 volts. voltagePercent = (100*x)/2.5 ie x*40
-        voltage_percent = (raw_voltage - min_voltage) * 40
+
+        voltage_percent = ((raw_voltage - min_voltage)/(max_voltage - min_voltage)) * 100
         if voltage_percent > 100:
             voltage_percent = 100
         return voltage_percent

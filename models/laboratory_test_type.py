@@ -80,6 +80,9 @@ class LaboratoryTestType:
 
         self.database.save(test_type)
 
+    def printable_name(self):
+        return self.short_name if self.short_name != "" else self.test_name
+
     def __str__(self):
         return 'LaboratoryTestType(test_name: '+self.test_name + ', short_name: '+self.short_name + ', department: ' + \
                self.department + ', test_type_id: '+self.test_type_id + ', specimen_types: '+self.specimen_types + \
